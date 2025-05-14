@@ -14,7 +14,11 @@ openai.api_key = st.secrets["OPENAI_API_KEY"]
 GPT_MODEL = "gpt-4o"  # GPT-4.1 Mini/Nano
 
 # --- Page Config ---
-st.set_page_config(page_title="Data Consultant Bot", layout="wide", page_icon="logo.png")
+st.set_page_config(
+    page_title="Pocket Analyst",
+    layout="wide",
+    page_icon="logo.png"
+)
 st.title("📊 Pocket Analyst")
 st.caption("Upload your file. Ask questions. Predict outcomes. Get insights.")
 
