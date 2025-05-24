@@ -19,10 +19,7 @@ st.set_page_config(
     layout="wide",
     page_icon="logo.png"
 )
-st.markdown(
-    "<div style='text-align: center; margin-bottom: 10px;'><img src='logo.png' width='160'></div>",
-    unsafe_allow_html=True
-)
+st.image("logo.png", width=160)
 st.title("Pocket Analyst")
 st.caption("Upload your file. Ask questions. Predict outcomes. Get insights.")
 
