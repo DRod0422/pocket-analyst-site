@@ -197,3 +197,8 @@ if uploaded_file:
 
         except Exception as e:
             st.error(f"API Error: {e}")
+            
+# --- Footer ---
+st.markdown("---")
+st.caption("Built with ❤️ using Streamlit + OpenAI + Pandas + Plotly")
+st.markdown("📬 Need help? Contact us at [pocketanalyst.help@gmail.com](mailto:pocketanalyst.help@gmail.com)")
