@@ -1,4 +1,4 @@
-# "data_consultant_app.py"
+# Chatbot Data Consultant Blueprint - Streamlit App
 
 import streamlit as st
 import pandas as pd
@@ -15,11 +15,12 @@ GPT_MODEL = "gpt-4o"  # GPT-4.1 Mini/Nano
 
 # --- Page Config ---
 st.set_page_config(
-    page_title="Pocket Analyst",
+    page_title="🤖 Pocket Analyst",
     layout="wide",
     page_icon="logo.png"
 )
-st.title("🤖 Pocket Analyst")
+st.image("logo.png", width=160)
+st.title("Pocket Analyst")
 st.caption("Upload your file. Ask questions. Predict outcomes. Get insights.")
 
 # --- Chart Type Detector ---
@@ -72,6 +73,23 @@ if uploaded_file:
         df_sample = df.sample(n=1000, random_state=42)
     else:
         df_sample = df
+
+    # --- Optional Chart Builder ---
+    with st.expander("🛠️ Create a Custom Chart (optional)"):
+        chart_type = st.selectbox("Chart Type", ["Bar", "Line", "Scatter"])
+        x_col = st.selectbox("Select X-axis column", options=df_sample.columns)
+        y_col = st.selectbox("Select Y-axis column", options=df_sample.columns)
+        if st.button("Generate Chart"):
+            try:
+                if chart_type == "Bar":
+                    fig = px.bar(df_sample, x=x_col, y=y_col)
+                elif chart_type == "Line":
+                    fig = px.line(df_sample, x=x_col, y=y_col)
+                elif chart_type == "Scatter":
+                    fig = px.scatter(df_sample, x=x_col, y=y_col)
+                st.plotly_chart(fig)
+            except Exception as e:
+                st.error(f"Chart creation failed: {e}")
 
     # --- Trial-limited Predictive Modeling ---
     if "predict_use_count" not in st.session_state:
@@ -153,18 +171,18 @@ if uploaded_file:
                 with st.expander("AI Response", expanded=True):
                     st.write(answer)
 
-                # Dynamic chart rendering
+                # Dynamic chart rendering from natural question
                 chart_type, chart_cols = detect_chart_type_and_columns(user_question, df_sample)
 
                 if chart_type == "bar" and chart_cols and chart_cols in df_sample.columns:
                     fig = px.bar(df_sample, x=chart_cols)
                     st.plotly_chart(fig)
 
-                elif chart_type == "line" and all(chart_cols):
+                elif chart_type == "line" and chart_cols and all(chart_cols):
                     fig = px.line(df_sample, x=chart_cols[0], y=chart_cols[1])
                     st.plotly_chart(fig)
 
-                elif chart_type == "scatter" and all(chart_cols):
+                elif chart_type == "scatter" and chart_cols and all(chart_cols):
                     fig = px.scatter(df_sample, x=chart_cols[0], y=chart_cols[1], color=chart_cols[2])
                     st.plotly_chart(fig)
 
