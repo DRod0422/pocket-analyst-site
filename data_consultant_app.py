@@ -254,7 +254,7 @@ else:
 
 
     # Dynamic chart rendering from natural question
-        chart_type, chart_cols = detect_chart_type_and_columns(user_question, df_sample)
+    chart_type, chart_cols = detect_chart_type_and_columns(user_question, df_sample)
 
         if chart_type == "bar" and chart_cols and chart_cols in df_sample.columns:
         fig = px.bar(df_sample, x=chart_cols)
