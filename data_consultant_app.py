@@ -218,32 +218,19 @@ if uploaded_file:
             Question: {user_question}
             """
 
-            try:
-                response = openai.chat.completions.create(
-                    model=GPT_MODEL,
-                    messages=[
-                        {"role": "system", "content": "You are a helpful data analyst."},
-                        {"role": "user", "content": prompt}
-                    ]
-                )
-                answer = response.choices[0].message.content
+    try:
+        response = openai.chat.completions.create(
+            model=GPT_MODEL,
+            messages=[
+                {"role": "system", "content": "You are a helpful data analyst."},
+                {"role": "user", "content": prompt}
+            ]
+        )
+        answer = response.choices[0].message.content
 
-                st.subheader("Bot's Answer")
-                with st.expander("AI Response", expanded=True):
-                    st.write(answer)
-
-       try:
-    response = openai.chat.completions.create(
-        model=GPT_MODEL,
-        messages=[
-            {"role": "system", "content": "You are a helpful data analyst."},
-            {"role": "user", "content": prompt}
-        ]
-    )
-    answer = response.choices[0].message.content
-    st.subheader("Bot's Answer")
-    with st.expander("AI Response", expanded=True):
-        st.write(answer)
+        st.subheader("Bot's Answer")
+        with st.expander("AI Response", expanded=True):
+            st.write(answer)
 
     # Dynamic chart rendering from natural question
     chart_type, chart_cols = detect_chart_type_and_columns(user_question, df_sample)
