@@ -232,43 +232,37 @@ if uploaded_file:
                 with st.expander("AI Response", expanded=True):
                     st.write(answer)
 
-        # Dynamic chart rendering
-        chart_type, chart_cols = detect_chart_type_and_columns(user_question, df_sample)
+       try:
+    response = openai.chat.completions.create(
+        model=GPT_MODEL,
+        messages=[
+            {"role": "system", "content": "You are a helpful data analyst."},
+            {"role": "user", "content": prompt}
+        ]
+    )
+    answer = response.choices[0].message.content
+    st.subheader("Bot's Answer")
+    with st.expander("AI Response", expanded=True):
+        st.write(answer)
 
-             if chart_type == "bar" and chart_cols and chart_cols in df_sample.columns:
-                    fig = px.bar(df_sample, x=chart_cols)
-                    st.plotly_chart(fig)
+    # Dynamic chart rendering from natural question
+    chart_type, chart_cols = detect_chart_type_and_columns(user_question, df_sample)
 
-                elif chart_type == "line" and all(chart_cols):
-                    fig = px.line(df_sample, x=chart_cols[0], y=chart_cols[1])
-                    st.plotly_chart(fig)
+    if chart_type == "bar" and chart_cols and chart_cols in df_sample.columns:
+        fig = px.bar(df_sample, x=chart_cols)
+        st.plotly_chart(fig)
 
-                elif chart_type == "scatter" and all(chart_cols):
-                    fig = px.scatter(df_sample, x=chart_cols[0], y=chart_cols[1], color=chart_cols[2])
-                    st.plotly_chart(fig)
+    elif chart_type == "line" and chart_cols and all(chart_cols):
+        fig = px.line(df_sample, x=chart_cols[0], y=chart_cols[1])
+        st.plotly_chart(fig)
 
-            except Exception as e:
-                st.error(f"API Error: {e}")
-        else:
-        st.info("Please upload a file to get started.")
+    elif chart_type == "scatter" and chart_cols and all(chart_cols):
+        fig = px.scatter(df_sample, x=chart_cols[0], y=chart_cols[1], color=chart_cols[2])
+        st.plotly_chart(fig)
 
-        # Dynamic chart rendering from natural question
-        chart_type, chart_cols = detect_chart_type_and_columns(user_question, df_sample)
+except Exception as e:
+    st.error(f"API Error: {e}")
 
-            if chart_type == "bar" and chart_cols and chart_cols in df_sample.columns:
-                fig = px.bar(df_sample, x=chart_cols)
-                st.plotly_chart(fig)
-
-            elif chart_type == "line" and chart_cols and all(chart_cols):
-                fig = px.line(df_sample, x=chart_cols[0], y=chart_cols[1])
-                st.plotly_chart(fig)
-
-            elif chart_type == "scatter" and chart_cols and all(chart_cols):
-                fig = px.scatter(df_sample, x=chart_cols[0], y=chart_cols[1], color=chart_cols[2])
-                st.plotly_chart(fig)
-
-        except Exception as e:
-            st.error(f"API Error: {e}")
             
 # --- Footer ---
 st.markdown("---")
