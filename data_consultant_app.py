@@ -257,16 +257,16 @@ else:
     chart_type, chart_cols = detect_chart_type_and_columns(user_question, df_sample)
 
         if chart_type == "bar" and chart_cols and chart_cols in df_sample.columns:
-        fig = px.bar(df_sample, x=chart_cols)
-        st.plotly_chart(fig)
+            fig = px.bar(df_sample, x=chart_cols)
+            st.plotly_chart(fig)
 
         elif chart_type == "line" and chart_cols and all(chart_cols):
-        fig = px.line(df_sample, x=chart_cols[0], y=chart_cols[1])
-        st.plotly_chart(fig)
+            fig = px.line(df_sample, x=chart_cols[0], y=chart_cols[1])
+            st.plotly_chart(fig)
 
         elif chart_type == "scatter" and chart_cols and all(chart_cols):
-        fig = px.scatter(df_sample, x=chart_cols[0], y=chart_cols[1], color=chart_cols[2])
-        st.plotly_chart(fig)
+            fig = px.scatter(df_sample, x=chart_cols[0], y=chart_cols[1], color=chart_cols[2])
+            st.plotly_chart(fig)
 
     except Exception as e:
         st.error(f"API Error: {e}")
