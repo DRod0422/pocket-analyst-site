@@ -232,10 +232,10 @@ if uploaded_file:
                 with st.expander("AI Response", expanded=True):
                     st.write(answer)
 
-                # Dynamic chart rendering
-                chart_type, chart_cols = detect_chart_type_and_columns(user_question, df_sample)
+        # Dynamic chart rendering
+        chart_type, chart_cols = detect_chart_type_and_columns(user_question, df_sample)
 
-                if chart_type == "bar" and chart_cols and chart_cols in df_sample.columns:
+             if chart_type == "bar" and chart_cols and chart_cols in df_sample.columns:
                     fig = px.bar(df_sample, x=chart_cols)
                     st.plotly_chart(fig)
 
@@ -249,11 +249,11 @@ if uploaded_file:
 
             except Exception as e:
                 st.error(f"API Error: {e}")
-else:
-    st.info("Please upload a file to get started.")
+        else:
+        st.info("Please upload a file to get started.")
 
-            # Dynamic chart rendering from natural question
-            chart_type, chart_cols = detect_chart_type_and_columns(user_question, df_sample)
+        # Dynamic chart rendering from natural question
+        chart_type, chart_cols = detect_chart_type_and_columns(user_question, df_sample)
 
             if chart_type == "bar" and chart_cols and chart_cols in df_sample.columns:
                 fig = px.bar(df_sample, x=chart_cols)
