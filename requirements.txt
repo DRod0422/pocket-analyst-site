@@ -4,4 +4,6 @@ pandas
 plotly
 kaleido
 scikit-learn
+matplotlib
+seaborn
 
