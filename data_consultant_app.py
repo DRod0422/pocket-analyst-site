@@ -150,3 +150,50 @@ if uploaded_file:
             fig, ax = plt.subplots(figsize=(12, 7))
             sns.heatmap(corr, annot=True, vmin=-1, vmax=1, fmt=".2f", cmap="Spectral", ax=ax)
             st.pyplot(fig)
+
+    # --- Chat Section (restored) ---
+    st.markdown("---")
+    st.subheader("🤖 Ask a question about your data")
+    user_question = st.text_input("Type your question and press Enter:")
+
+    if user_question:
+        csv_snippet = df_sample.to_csv(index=False)
+        prompt = f"""
+        You are an expert data analyst. Based on the following CSV data, answer the user's question clearly and briefly. Do not include Python code in your response.
+
+        Data:
+        {csv_snippet[:4000]}
+
+        Question: {user_question}
+        """
+
+        try:
+            response = openai.chat.completions.create(
+                model=GPT_MODEL,
+                messages=[
+                    {"role": "system", "content": "You are a helpful data analyst."},
+                    {"role": "user", "content": prompt}
+                ]
+            )
+            answer = response.choices[0].message.content
+            st.subheader("Bot's Answer")
+            with st.expander("AI Response", expanded=True):
+                st.write(answer)
+
+            # Dynamic chart rendering from natural question
+            chart_type, chart_cols = detect_chart_type_and_columns(user_question, df_sample)
+
+            if chart_type == "bar" and chart_cols and chart_cols in df_sample.columns:
+                fig = px.bar(df_sample, x=chart_cols)
+                st.plotly_chart(fig)
+
+            elif chart_type == "line" and chart_cols and all(chart_cols):
+                fig = px.line(df_sample, x=chart_cols[0], y=chart_cols[1])
+                st.plotly_chart(fig)
+
+            elif chart_type == "scatter" and chart_cols and all(chart_cols):
+                fig = px.scatter(df_sample, x=chart_cols[0], y=chart_cols[1], color=chart_cols[2])
+                st.plotly_chart(fig)
+
+        except Exception as e:
+            st.error(f"API Error: {e}")
