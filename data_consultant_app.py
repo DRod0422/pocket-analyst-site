@@ -142,8 +142,8 @@ if uploaded_file:
         st.session_state.query_reset_time = datetime.datetime.now()
 
     if user_question:
-        if st.session_state.query_count >= 5:
-            st.warning("You've reached your free question limit for today. Please upgrade to unlock more features.")
+        #if st.session_state.query_count >= 5:
+            #st.warning("You've reached your free question limit for today. Please upgrade to unlock more features.")
         else:
             st.session_state.query_count += 1
             csv_snippet = df_sample.to_csv(index=False)
