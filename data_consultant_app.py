@@ -79,7 +79,7 @@ if uploaded_file:
         chart_type = st.selectbox("Chart Type", ["Bar", "Line", "Scatter"])
         x_col = st.selectbox("Select X-axis column", options=df_sample.columns)
         y_col = st.selectbox("Select Y-axis column", options=df_sample.columns)
-        if st.button("Generate Chart"):
+        if st.button("Generate Custom Chart"):
             try:
                 if chart_type == "Bar":
                     fig = px.bar(df_sample, x=x_col, y=y_col)
