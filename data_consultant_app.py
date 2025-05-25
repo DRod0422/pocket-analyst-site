@@ -177,5 +177,3 @@ else:
 st.markdown("---")
 st.caption("Built with ❤️ using Streamlit + OpenAI + Pandas + Plotly")
 st.markdown("📬 Need help? Contact us at [pocketanalyst.help@gmail.com](mailto:pocketanalyst.help@gmail.com)")
-
-
