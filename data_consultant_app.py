@@ -76,8 +76,40 @@ if uploaded_file:
         df_sample = df.sample(n=1000, random_state=42)
     else:
         df_sample = df
-        
-     # --- Trial-limited Predictive Modeling ---
+
+    # --- Optional Chart Builder ---
+    with st.expander("🛠️ Create a Custom Chart (optional)"):
+        chart_type = st.selectbox("Chart Type", ["Bar", "Line", "Scatter"])
+        x_col = st.selectbox("Select X-axis column", options=df_sample.columns)
+        y_col = st.selectbox("Select Y-axis column", options=df_sample.columns)
+        if st.button("Generate Custom Chart"):
+            try:
+                if chart_type == "Bar":
+                    fig = px.bar(df_sample, x=x_col, y=y_col)
+                elif chart_type == "Line":
+                    fig = px.line(df_sample, x=x_col, y=y_col)
+                elif chart_type == "Scatter":
+                    fig = px.scatter(df_sample, x=x_col, y=y_col)
+                st.plotly_chart(fig)
+            except Exception as e:
+                st.error(f"Chart creation failed: {e}")
+                
+    # --- Guidance for ML Tools --
+    st.markdown("---")
+    st.markdown("## 🔬 Modeling & Advanced Analysis")
+    st.info(
+        """
+        The following tools include **univariate analysis**, **machine learning insights**, and **predictive analysis**.
+        These features require well-structured data — not all datasets are suitable.
+
+        If your data is missing key variables, has poor formatting, or doesn't represent measurable relationships,
+        these models may return inaccurate or meaningless results.
+
+        ➤ Use these tools only when your data is appropriate for modeling.
+        """
+    )  
+
+    # --- Trial-limited Predictive Modeling ---
     if "predict_use_count" not in st.session_state:
         st.session_state.predict_use_count = 0
 
@@ -114,39 +146,6 @@ if uploaded_file:
         with st.expander("🔒 Predictive Modeling (Pro Only)"):
             st.warning("You've reached your free trial limit for predictions today. Upgrade to Pocket Analyst Pro to unlock unlimited forecasting.")
             st.button("🔓 Unlock Predictive Tools")
-
-
-    # --- Optional Chart Builder ---
-    with st.expander("🛠️ Create a Custom Chart (optional)"):
-        chart_type = st.selectbox("Chart Type", ["Bar", "Line", "Scatter"])
-        x_col = st.selectbox("Select X-axis column", options=df_sample.columns)
-        y_col = st.selectbox("Select Y-axis column", options=df_sample.columns)
-        if st.button("Generate Custom Chart"):
-            try:
-                if chart_type == "Bar":
-                    fig = px.bar(df_sample, x=x_col, y=y_col)
-                elif chart_type == "Line":
-                    fig = px.line(df_sample, x=x_col, y=y_col)
-                elif chart_type == "Scatter":
-                    fig = px.scatter(df_sample, x=x_col, y=y_col)
-                st.plotly_chart(fig)
-            except Exception as e:
-                st.error(f"Chart creation failed: {e}")
-                
-    # --- Guidance for ML Tools --
-    st.markdown("---")
-    st.markdown("## 🔬 Modeling & Advanced Analysis")
-    st.info(
-        """
-        The following tools include **univariate analysis**, **machine learning insights**, and **predictive analysis**.
-        These features require well-structured data — not all datasets are suitable.
-
-        If your data is missing key variables, has poor formatting, or doesn't represent measurable relationships,
-        these models may return inaccurate or meaningless results.
-
-        ➤ Use these tools only when your data is appropriate for modeling.
-        """
-    )  
     
     # --- Univariate Analysis ---
     with st.expander("📈 Univariate Analysis"):
