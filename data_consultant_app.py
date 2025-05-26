@@ -132,7 +132,22 @@ if uploaded_file:
                 st.plotly_chart(fig)
             except Exception as e:
                 st.error(f"Chart creation failed: {e}")
+                
+    # --- Guidance for ML Tools --
+    st.markdown("---")
+    st.markdown("## 🔬 Modeling & Advanced Analysis")
+    st.info(
+        """
+        The following tools include **univariate analysis**, **machine learning insights**, and **predictive analysis**.
+        These features require well-structured data — not all datasets are suitable.
 
+        If your data is missing key variables, has poor formatting, or doesn't represent measurable relationships,
+        these models may return inaccurate or meaningless results.
+
+        ➤ Use these tools only when your data is appropriate for modeling.
+        """
+    )  
+    
     # --- Univariate Analysis ---
     with st.expander("📈 Univariate Analysis"):
         num_cols = df_sample.select_dtypes(include=np.number).columns.tolist()
