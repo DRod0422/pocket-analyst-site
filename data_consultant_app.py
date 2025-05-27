@@ -94,6 +94,9 @@ if uploaded_file:
             except Exception as e:
                 st.error(f"Chart creation failed: {e}")
                 
+    # --- Chat Section ---
+    user_question = st.text_input("Ask a question about your data:")
+                
     # --- Guidance for ML Tools --
     st.markdown("---")
     st.markdown("## 🔬 Modeling & Advanced Analysis")
@@ -204,8 +207,6 @@ if uploaded_file:
             sns.heatmap(corr, annot=True, vmin=-1, vmax=1, fmt=".2f", cmap="Spectral", ax=ax)
             st.pyplot(fig)
 
-    # --- Chat Section ---
-    user_question = st.text_input("Ask a question about your data:")
 
     # Session usage tracking (limit free users to 5 questions/day)
     if "query_count" not in st.session_state:
