@@ -204,14 +204,15 @@ if uploaded_file:
             for col in numeric_cols:
                 st.markdown(f"**{col}**")
                 try:
-                    # Convert value counts to a DataFrame
-                    counts = df_sample[col].dropna().value_counts().sort_index()
-                    vc_df = pd.DataFrame({col: counts.index, "Count": counts.values})
+                    # Bin the numeric column into discrete intervals before counting
+                    binned_col = pd.cut(df_sample[col], bins=10)  # You can tweak bin count if needed
+                    counts = binned_col.value_counts().sort_index()
+                    vc_df = pd.DataFrame({f"{col} (binned)": counts.index.astype(str), "Count": counts.values})
 
                     if chart_type == "Bar (Counts)":
-                        fig = px.bar(vc_df, x=col, y="Count", title=f"{col} - Bar Chart")
+                        fig = px.bar(vc_df, x=f"{col} (binned)", y="Count", title=f"{col} - Bar Chart (Binned)")
                     elif chart_type == "Line (Counts)":
-                        fig = px.line(vc_df, x=col, y="Count", title=f"{col} - Line Chart")
+                        fig = px.line(vc_df, x=f"{col} (binned)", y="Count", title=f"{col} - Line Chart (Binned)")
                     else:
                         st.warning("Chart type not recognized.")
                         
