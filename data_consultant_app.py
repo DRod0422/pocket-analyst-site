@@ -154,7 +154,7 @@ if uploaded_file:
                 except Exception as e:
                     st.warning(f"Could not generate chart for {col}: {e}")
         else:
-        st.info("No numeric columns found.")
+            st.info("No numeric columns found.")
 
                 
     # --- Guidance for ML Tools --
