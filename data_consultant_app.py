@@ -72,9 +72,6 @@ if uploaded_file:
         
     # --- Chat Section ---
     user_question = st.text_input("Ask a question about your data:")
-
-    # --- Divider --
-    st.markdown("---")
       
     # --- Light Sampling for Large Files ---
     if len(df) > 5000:
@@ -100,6 +97,8 @@ if uploaded_file:
             except Exception as e:
                 st.error(f"Chart creation failed: {e}")
                 
+    # --- Divider --
+    st.markdown("---")            
 
     # --- Smart Auto Insights ---
     with st.expander("📊 Smart Auto Insights (Beta)", expanded=True):
