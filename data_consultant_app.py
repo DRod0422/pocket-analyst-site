@@ -141,15 +141,18 @@ if uploaded_file:
         chart_type = st.radio("Chart style:", ["Line", "Bar"], horizontal=True)
 
         if numeric_cols:
-            st.markdown("Quick glance at each numeric column:")
+            st.markdown("Quick glance at value distributions:")
 
             for col in numeric_cols:
                 st.markdown(f"**{col}**")
                 try:
-                    if chart_type == "Line":
-                        fig = px.line(df_sample, y=col, title=f"{col} - Line Chart")
+                     value_counts = df_sample[col].dropna().value_counts().sort_index()
+
+                    if chart_type == "Bar (Counts)":
+                        fig = px.bar(x=value_counts.index, y=value_counts.values, labels={'x': col, 'y': 'Count'}, title=f"{col} - Bar Chart")
                     else:
-                        fig = px.bar(df_sample, y=col, title=f"{col} - Bar Chart")
+                        fig = px.line(x=value_counts.index, y=value_counts.values, labels={'x': col, 'y': 'Count'}, title=f"{col} - Line Chart")
+                        
                     st.plotly_chart(fig, use_container_width=True)
                 except Exception as e:
                     st.warning(f"Could not generate chart for {col}: {e}")
