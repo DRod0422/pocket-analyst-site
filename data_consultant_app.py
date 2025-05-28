@@ -73,6 +73,13 @@ if uploaded_file:
     # --- Chat Section ---
     user_question = st.text_input("Ask a question about your data:")
 
+    # --- Light Sampling for Large Files ---
+    if len(df) > 5000:
+        st.warning(f"Large dataset detected ({len(df)} rows). Sampling 1000 rows for efficiency.")
+        df_sample = df.sample(n=1000, random_state=42)
+    else:
+        df_sample = df
+
     # Session usage tracking (limit free users to 5 questions/day)
     if "query_count" not in st.session_state:
         st.session_state.query_count = 0
@@ -130,12 +137,6 @@ if uploaded_file:
             except Exception as e:
                 st.error(f"API Error: {e}")
           
-    # --- Light Sampling for Large Files ---
-    if len(df) > 5000:
-        st.warning(f"Large dataset detected ({len(df)} rows). Sampling 1000 rows for efficiency.")
-        df_sample = df.sample(n=1000, random_state=42)
-    else:
-        df_sample = df
 
     # --- Optional Chart Builder ---
     with st.expander("🛠️ Create a Custom Chart (optional)"):
