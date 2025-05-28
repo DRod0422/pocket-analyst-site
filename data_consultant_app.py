@@ -137,13 +137,25 @@ if uploaded_file:
             st.markdown(f"**{col}** - Top Categories")
             st.dataframe(df_sample[col].value_counts().head(5))
 
-        st.subheader("🧠 Quick Correlation Heatmap")
-        if len(numeric_cols) >= 2:
-            fig, ax = plt.subplots(figsize=(10, 6))
-            sns.heatmap(df_sample[numeric_cols].corr(), annot=True, fmt=".2f", cmap="Spectral", ax=ax)
-            st.pyplot(fig)
+        st.subheader("🧪 Auto-Generated Chart Gallery")
+        chart_type = st.radio("Chart style:", ["Line", "Bar"], horizontal=True)
+
+        if numeric_cols:
+            st.markdown("Quick glance at each numeric column:")
+
+            for col in numeric_cols:
+                st.markdown(f"**{col}**")
+                    try:
+                        if chart_type == "Line":
+                            fig = px.line(df_sample, y=col, title=f"{col} - Line Chart")
+                        else:
+                            fig = px.bar(df_sample, y=col, title=f"{col} - Bar Chart")
+                        st.plotly_chart(fig, use_container_width=True)
+                    except Exception as e:
+                        st.warning(f"Could not generate chart for {col}: {e}")
         else:
-            st.info("Not enough numeric columns for correlation heatmap.")
+        st.info("No numeric columns found.")
+
                 
     # --- Guidance for ML Tools --
     st.markdown("---")
