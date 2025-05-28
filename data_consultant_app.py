@@ -146,7 +146,9 @@ if uploaded_file:
             for col in numeric_cols:
                 st.markdown(f"**{col}**")
                 try:
-                    value_counts = df_sample[col].dropna().value_counts().sort_index()
+                    # Convert value counts to a DataFrame
+                    vc_df = df_sample[col].dropna().value_counts().sort_index().reset_index()
+                    vc_df.columns = [col, "Count"]
 
                     if chart_type == "Bar (Counts)":
                         fig = px.bar(x=value_counts.index, y=value_counts.values, labels={'x': col, 'y': 'Count'}, title=f"{col} - Bar Chart")
