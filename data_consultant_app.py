@@ -137,12 +137,12 @@ if uploaded_file:
             st.dataframe(df_sample[col].value_counts().head(5))
 
         st.subheader("🧠 Quick Correlation Heatmap")
-            if len(numeric_cols) >= 2:
-                fig, ax = plt.subplots(figsize=(10, 6))
-                sns.heatmap(df_sample[numeric_cols].corr(), annot=True, fmt=".2f", cmap="Spectral", ax=ax)
-                st.pyplot(fig)
-            else:
-                st.info("Not enough numeric columns for correlation heatmap.")
+        if len(numeric_cols) >= 2:
+            fig, ax = plt.subplots(figsize=(10, 6))
+            sns.heatmap(df_sample[numeric_cols].corr(), annot=True, fmt=".2f", cmap="Spectral", ax=ax)
+            st.pyplot(fig)
+        else:
+            st.info("Not enough numeric columns for correlation heatmap.")
                 
     # --- Guidance for ML Tools --
     st.markdown("---")
