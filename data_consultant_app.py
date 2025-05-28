@@ -147,13 +147,15 @@ if uploaded_file:
                 st.markdown(f"**{col}**")
                 try:
                     # Convert value counts to a DataFrame
-                    vc_df = df_sample[col].dropna().value_counts().sort_index().reset_index()
-                    vc_df.columns = [col, "Count"]
+                    counts = df_sample[col].dropna().value_counts().sort_index()
+                    vc_df = pd.DataFrame({col: counts.index, "Count": counts.values})
 
                     if chart_type == "Bar (Counts)":
                         fig = px.bar(vc_df, x=col, y="Count", title=f"{col} - Bar Chart")
-                    else:
+                    elif chart_type == "Line (Counts)":
                         fig = px.line(vc_df, x=col, y="Count", title=f"{col} - Line Chart")
+                    else:
+                        st.warning("Chart type not recognized.")
                         
                     st.plotly_chart(fig, use_container_width=True)
                 except Exception as e:
