@@ -138,7 +138,7 @@ if uploaded_file:
             st.dataframe(df_sample[col].value_counts().head(5))
 
         st.subheader("🧪 Auto-Generated Chart Gallery")
-        chart_type = st.radio("Chart style:", ["Line", "Bar"], horizontal=True)
+        chart_type = st.radio("Chart style:", ["Bar (Counts)", "Line (Counts)"], horizontal=True)
 
         if numeric_cols:
             st.markdown("Quick glance at value distributions:")
