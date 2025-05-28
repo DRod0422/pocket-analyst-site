@@ -57,8 +57,6 @@ if uploaded_file:
     st.subheader("Preview of Your Data")
     st.dataframe(df.head(100))
 
-
-
     # --- Go-By Suggestions ---
     with st.expander("💡 Try asking about your data:"):
         st.markdown("""
@@ -71,7 +69,13 @@ if uploaded_file:
         - Line chart of total revenue over time
         - What insights can you provide from this data?
         """)
+        
+    # --- Chat Section ---
+    user_question = st.text_input("Ask a question about your data:")
 
+    # --- Divider --
+    st.markdown("---")
+      
     # --- Light Sampling for Large Files ---
     if len(df) > 5000:
         st.warning(f"Large dataset detected ({len(df)} rows). Sampling 1000 rows for efficiency.")
@@ -96,8 +100,6 @@ if uploaded_file:
             except Exception as e:
                 st.error(f"Chart creation failed: {e}")
                 
-    # --- Chat Section ---
-    user_question = st.text_input("Ask a question about your data:")
 
     # --- Smart Auto Insights ---
     with st.expander("📊 Smart Auto Insights (Beta)", expanded=True):
