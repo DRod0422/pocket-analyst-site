@@ -122,13 +122,13 @@ if uploaded_file:
 
         st.subheader("📈 Quick Distribution Check (Numeric Columns)")
         numeric_cols = df_sample.select_dtypes(include=np.number).columns.tolist()
-            if numeric_cols:
-                stats_df = df_sample[numeric_cols].describe().T
-                stats_df['skew'] = df_sample[numeric_cols].skew()
-                stats_df['kurtosis'] = df_sample[numeric_cols].kurtosis()
-                st.dataframe(stats_df.round(2))
-            else:
-                st.info("No numeric columns detected.")
+        if numeric_cols:
+            stats_df = df_sample[numeric_cols].describe().T
+            stats_df['skew'] = df_sample[numeric_cols].skew()
+            stats_df['kurtosis'] = df_sample[numeric_cols].kurtosis()
+            st.dataframe(stats_df.round(2))
+        else:
+            st.info("No numeric columns detected.")
 
         st.subheader("📊 Top Categorical Distributions")
         cat_cols = df_sample.select_dtypes(include='object').columns.tolist()
