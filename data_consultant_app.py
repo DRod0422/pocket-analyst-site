@@ -165,6 +165,7 @@ if uploaded_file:
                 col_data = df_sample[selected_col].dropna()
                 st.write(f"**Summary Statistics for {selected_col}:**")
                 st.write(col_data.describe().T)
+                st.write(col_data.shape())
                 st.write(f"**Skewness:** {skew(col_data):.3f}")
                 st.write(f"**Kurtosis:** {kurtosis(col_data):.3f}")
                 st.plotly_chart(px.histogram(col_data, nbins=30, title=f"Histogram of {selected_col}"))
