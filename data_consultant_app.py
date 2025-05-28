@@ -57,50 +57,7 @@ if uploaded_file:
     st.subheader("Preview of Your Data")
     st.dataframe(df.head(100))
 
-# --- Smart Auto Insights ---
-with st.expander("📊 Smart Auto Insights (Beta)", expanded=True):
-    st.markdown("Get an instant overview of your dataset without lifting a finger. This section auto-generates summaries, stats, and visuals for quick insight.")
 
-    st.subheader("🔍 Dataset Summary")
-    st.write(f"**Shape:** {df_sample.shape[0]} rows × {df_sample.shape[1]} columns")
-    st.write("**Data Types:**")
-    st.dataframe(df_sample.dtypes)
-
-    missing_counts = df_sample.isnull().sum()
-    missing_percent = (missing_counts / len(df_sample)) * 100
-    missing_df = pd.DataFrame({
-        'Missing Values': missing_counts,
-        'Percent Missing': missing_percent
-    }).round(2)
-    st.write("**Missing Data Overview:**")
-    st.dataframe(missing_df[missing_df['Missing Values'] > 0])
-
-    dup_count = df_sample.duplicated().sum()
-    st.write(f"**Duplicate Rows:** {dup_count}")
-
-    st.subheader("📈 Quick Distribution Check (Numeric Columns)")
-    numeric_cols = df_sample.select_dtypes(include=np.number).columns.tolist()
-    if numeric_cols:
-        stats_df = df_sample[numeric_cols].describe().T
-        stats_df['skew'] = df_sample[numeric_cols].skew()
-        stats_df['kurtosis'] = df_sample[numeric_cols].kurtosis()
-        st.dataframe(stats_df.round(2))
-    else:
-        st.info("No numeric columns detected.")
-
-    st.subheader("📊 Top Categorical Distributions")
-    cat_cols = df_sample.select_dtypes(include='object').columns.tolist()
-    for col in cat_cols[:3]:  # Show only top 3 for brevity
-        st.markdown(f"**{col}** - Top Categories")
-        st.dataframe(df_sample[col].value_counts().head(5))
-
-    st.subheader("🧠 Quick Correlation Heatmap")
-    if len(numeric_cols) >= 2:
-        fig, ax = plt.subplots(figsize=(10, 6))
-        sns.heatmap(df_sample[numeric_cols].corr(), annot=True, fmt=".2f", cmap="Spectral", ax=ax)
-        st.pyplot(fig)
-    else:
-        st.info("Not enough numeric columns for correlation heatmap.")
 
     # --- Go-By Suggestions ---
     with st.expander("💡 Try asking about your data:"):
@@ -141,6 +98,51 @@ with st.expander("📊 Smart Auto Insights (Beta)", expanded=True):
                 
     # --- Chat Section ---
     user_question = st.text_input("Ask a question about your data:")
+
+    # --- Smart Auto Insights ---
+    with st.expander("📊 Smart Auto Insights (Beta)", expanded=True):
+        st.markdown("Get an instant overview of your dataset without lifting a finger. This section auto-generates summaries, stats, and visuals for quick insight.")
+
+        st.subheader("🔍 Dataset Summary")
+        st.write(f"**Shape:** {df_sample.shape[0]} rows × {df_sample.shape[1]} columns")
+        st.write("**Data Types:**")
+        st.dataframe(df_sample.dtypes)
+
+        missing_counts = df_sample.isnull().sum()
+        missing_percent = (missing_counts / len(df_sample)) * 100
+        missing_df = pd.DataFrame({
+        'Missing Values': missing_counts,
+        'Percent Missing': missing_percent
+        }).round(2)
+        st.write("**Missing Data Overview:**")
+        st.dataframe(missing_df[missing_df['Missing Values'] > 0])
+
+        dup_count = df_sample.duplicated().sum()
+        st.write(f"**Duplicate Rows:** {dup_count}")
+
+        st.subheader("📈 Quick Distribution Check (Numeric Columns)")
+        numeric_cols = df_sample.select_dtypes(include=np.number).columns.tolist()
+            if numeric_cols:
+                stats_df = df_sample[numeric_cols].describe().T
+                stats_df['skew'] = df_sample[numeric_cols].skew()
+                stats_df['kurtosis'] = df_sample[numeric_cols].kurtosis()
+                st.dataframe(stats_df.round(2))
+            else:
+                st.info("No numeric columns detected.")
+
+        st.subheader("📊 Top Categorical Distributions")
+        cat_cols = df_sample.select_dtypes(include='object').columns.tolist()
+        for col in cat_cols[:3]:  # Show only top 3 for brevity
+            st.markdown(f"**{col}** - Top Categories")
+            st.dataframe(df_sample[col].value_counts().head(5))
+
+        st.subheader("🧠 Quick Correlation Heatmap")
+            if len(numeric_cols) >= 2:
+                fig, ax = plt.subplots(figsize=(10, 6))
+                sns.heatmap(df_sample[numeric_cols].corr(), annot=True, fmt=".2f", cmap="Spectral", ax=ax)
+                st.pyplot(fig)
+            else:
+                st.info("Not enough numeric columns for correlation heatmap.")
                 
     # --- Guidance for ML Tools --
     st.markdown("---")
