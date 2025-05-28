@@ -145,14 +145,14 @@ if uploaded_file:
 
             for col in numeric_cols:
                 st.markdown(f"**{col}**")
-                    try:
-                        if chart_type == "Line":
-                            fig = px.line(df_sample, y=col, title=f"{col} - Line Chart")
-                        else:
-                            fig = px.bar(df_sample, y=col, title=f"{col} - Bar Chart")
-                        st.plotly_chart(fig, use_container_width=True)
-                    except Exception as e:
-                        st.warning(f"Could not generate chart for {col}: {e}")
+                try:
+                    if chart_type == "Line":
+                        fig = px.line(df_sample, y=col, title=f"{col} - Line Chart")
+                    else:
+                        fig = px.bar(df_sample, y=col, title=f"{col} - Bar Chart")
+                    st.plotly_chart(fig, use_container_width=True)
+                except Exception as e:
+                    st.warning(f"Could not generate chart for {col}: {e}")
         else:
         st.info("No numeric columns found.")
 
