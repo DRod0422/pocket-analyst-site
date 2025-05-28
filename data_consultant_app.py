@@ -72,6 +72,63 @@ if uploaded_file:
         
     # --- Chat Section ---
     user_question = st.text_input("Ask a question about your data:")
+
+    # Session usage tracking (limit free users to 5 questions/day)
+    if "query_count" not in st.session_state:
+        st.session_state.query_count = 0
+        st.session_state.query_reset_time = datetime.datetime.now()
+
+    if datetime.datetime.now() - st.session_state.query_reset_time > datetime.timedelta(days=1):
+        st.session_state.query_count = 0
+        st.session_state.query_reset_time = datetime.datetime.now()
+
+    if user_question:
+        if st.session_state.query_count >= 5:
+            st.warning("You've reached your free question limit for today. Please upgrade to unlock more features.")
+        else:
+            st.session_state.query_count += 1
+            csv_snippet = df_sample.to_csv(index=False)
+
+            prompt = f"""
+            You are an expert data analyst. Based on the following CSV data, answer the user's question clearly and briefly. Do not include Python code in your response.
+
+            Data:
+            {csv_snippet[:4000]}
+
+            Question: {user_question}
+            """
+
+            try:
+                response = openai.chat.completions.create(
+                    model=GPT_MODEL,
+                    messages=[
+                        {"role": "system", "content": "You are a helpful data analyst."},
+                        {"role": "user", "content": prompt}
+                    ]
+                )
+                answer = response.choices[0].message.content
+
+                st.subheader("Bot's Answer")
+                with st.expander("AI Response", expanded=True):
+                    st.write(answer)
+
+                # Dynamic chart rendering
+                chart_type, chart_cols = detect_chart_type_and_columns(user_question, df_sample)
+
+                if chart_type == "bar" and chart_cols and chart_cols in df_sample.columns:
+                    fig = px.bar(df_sample, x=chart_cols)
+                    st.plotly_chart(fig)
+
+                elif chart_type == "line" and all(chart_cols):
+                    fig = px.line(df_sample, x=chart_cols[0], y=chart_cols[1])
+                    st.plotly_chart(fig)
+
+                elif chart_type == "scatter" and all(chart_cols):
+                    fig = px.scatter(df_sample, x=chart_cols[0], y=chart_cols[1], color=chart_cols[2])
+                    st.plotly_chart(fig)
+
+            except Exception as e:
+                st.error(f"API Error: {e}")
       
     # --- Light Sampling for Large Files ---
     if len(df) > 5000:
@@ -275,62 +332,7 @@ if uploaded_file:
             st.pyplot(fig)
 
 
-    # Session usage tracking (limit free users to 5 questions/day)
-    if "query_count" not in st.session_state:
-        st.session_state.query_count = 0
-        st.session_state.query_reset_time = datetime.datetime.now()
-
-    if datetime.datetime.now() - st.session_state.query_reset_time > datetime.timedelta(days=1):
-        st.session_state.query_count = 0
-        st.session_state.query_reset_time = datetime.datetime.now()
-
-    if user_question:
-        if st.session_state.query_count >= 5:
-            st.warning("You've reached your free question limit for today. Please upgrade to unlock more features.")
-        else:
-            st.session_state.query_count += 1
-            csv_snippet = df_sample.to_csv(index=False)
-
-            prompt = f"""
-            You are an expert data analyst. Based on the following CSV data, answer the user's question clearly and briefly. Do not include Python code in your response.
-
-            Data:
-            {csv_snippet[:4000]}
-
-            Question: {user_question}
-            """
-
-            try:
-                response = openai.chat.completions.create(
-                    model=GPT_MODEL,
-                    messages=[
-                        {"role": "system", "content": "You are a helpful data analyst."},
-                        {"role": "user", "content": prompt}
-                    ]
-                )
-                answer = response.choices[0].message.content
-
-                st.subheader("Bot's Answer")
-                with st.expander("AI Response", expanded=True):
-                    st.write(answer)
-
-                # Dynamic chart rendering
-                chart_type, chart_cols = detect_chart_type_and_columns(user_question, df_sample)
-
-                if chart_type == "bar" and chart_cols and chart_cols in df_sample.columns:
-                    fig = px.bar(df_sample, x=chart_cols)
-                    st.plotly_chart(fig)
-
-                elif chart_type == "line" and all(chart_cols):
-                    fig = px.line(df_sample, x=chart_cols[0], y=chart_cols[1])
-                    st.plotly_chart(fig)
-
-                elif chart_type == "scatter" and all(chart_cols):
-                    fig = px.scatter(df_sample, x=chart_cols[0], y=chart_cols[1], color=chart_cols[2])
-                    st.plotly_chart(fig)
-
-            except Exception as e:
-                st.error(f"API Error: {e}")
+    
 else:
     st.info("Please upload a file to get started.")
 
