@@ -151,9 +151,9 @@ if uploaded_file:
                     vc_df.columns = [col, "Count"]
 
                     if chart_type == "Bar (Counts)":
-                        fig = px.bar(x=value_counts.index, y=value_counts.values, labels={'x': col, 'y': 'Count'}, title=f"{col} - Bar Chart")
+                        fig = px.bar(vc_df, x=col, y="Count", title=f"{col} - Bar Chart")
                     else:
-                        fig = px.line(x=value_counts.index, y=value_counts.values, labels={'x': col, 'y': 'Count'}, title=f"{col} - Line Chart")
+                        fig = px.line(vc_df, x=col, y="Count", title=f"{col} - Line Chart")
                         
                     st.plotly_chart(fig, use_container_width=True)
                 except Exception as e:
