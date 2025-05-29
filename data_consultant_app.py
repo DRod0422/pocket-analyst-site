@@ -202,6 +202,9 @@ if uploaded_file:
         df_sample[df_sample.select_dtypes(include=["float"]).columns] = (
             df_sample.select_dtypes(include=["float"]).round().astype("Int64")
         )
+        # Recompute numeric columns after transformation
+        numeric_cols = df_sample.select_dtypes(include="number").columns.tolist()
+
         if numeric_cols:
             st.markdown("Quick glance at value distributions:")
 
