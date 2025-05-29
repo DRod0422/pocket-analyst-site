@@ -94,13 +94,17 @@ if uploaded_file:
             st.warning("You've reached your free question limit for today. Please upgrade to unlock more features.")
         else:
             st.session_state.query_count += 1
-            csv_snippet = df_sample.to_csv(index=False)
+            csv_snippet = df_sample.head(10).to_string(index=False)
 
+            row_count, col_count = df_sample.shape
+            
             prompt = f"""
-            You are an expert data analyst. Based on the following CSV data, answer the user's question clearly and briefly. Do not include Python code in your response.
+            You are an expert data analyst. The dataset has {row_count} rows and {col_count} columns.
+            Below is a preview of the first 10 rows. Use it to understand the structure and help answer the user's question.
 
-            Data:
-            {csv_snippet[:4000]}
+            Sample Data:
+            {csv_snippet}
+            
 
             Question: {user_question}
             """
