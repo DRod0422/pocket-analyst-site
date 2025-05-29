@@ -199,9 +199,10 @@ if uploaded_file:
         chart_type = st.radio("Chart style:", ["Bar (Counts)", "Line (Counts)"], horizontal=True)
         
         # Convert float columns to rounded integers (safe for counting)
-        df_sample[df_sample.select_dtypes(include=["float"]).columns] = (
-            df_sample.select_dtypes(include=["float"]).round().astype("Int64")
-        )
+        float_cols = df_sample.select_dtypes(include=["float"]).columns
+        for col in float_cols:
+            df_sample.loc[:, col] = df_sample[col].round().astype("Int64")
+        
         # Recompute numeric columns after transformation
         numeric_cols = df_sample.select_dtypes(include="number").columns.tolist()
 
