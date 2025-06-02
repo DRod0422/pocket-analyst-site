@@ -57,21 +57,33 @@ if uploaded_file:
     st.subheader("Preview of Your Data")
     st.dataframe(df.head(100))
 
-    with st.expander("✨ Quick Overview & Business Insights", expanded=True):
+    with st.expander("✨ AI Quick Insights", expanded=True):
         try:
-            st.markdown("Here's a quick summary of your uploaded data:")
+            st.markdown("Here's what I noticed in your data:")
     
-            st.write(f"- Your dataset has **{df.shape[0]} rows** and **{df.shape[1]} columns**.")
-            st.write(f"- Detected date fields: {', '.join([col for col in df.columns if 'date' in col.lower()]) or 'None'}")
-            st.write(f"- Numeric fields: {', '.join(df.select_dtypes(include='number').columns)}")
+            csv_snippet = df_sample.to_csv(index=False)[:4000]  # Keep it short for token limits
+            insight_prompt = f"""
+            You are a data analyst. Read the data below and write 3 short, plain-English insights.
+            Avoid technical jargon. Pretend you're talking to a small business owner.
     
-            top_numeric = df.select_dtypes(include='number').columns.tolist()[:2]
-            if top_numeric:
-                for col in top_numeric:
-                    st.plotly_chart(px.histogram(df, x=col, title=f"Distribution of {col}"))
-
+            Data sample:
+            {csv_snippet}
+            """
+    
+            response = openai.chat.completions.create(
+                model="gpt-4o",
+                messages=[
+                    {"role": "system", "content": "You are a helpful data analyst."},
+                    {"role": "user", "content": insight_prompt}
+                ]
+            )
+            ai_insights = response.choices[0].message.content
+    
+            st.markdown(ai_insights)
+    
         except Exception as e:
-            st.warning(f"Could not generate insights: {e}")
+            st.warning(f"Could not generate AI insights: {e}")
+
 
     # --- Go-By Suggestions ---
     with st.expander("💡 Try asking about your data:"):
