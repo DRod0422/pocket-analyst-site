@@ -45,6 +45,13 @@ def detect_chart_type_and_columns(question, df):
         return ("scatter", (x_col, y_col, color_col))
     return (None, None)
 
+# --- Light Sampling for Large Files ---
+    if len(df) > 5000:
+        st.warning(f"Large dataset detected ({len(df)} rows). Sampling 1000 rows for efficiency.")
+        df_sample = df.sample(n=1000, random_state=42)
+    else:
+        df_sample = df
+
 # --- File Upload Section ---
 uploaded_file = st.file_uploader("Upload a CSV or XLSX file", type=["csv", "xlsx"])
 
@@ -101,12 +108,7 @@ if uploaded_file:
     # --- Chat Section ---
     user_question = st.text_input("Ask a question about your data:")
 
-    # --- Light Sampling for Large Files ---
-    if len(df) > 5000:
-        st.warning(f"Large dataset detected ({len(df)} rows). Sampling 1000 rows for efficiency.")
-        df_sample = df.sample(n=1000, random_state=42)
-    else:
-        df_sample = df
+    
 
     # Session usage tracking (limit free users to 5 questions/day)
     if "query_count" not in st.session_state:
