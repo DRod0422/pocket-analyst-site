@@ -58,20 +58,20 @@ if uploaded_file:
     st.dataframe(df.head(100))
 
     with st.expander("✨ Quick Overview & Business Insights", expanded=True):
-    try:
-        st.markdown("Here's a quick summary of your uploaded data:")
+        try:
+            st.markdown("Here's a quick summary of your uploaded data:")
+    
+            st.write(f"- Your dataset has **{df.shape[0]} rows** and **{df.shape[1]} columns**.")
+            st.write(f"- Detected date fields: {', '.join([col for col in df.columns if 'date' in col.lower()]) or 'None'}")
+            st.write(f"- Numeric fields: {', '.join(df.select_dtypes(include='number').columns)}")
+    
+            top_numeric = df.select_dtypes(include='number').columns.tolist()[:2]
+            if top_numeric:
+                for col in top_numeric:
+                    st.plotly_chart(px.histogram(df, x=col, title=f"Distribution of {col}"))
 
-        st.write(f"- Your dataset has **{df.shape[0]} rows** and **{df.shape[1]} columns**.")
-        st.write(f"- Detected date fields: {', '.join([col for col in df.columns if 'date' in col.lower()]) or 'None'}")
-        st.write(f"- Numeric fields: {', '.join(df.select_dtypes(include='number').columns)}")
-
-        top_numeric = df.select_dtypes(include='number').columns.tolist()[:2]
-        if top_numeric:
-            for col in top_numeric:
-                st.plotly_chart(px.histogram(df, x=col, title=f"Distribution of {col}"))
-
-    except Exception as e:
-        st.warning(f"Could not generate insights: {e}")
+        except Exception as e:
+            st.warning(f"Could not generate insights: {e}")
 
     # --- Go-By Suggestions ---
     with st.expander("💡 Try asking about your data:"):
