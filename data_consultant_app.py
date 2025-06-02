@@ -54,16 +54,15 @@ if uploaded_file:
         df = pd.read_csv(uploaded_file)
     else:
         df = pd.read_excel(uploaded_file)
-        
-if len(df) > 5000:
-    st.warning(f"Large dataset detected ({len(df)} rows). Sampling 1000 rows for faster performance.")
-    df_sample = df.sample(n=1000, random_state=42)
-else:
-    df_sample = df
-
 
     st.subheader("Preview of Your Data")
     st.dataframe(df.head(100))
+
+    if len(df) > 5000:
+        st.warning(f"Large dataset detected ({len(df)} rows). Sampling 1000 rows for faster performance.")
+        df_sample = df.sample(n=1000, random_state=42)
+    else:
+        df_sample = df
 
     with st.expander("✨ AI Quick Insights", expanded=True):
         try:
