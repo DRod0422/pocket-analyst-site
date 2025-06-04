@@ -285,43 +285,61 @@ if uploaded_file:
         """
     )  
 
-    # --- Trial-limited Predictive Modeling ---
-    if "predict_use_count" not in st.session_state:
-        st.session_state.predict_use_count = 0
+    # --- Predictive Forecasting (Simple Time Series) ---
+    with st.expander("📈 Forecast Future Values (Beta)", expanded=False):
+        try:
+            date_cols = [col for col in df_sample.columns if pd.api.types.is_datetime64_any_dtype(df_sample[col])]
+            numeric_cols = df_sample.select_dtypes(include='number').columns.tolist()
+    
+            if not date_cols:
+                st.warning("No datetime column found. Please include a date column to enable forecasting.")
+            else:
+                date_col = st.selectbox("Select the date column:", date_cols)
+                target_col = st.selectbox("Select the value to forecast:", numeric_cols)
+    
+                # User input for forecast horizon
+                forecast_periods = st.slider("Months to forecast", min_value=1, max_value=12, value=6)
+    
+                # Prepare data
+                df_forecast = df_sample[[date_col, target_col]].dropna().sort_values(date_col)
+                df_forecast[date_col] = pd.to_datetime(df_forecast[date_col])
+                df_forecast = df_forecast.groupby(pd.Grouper(key=date_col, freq='M')).sum().reset_index()
+    
+                # Convert dates to ordinal for regression
+                df_forecast['ordinal_date'] = df_forecast[date_col].map(datetime.datetime.toordinal)
+                X = df_forecast[['ordinal_date']]
+                y = df_forecast[target_col]
+    
+                model = LinearRegression()
+                model.fit(X, y)
+    
+                # Forecast future dates
+                last_date = df_forecast[date_col].max()
+                future_dates = [last_date + pd.DateOffset(months=i) for i in range(1, forecast_periods + 1)]
+                future_ordinal = [[d.toordinal()] for d in future_dates]
+                predictions = model.predict(future_ordinal)
+    
+                # Create forecast DataFrame
+                forecast_df = pd.DataFrame({
+                    date_col: future_dates,
+                    'Forecast': predictions
+                })
+    
+                # Combine past + forecast
+                full_df = pd.concat([
+                    df_forecast[[date_col, target_col]].rename(columns={target_col: "Actual"}),
+                    forecast_df.rename(columns={'Forecast': "Actual"})
+                ]).reset_index(drop=True)
+    
+                # Plot
+                fig = px.line(full_df, x=date_col, y="Actual", title=f"{target_col} Forecast", markers=True)
+                fig.add_scatter(x=forecast_df[date_col], y=forecast_df["Actual"], mode="lines+markers", name="Forecast")
+    
+                st.plotly_chart(fig, use_container_width=True)
+    
+        except Exception as e:
+            st.error(f"Forecasting failed: {e}")
 
-    if st.session_state.predict_use_count < 3:
-        with st.expander("🔮 Predictive Modeling (Beta)"):
-            st.markdown("Use linear regression to forecast outcomes based on your data. You have "
-                        f"{3 - st.session_state.predict_use_count} predictions left today.")
-            numeric_cols = df_sample.select_dtypes(include=np.number).columns.tolist()
-
-            target_col = st.selectbox("Select a column to predict (target):", options=numeric_cols)
-            feature_cols = st.multiselect("Select feature columns to use for prediction:", options=[col for col in numeric_cols if col != target_col])
-
-            if target_col and feature_cols:
-                new_data = []
-                st.markdown("Enter values for prediction:")
-                for col in feature_cols:
-                    val = st.number_input(f"{col}", step=1.0)
-                    new_data.append(val)
-
-                if st.button("Run Prediction"):
-                    try:
-                        X = df_sample[feature_cols]
-                        y = df_sample[target_col]
-
-                        model = LinearRegression()
-                        model.fit(X, y)
-
-                        prediction = model.predict([new_data])[0]
-                        st.success(f"Estimated {target_col}: {prediction:,.2f}")
-                        st.session_state.predict_use_count += 1
-                    except Exception as e:
-                        st.error(f"Prediction failed: {e}")
-    else:
-        with st.expander("🔒 Predictive Modeling (Pro Only)"):
-            st.warning("You've reached your free trial limit for predictions today. Upgrade to Pocket Analyst Pro to unlock unlimited forecasting.")
-            st.button("🔓 Unlock Predictive Tools")
     
     # --- Univariate Analysis ---
     with st.expander("📈 Univariate Analysis"):
