@@ -6,4 +6,4 @@ kaleido
 scikit-learn
 matplotlib
 seaborn
-
+openpyxl
