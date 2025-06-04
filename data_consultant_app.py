@@ -275,7 +275,7 @@ if uploaded_file:
     st.markdown("## 🔬 Modeling & Advanced Analysis")
     st.info(
         """
-        The following tools include **univariate analysis**, **machine learning insights**, and **predictive analysis**.
+        The following tools include **univariate analysis**, **machine learning insights**, and **predictive forecasting analysis**.
         These features require well-structured data — not all datasets are suitable.
 
         If your data is missing key variables, has poor formatting, or doesn't represent measurable relationships,
