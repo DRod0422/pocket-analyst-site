@@ -99,9 +99,6 @@ if uploaded_file:
         - What is the average sale price?
         - How many items were sold per region?
         - Which month had the highest revenue?
-        - Predict the sale price for a 3-bedroom, 2-bath house
-        - Show a bar chart of sales by category
-        - Line chart of total revenue over time
         - What insights can you provide from this data?
         """)
         
