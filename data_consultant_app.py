@@ -23,7 +23,7 @@ st.set_page_config(
     page_icon="logo.png"
 )
 #st.image("logo.png", width=160)
-st.title("🤖 Pocket Analyst")
+st.title("🤖 AI Pocket Analyst")
 st.caption("Upload your file. Ask questions. Predict outcomes. Get insights.")
 
 # --- Chart Type Detector ---
