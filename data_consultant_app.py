@@ -395,6 +395,54 @@ if uploaded_file:
             sns.heatmap(corr, annot=True, vmin=-1, vmax=1, fmt=".2f", cmap="Spectral", ax=ax)
             st.pyplot(fig)
 
+    # --- Divider ---
+    st.markdown("---")
+    
+    # --- Advanced Data Scientist Tools (Expandable Section) ---
+    with st.expander("🔬 Data Scientist Tools (Pro Preview)", expanded=False):
+        st.info("This section includes advanced machine learning tools for experienced analysts and data scientists.")
+    
+        if uploaded_file is not None:
+            try:
+                numeric_cols = df.select_dtypes(include="number").columns.tolist()
+    
+                if len(numeric_cols) < 2:
+                    st.warning("Not enough numeric columns to run advanced models.")
+                else:
+                    target_col = st.selectbox("🎯 Select a target column", numeric_cols)
+    
+                    features = [col for col in numeric_cols if col != target_col]
+    
+                    st.write(f"📊 Using {len(features)} features to predict **{target_col}**")
+    
+                    if st.button("🚀 Run Random Forest Model"):
+                        from sklearn.ensemble import RandomForestRegressor
+                        from sklearn.model_selection import train_test_split
+    
+                        X = df[features]
+                        y = df[target_col]
+    
+                        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+    
+                        model = RandomForestRegressor(random_state=42)
+                        model.fit(X_train, y_train)
+    
+                        importances = model.feature_importances_
+                        feature_df = pd.DataFrame({
+                            "Feature": features,
+                            "Importance": importances
+                        }).sort_values(by="Importance", ascending=False)
+    
+                        st.subheader("🔍 Feature Importances")
+                        st.dataframe(feature_df)
+    
+                        import plotly.express as px
+                        fig = px.bar(feature_df, x="Feature", y="Importance", title="Feature Importance (Random Forest)")
+                        st.plotly_chart(fig)
+    
+            except Exception as e:
+                st.error(f"❌ Error running advanced analysis: {e}")
+
 
     
 else:
