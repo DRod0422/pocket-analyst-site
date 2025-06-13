@@ -399,7 +399,7 @@ if uploaded_file:
     st.markdown("---")
     
     # --- Advanced Data Scientist Tools (Expandable Section) ---
-    with st.expander("🔬 Data Scientist Tools (Pro Preview)", expanded=False):
+    with st.expander("🔬 Data Scientist Tools (Pro Preview) *Beta* ", expanded=False):
         st.info("This section includes advanced machine learning tools for experienced analysts and data scientists.")
     
         if uploaded_file is not None:
