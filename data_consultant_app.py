@@ -18,7 +18,7 @@ GPT_MODEL = "gpt-4o"  # GPT-4.1 Mini/Nano
 
 # --- Page Config ---
 st.set_page_config(
-    page_title="Pocket Analyst",
+    page_title=" AI Pocket Analyst",
     layout="wide",
     page_icon="logo.png"
 )
