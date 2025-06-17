@@ -440,6 +440,16 @@ if uploaded_file:
                         import plotly.express as px
                         fig = px.bar(feature_df, x="Feature", y="Importance", title="Feature Importance (Random Forest)")
                         st.plotly_chart(fig)
+
+                        # Show prediction samples
+                        st.subheader("📊 Prediction Samples (Actual vs. Predicted)")
+                        sample_df = X_test.copy()
+                        sample_df["Actual"] = y_test.values
+                        sample_df["Predicted"] = model.predict(X_test)
+
+                        st.caption("Compare model predictions to actual values for a sample of test data.")
+                        st.dataframe(sample_df.head(10), use_container_width=True)
+
     
             except Exception as e:
                 st.error(f"❌ Error running advanced analysis: {e}")
