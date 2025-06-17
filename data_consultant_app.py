@@ -450,6 +450,32 @@ if uploaded_file:
                         st.caption("Compare model predictions to actual values for a sample of test data.")
                         st.dataframe(sample_df.head(10), use_container_width=True)
 
+                        # Evaluate model performance
+                        from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
+                        import numpy as np
+                        
+                        # Generate predictions on test set
+                        y_pred = model.predict(X_test)
+                        
+                        # Create a DataFrame of actual vs. predicted
+                        sample_df = pd.DataFrame({
+                            "Actual": y_test.values,
+                            "Predicted": y_pred
+                        }).reset_index(drop=True)
+                        
+                        st.subheader("🎯 Prediction Samples (Actual vs. Predicted)")
+                        st.dataframe(sample_df.head(10))
+                        
+                        # Show performance metrics
+                        mae = mean_absolute_error(y_test, y_pred)
+                        rmse = np.sqrt(mean_squared_error(y_test, y_pred))
+                        r2 = r2_score(y_test, y_pred)
+                        
+                        st.subheader("📊 Model Performance Metrics")
+                        st.markdown(f"- **MAE (Mean Absolute Error):** `{mae:.2f}`")
+                        st.markdown(f"- **RMSE (Root Mean Squared Error):** `{rmse:.2f}`")
+                        st.markdown(f"- **R² Score:** `{r2:.2f}`")
+
     
             except Exception as e:
                 st.error(f"❌ Error running advanced analysis: {e}")
