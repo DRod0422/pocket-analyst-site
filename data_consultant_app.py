@@ -415,6 +415,22 @@ if uploaded_file:
                     features = [col for col in numeric_cols if col != target_col]
     
                     st.write(f"📊 Using {len(features)} features to predict **{target_col}**")
+
+                    with st.expander("📘 What This Model Does", expanded=False):
+                        st.markdown("""
+                        The **Random Forest** model is a type of machine learning algorithm that builds multiple decision trees and averages their results for better accuracy.
+                    
+                        - **Feature Importance** shows which variables influence the prediction the most.
+                        - **Actual vs Predicted** helps you evaluate how well the model is performing.
+                        - **Performance Metrics (MAE, RMSE, R²)** tell you how reliable the model is.
+                    
+                        Example Use:
+                        - Predict loan duration based on age, income, etc.
+                        - Find out which features most affect the outcome.
+                        - Test how changing an input value affects predictions.
+                    
+                        Use this to explore "what-if" scenarios and gain deeper insight into your data.
+                        """)
     
                     if st.button("🚀 Run Random Forest Model"):
                         from sklearn.ensemble import RandomForestRegressor
