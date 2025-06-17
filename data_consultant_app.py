@@ -416,22 +416,22 @@ if uploaded_file:
     
                     st.write(f"📊 Using {len(features)} features to predict **{target_col}**")
 
-                    with st.expander("📘 What This Model Does", expanded=False):
+                    if st.checkbox("📘 What This Model Does"):
                         st.markdown("""
-                        The **Random Forest** model is a type of machine learning algorithm that builds multiple decision trees and averages their results for better accuracy.
+                        The **Random Forest** model is a machine learning algorithm that builds multiple decision trees and averages their results for better accuracy.
                     
                         - **Feature Importance** shows which variables influence the prediction the most.
                         - **Actual vs Predicted** helps you evaluate how well the model is performing.
-                        - **Performance Metrics (MAE, RMSE, R²)** tell you how reliable the model is.
+                        - **Performance Metrics (MAE, RMSE, R²)** indicate how reliable the model is.
                     
-                        Example Use:
-                        - Predict loan duration based on age, income, etc.
-                        - Find out which features most affect the outcome.
-                        - Test how changing an input value affects predictions.
+                        **Example Use Cases:**
+                        - Predict loan duration based on age, income, and credit score.
+                        - Discover which features most impact an outcome.
+                        - Explore "what-if" scenarios to understand data sensitivity.
                     
-                        Use this to explore "what-if" scenarios and gain deeper insight into your data.
+                        Use this model to gain deeper, data-backed insight into trends and patterns hidden in your dataset.
                         """)
-    
+
                     if st.button("🚀 Run Random Forest Model"):
                         from sklearn.ensemble import RandomForestRegressor
                         from sklearn.model_selection import train_test_split
