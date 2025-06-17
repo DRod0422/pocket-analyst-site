@@ -272,7 +272,7 @@ if uploaded_file:
     st.markdown("## 🔬 Modeling & Advanced Analysis")
     st.info(
         """
-        The following tools include **univariate analysis**, **machine learning insights**, and **predictive forecasting analysis**.
+        The following tools include **univariate analysis**, **variable relationships**, and **predictive forecasting analysis**.
         These features require well-structured data — not all datasets are suitable.
 
         If your data is missing key variables, has poor formatting, or doesn't represent measurable relationships,
@@ -386,8 +386,8 @@ if uploaded_file:
                     fig.delaxes(axes[j])
                 st.pyplot(fig)
 
-    # --- Machine Learning Insights ---
-    with st.expander("🧠 Machine Learning Insights"):
+    # --- Variable Relationships ---
+    with st.expander("🔍 Explore Variable Relationships"):
         st.markdown("### 🔥 Correlation Heatmap")
         if st.button("Generate Correlation Heatmap"):
             corr = df_sample.select_dtypes(include=np.number).corr()
