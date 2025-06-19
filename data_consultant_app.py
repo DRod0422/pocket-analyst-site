@@ -79,21 +79,21 @@ if uploaded_file:
         drop_columns = st.multiselect("Optional: Drop Columns Before Processing", df.columns.tolist())
         
         if normalize_data:
-        from sklearn.preprocessing import MinMaxScaler
-    
-        # Drop selected columns (if any)
-        df_encoded = df.drop(columns=drop_columns) if drop_columns else df.copy()
-    
-        # One-hot encode categorical columns
-        df_encoded = pd.get_dummies(df_encoded, drop_first=True)
-    
-        # Normalize numeric columns
-        numeric_cols = df_encoded.select_dtypes(include=["int64", "float64"]).columns
-        scaler = MinMaxScaler()
-        df_encoded[numeric_cols] = scaler.fit_transform(df_encoded[numeric_cols])
-    
-        st.success("✅ Dataset normalized and one-hot encoded!")
-        st.dataframe(df_encoded.head())
+            from sklearn.preprocessing import MinMaxScaler
+        
+            # Drop selected columns (if any)
+            df_encoded = df.drop(columns=drop_columns) if drop_columns else df.copy()
+        
+            # One-hot encode categorical columns
+            df_encoded = pd.get_dummies(df_encoded, drop_first=True)
+        
+            # Normalize numeric columns
+            numeric_cols = df_encoded.select_dtypes(include=["int64", "float64"]).columns
+            scaler = MinMaxScaler()
+            df_encoded[numeric_cols] = scaler.fit_transform(df_encoded[numeric_cols])
+        
+            st.success("✅ Dataset normalized and one-hot encoded!")
+            st.dataframe(df_encoded.head())
                 
     # --- Quick AI Insights block ---
     with st.expander("✨ AI Quick Insights", expanded=True):
