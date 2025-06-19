@@ -93,7 +93,9 @@ if uploaded_file:
             df_encoded[numeric_cols] = scaler.fit_transform(df_encoded[numeric_cols])
         
             st.success("✅ Dataset normalized and one-hot encoded!")
-            st.dataframe(df_encoded.head())
+            st.dataframe(df_encoded.head(10))
+
+            
                 
     # --- Quick AI Insights block ---
     with st.expander("✨ AI Quick Insights", expanded=True):
