@@ -63,7 +63,39 @@ if uploaded_file:
         df_sample = df.sample(n=1000, random_state=42)
     else:
         df_sample = df
-
+        
+    # --- Normalize Data ---
+    with st.expander("🧹 Data Normalization & Encoding", expanded=False):
+        st.markdown("""
+        Prepare your dataset for analysis by normalizing numeric values and encoding categories.
+        
+        - **One-hot encoding**: Converts categories into numeric flags.
+        - **Normalization**: Scales numbers between 0 and 1.
+        - Optionally: Drop columns manually before running ML models.
+        """)
+        
+        normalize_data = st.button("⚙️ Normalize & Encode Dataset")
+    
+        drop_columns = st.multiselect("Optional: Drop Columns Before Processing", df.columns.tolist())
+        
+        if normalize_data:
+        from sklearn.preprocessing import MinMaxScaler
+    
+        # Drop selected columns (if any)
+        df_encoded = df.drop(columns=drop_columns) if drop_columns else df.copy()
+    
+        # One-hot encode categorical columns
+        df_encoded = pd.get_dummies(df_encoded, drop_first=True)
+    
+        # Normalize numeric columns
+        numeric_cols = df_encoded.select_dtypes(include=["int64", "float64"]).columns
+        scaler = MinMaxScaler()
+        df_encoded[numeric_cols] = scaler.fit_transform(df_encoded[numeric_cols])
+    
+        st.success("✅ Dataset normalized and one-hot encoded!")
+        st.dataframe(df_encoded.head())
+                
+    # --- Quick AI Insights block ---
     with st.expander("✨ AI Quick Insights", expanded=True):
         try:
             st.markdown("Here's what I noticed in your data:")
@@ -406,6 +438,9 @@ if uploaded_file:
         if uploaded_file is not None:
             try:
                 numeric_cols = df.select_dtypes(include="number").columns.tolist()
+                
+                # 👇 This handles switching between original or normalized data
+                data_for_modeling = df_encoded if normalize_data else df
     
                 if len(numeric_cols) < 2:
                     st.warning("Not enough numeric columns to run advanced models.")
@@ -436,9 +471,9 @@ if uploaded_file:
                         from sklearn.ensemble import RandomForestRegressor
                         from sklearn.model_selection import train_test_split
     
-                        X = df[features]
-                        y = df[target_col]
-    
+                        X = data_for_modeling[features]
+                        Y = data_for_modeling[target_col]
+
                         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
     
                         model = RandomForestRegressor(random_state=42)
