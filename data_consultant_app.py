@@ -439,13 +439,10 @@ if uploaded_file:
     
         if uploaded_file is not None:
             try:
-                numeric_cols = data_for_modeling.select_dtypes(include="number").columns.tolist()
-                
-                st.caption("Columns available for modeling:")
-                st.code(numeric_cols)
-                
-                # 👇 This handles switching between original or normalized data
+                 # 👇 This handles switching between original or normalized data
                 data_for_modeling = df_encoded if normalize_data else df
+                
+                numeric_cols = data_for_modeling.select_dtypes(include="number").columns.tolist()
     
                 if len(numeric_cols) < 2:
                     st.warning("Not enough numeric columns to run advanced models.")
