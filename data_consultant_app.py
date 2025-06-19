@@ -104,31 +104,31 @@ if uploaded_file:
             
                 
     --- Quick AI Insights block ---
-   if "ai_ran_once" not in st.session_state:
-    with st.expander("✨ AI Quick Insights", expanded=True):
-        try:
-            st.markdown("Here's what I noticed in your data:")
-    
-            csv_snippet = df_sample.to_csv(index=False)[:4000]  # Keep it short for token limits
-            insight_prompt = f"""
-            You are a data analyst. Read the data below and write 3 short, plain-English insights.
-            Avoid technical jargon. Pretend you're talking to a small business owner.
-    
-            Data sample:
-            {csv_snippet}
-            """
-    
-            response = openai.chat.completions.create(
-                model="gpt-4o",
-                messages=[
-                    {"role": "system", "content": "You are a helpful data analyst."},
-                    {"role": "user", "content": insight_prompt}
-                ]
-            )
-            ai_insights = response.choices[0].message.content
-    
-            st.markdown(ai_insights)
-           st.session_state.ai_ran_once = True 
+    if "ai_ran_once" not in st.session_state:
+        with st.expander("✨ AI Quick Insights", expanded=True):
+            try:
+                st.markdown("Here's what I noticed in your data:")
+        
+                csv_snippet = df_sample.to_csv(index=False)[:4000]  # Keep it short for token limits
+                insight_prompt = f"""
+                You are a data analyst. Read the data below and write 3 short, plain-English insights.
+                Avoid technical jargon. Pretend you're talking to a small business owner.
+        
+                Data sample:
+                {csv_snippet}
+                """
+        
+                response = openai.chat.completions.create(
+                    model="gpt-4o",
+                    messages=[
+                        {"role": "system", "content": "You are a helpful data analyst."},
+                        {"role": "user", "content": insight_prompt}
+                    ]
+                )
+                ai_insights = response.choices[0].message.content
+        
+                st.markdown(ai_insights)
+                st.session_state.ai_ran_once = True 
     
         except Exception as e:
             st.warning(f"Could not generate AI insights: {e}")
