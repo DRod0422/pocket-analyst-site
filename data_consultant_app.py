@@ -229,7 +229,7 @@ if uploaded_file:
     st.markdown("---")            
 
     # --- Smart Auto Insights ---
-    with st.expander("📊 Smart Auto Insights (Beta)", expanded=True):
+    with st.expander("Smart Auto Insights", expanded=True):
         st.markdown("Get an instant overview of your dataset without lifting a finger. This section auto-generates summaries, stats, and visuals for quick insight.")
 
         st.subheader("🔍 Dataset Summary")
@@ -259,7 +259,7 @@ if uploaded_file:
         else:
             st.info("No numeric columns detected.")
 
-        st.subheader("📊 Top Categorical Distributions")
+        st.subheader("Top Categorical Distributions")
         cat_cols = df_sample.select_dtypes(include='object').columns.tolist()
         for col in cat_cols[:3]:  # Show only top 3 for brevity
             st.markdown(f"**{col}** - Top Categories")
@@ -439,7 +439,10 @@ if uploaded_file:
     
         if uploaded_file is not None:
             try:
-                numeric_cols = df.select_dtypes(include="number").columns.tolist()
+                numeric_cols = data_for_modeling.select_dtypes(include="number").columns.tolist()
+                
+                st.caption("Columns available for modeling:")
+                st.code(numeric_cols)
                 
                 # 👇 This handles switching between original or normalized data
                 data_for_modeling = df_encoded if normalize_data else df
@@ -469,7 +472,7 @@ if uploaded_file:
                         Use this model to gain deeper, data-backed insight into trends and patterns hidden in your dataset.
                         """)
 
-                    if st.button("🚀 Run Random Forest Model"):
+                    if st.button("🌲 Run Random Forest Model"):
                         from sklearn.ensemble import RandomForestRegressor
                         from sklearn.model_selection import train_test_split
     
@@ -495,7 +498,7 @@ if uploaded_file:
                         st.plotly_chart(fig)
 
                         # Show prediction samples
-                        st.subheader("📊 Prediction Samples (Actual vs. Predicted)")
+                        st.subheader("Prediction Samples (Actual vs. Predicted)")
                         sample_df = X_test.copy()
                         sample_df["Actual"] = y_test.values
                         sample_df["Predicted"] = model.predict(X_test)
@@ -524,7 +527,7 @@ if uploaded_file:
                         rmse = np.sqrt(mean_squared_error(y_test, y_pred))
                         r2 = r2_score(y_test, y_pred)
                         
-                        st.subheader("📊 Model Performance Metrics")
+                        st.subheader("📈 Model Performance Metrics")
                         st.markdown(f"- **MAE (Mean Absolute Error):** `{mae:.2f}`")
                         st.markdown(f"- **RMSE (Root Mean Squared Error):** `{rmse:.2f}`")
                         st.markdown(f"- **R² Score:** `{r2:.2f}`")
