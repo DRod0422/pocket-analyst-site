@@ -81,7 +81,7 @@ if uploaded_file:
         if normalize_data:
             from sklearn.preprocessing import MinMaxScaler
         
-            # Drop selected columns (if any)
+            # Drop selected columns
             df_encoded = df.drop(columns=drop_columns) if drop_columns else df.copy()
         
             # One-hot encode categorical columns
@@ -92,8 +92,11 @@ if uploaded_file:
             scaler = MinMaxScaler()
             df_encoded[numeric_cols] = scaler.fit_transform(df_encoded[numeric_cols])
         
+            # Store it in session state
+            st.session_state["normalized_data"] = df_encoded
+        
             st.success("✅ Dataset normalized and one-hot encoded!")
-            st.dataframe(df_encoded.head(10))
+            st.dataframe(df_encoded.head())
 
             
                 
@@ -438,7 +441,7 @@ if uploaded_file:
     with st.expander("🔬 Data Scientist Tools (Pro Preview) *Beta* ", expanded=False):
         
         # 👇 This handles switching between original or normalized data
-        data_for_modeling = df_encoded if normalize_data else df
+        data_for_modeling = st.session_state.get("normalized_data", df)
         
         if uploaded_file is not None:
             try:
