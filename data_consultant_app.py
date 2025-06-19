@@ -105,7 +105,6 @@ if uploaded_file:
                 
     --- Quick AI Insights block ---
    if "ai_ran_once" not in st.session_state:
-        with st.expander("✨ AI Quick Insights", expanded=True): 
     with st.expander("✨ AI Quick Insights", expanded=True):
         try:
             st.markdown("Here's what I noticed in your data:")
