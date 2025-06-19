@@ -103,7 +103,7 @@ if uploaded_file:
 
             
                 
-    --- Quick AI Insights block ---
+    #--- Quick AI Insights block ---
     if "ai_ran_once" not in st.session_state:
         with st.expander("✨ AI Quick Insights", expanded=True):
             try:
@@ -130,8 +130,8 @@ if uploaded_file:
                 st.markdown(ai_insights)
                 st.session_state.ai_ran_once = True 
     
-        except Exception as e:
-            st.warning(f"Could not generate AI insights: {e}")
+            except Exception as e:
+                st.warning(f"Could not generate AI insights: {e}")
 
 
     # --- Go-By Suggestions ---
