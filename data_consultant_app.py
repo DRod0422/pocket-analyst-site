@@ -65,7 +65,8 @@ if uploaded_file:
         df_sample = df
         
     # ✅ Reset AI trigger
-    st.session_state.ai_ran_once = False
+    if uploaded_file and "ai_ran_once" not in st.session_state: 
+        st.session_state.ai_ran_once = False
     
     # --- Normalize Data ---
     with st.expander("🧹 Data Normalization & Encoding", expanded=False):
@@ -104,7 +105,7 @@ if uploaded_file:
             
                 
     # --- Quick AI Insights block ---
-    if "ai_ran_once" not in st.session_state:
+    if uploaded_file and not st.session_state.ai_ran_once:
         with st.expander("✨ AI Quick Insights", expanded=True):
             try:
                 st.markdown("Here's what I noticed in your data:")
