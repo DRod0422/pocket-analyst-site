@@ -358,8 +358,9 @@ if uploaded_file:
                 # Prepare data
                 df_forecast = df_sample[[date_col, target_col]].dropna().sort_values(date_col)
                 df_forecast[date_col] = pd.to_datetime(df_forecast[date_col]).dt.normalize()
-                df_forecast = df_forecast.groupby(pd.Grouper(key=date_col, freq='M')).sum().reset_index()
-    
+                df_forecast = df_forecast[[date_col, target_col]].dropna().sort_values(date_col)
+                df_forecast[date_col] = pd.to_datetime(df_forecast[date_col])
+
                 # Convert dates to ordinal for regression
                 df_forecast['ordinal_date'] = df_forecast[date_col].map(datetime.datetime.toordinal)
                 X = df_forecast[['ordinal_date']]
