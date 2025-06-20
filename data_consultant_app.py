@@ -357,7 +357,7 @@ if uploaded_file:
     
                 # Prepare data
                 df_forecast = df_sample[[date_col, target_col]].dropna().sort_values(date_col)
-                df_forecast[date_col] = pd.to_datetime(df_forecast[date_col])
+                df_forecast[date_col] = pd.to_datetime(df_forecast[date_col]).dt.normalize()
                 df_forecast = df_forecast.groupby(pd.Grouper(key=date_col, freq='M')).sum().reset_index()
     
                 # Convert dates to ordinal for regression
@@ -379,6 +379,7 @@ if uploaded_file:
                     date_col: future_dates,
                     'Forecast': predictions
                 })
+                forecast_df[date_col] = pd.to_datetime(forecast_df[date_col]).dt.normalize()
     
                 # Combine past + forecast
                 full_df = pd.concat([
