@@ -58,6 +58,10 @@ if uploaded_file:
     st.subheader("Preview of Your Data")
     st.dataframe(df.head(100))
 
+     # Remove time from all datetime columns
+    for col in df.select_dtypes(include=["datetime", "datetimetz"]).columns:
+        df[col] = pd.to_datetime(df[col]).dt.date
+
     if len(df) > 5000:
         st.warning(f"Large dataset detected ({len(df)} rows). Sampling 1000 rows for faster performance.")
         df_sample = df.sample(n=1000, random_state=42)
