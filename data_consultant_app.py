@@ -55,17 +55,17 @@ if uploaded_file:
     else:
         df = pd.read_excel(uploaded_file)
         
-     # ✅ Normalize date columns by removing time (if present)
-    for col in df.select_dtypes(include=["datetime", "datetimetz"]).columns:
-        df[col] = pd.to_datetime(df[col]).dt.floor("D")
+    #  # ✅ Normalize date columns by removing time (if present)
+    # for col in df.select_dtypes(include=["datetime", "datetimetz"]).columns:
+    #     df[col] = pd.to_datetime(df[col]).dt.floor("D")
 
-    # 🔍 Bonus: Try parsing object columns that might be dates
-    for col in df.select_dtypes(include="object").columns:
-        try:
-            parsed = pd.to_datetime(df[col], format="%Y-%m-%d", errors="raise")
-            df[col] = parsed.dt.floor("D")
-        except:
-            pass  # Skip columns that can't be parsed as dates
+    # # 🔍 Bonus: Try parsing object columns that might be dates
+    # for col in df.select_dtypes(include="object").columns:
+    #     try:
+    #         parsed = pd.to_datetime(df[col], format="%Y-%m-%d", errors="raise")
+    #         df[col] = parsed.dt.floor("D")
+    #     except:
+    #         pass  # Skip columns that can't be parsed as dates
         
     st.subheader("Preview of Your Data")
     st.dataframe(df.head(100))
