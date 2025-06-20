@@ -57,7 +57,7 @@ if uploaded_file:
         
      # Remove time from all datetime columns
     for col in df.select_dtypes(include=["datetime", "datetimetz"]).columns:
-        df[col] = pd.to_datetime(df[col]).dt.date
+        df[col] = pd.to_datetime(df[col]).dt.floor("D")
         
     st.subheader("Preview of Your Data")
     st.dataframe(df.head(100))
@@ -158,6 +158,9 @@ if uploaded_file:
         df_sample = df.sample(n=1000, random_state=42)
     else:
         df_sample = df
+        
+    for col in df_sample.select_dtypes(include=["datetime", "datetimetz"]).columns:
+    df_sample[col] = pd.to_datetime(df_sample[col]).dt.floor("D")
 
     # Session usage tracking (limit free users to 5 questions/day)
     if "query_count" not in st.session_state:
