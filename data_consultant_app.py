@@ -55,18 +55,6 @@ if uploaded_file:
     else:
         df = pd.read_excel(uploaded_file)
         
-    #  # ✅ Normalize date columns by removing time (if present)
-    # for col in df.select_dtypes(include=["datetime", "datetimetz"]).columns:
-    #     df[col] = pd.to_datetime(df[col]).dt.floor("D")
-
-    # # 🔍 Bonus: Try parsing object columns that might be dates
-    # for col in df.select_dtypes(include="object").columns:
-    #     try:
-    #         parsed = pd.to_datetime(df[col], format="%Y-%m-%d", errors="raise")
-    #         df[col] = parsed.dt.floor("D")
-    #     except:
-    #         pass  # Skip columns that can't be parsed as dates
-        
     st.subheader("Preview of Your Data")
     st.dataframe(df.head(100))
 
@@ -356,10 +344,9 @@ if uploaded_file:
                 forecast_periods = st.slider("Months to forecast", min_value=1, max_value=12, value=6)
     
                 # Prepare data
-                df_forecast = df_sample[[date_col, target_col]].dropna().sort_values(date_col)
+                df_forecast = df_sample[[date_col, target_col]].dropna().copy()
                 df_forecast[date_col] = pd.to_datetime(df_forecast[date_col]).dt.normalize()
-                df_forecast = df_forecast[[date_col, target_col]].dropna().sort_values(date_col)
-                df_forecast[date_col] = pd.to_datetime(df_forecast[date_col])
+                df_forecast = df_forecast.sort_values(date_col)
 
                 # Convert dates to ordinal for regression
                 df_forecast['ordinal_date'] = df_forecast[date_col].map(datetime.datetime.toordinal)
