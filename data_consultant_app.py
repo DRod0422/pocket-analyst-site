@@ -153,14 +153,16 @@ if uploaded_file:
     user_question = st.text_input("Ask a question about your data:")
 
     # --- Light Sampling for Large Files ---
-    if len(df) > 5000:
-        st.warning(f"Large dataset detected ({len(df)} rows). Sampling 1000 rows for efficiency.")
-        df_sample = df.sample(n=1000, random_state=42)
-    else:
-        df_sample = df
-        
     for col in df_sample.select_dtypes(include=["datetime", "datetimetz"]).columns:
-    df_sample[col] = pd.to_datetime(df_sample[col]).dt.floor("D")
+        df_sample[col] = pd.to_datetime(df_sample[col]).dt.floor("D")
+        
+        if len(df) > 5000:
+            st.warning(f"Large dataset detected ({len(df)} rows). Sampling 1000 rows for efficiency.")
+            df_sample = df.sample(n=1000, random_state=42)
+        else:
+            df_sample = df
+        
+    
 
     # Session usage tracking (limit free users to 5 questions/day)
     if "query_count" not in st.session_state:
