@@ -53,7 +53,13 @@ if uploaded_file:
     if uploaded_file.name.endswith(".csv"):
         df = pd.read_csv(uploaded_file)
     else:
-        df = pd.read_excel(uploaded_file)
+        # Get available sheet names
+        xls = pd.ExcelFile(uploaded_file)
+        sheet_names = xls.sheet_names
+        selected_sheet = st.selectbox("Select a sheet to load", sheet_names)
+        
+        # Load only the selected sheet
+        df = pd.read_excel(xls, sheet_name=selected_sheet)
         
     if "last_uploaded_name" not in st.session_state or st.session_state.last_uploaded_name != uploaded_file.name:
         st.session_state.last_uploaded_name = uploaded_file.name
