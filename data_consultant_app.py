@@ -54,13 +54,13 @@ if uploaded_file:
         df = pd.read_csv(uploaded_file)
     else:
         df = pd.read_excel(uploaded_file)
-
-    st.subheader("Preview of Your Data")
-    st.dataframe(df.head(100))
-
+        
      # Remove time from all datetime columns
     for col in df.select_dtypes(include=["datetime", "datetimetz"]).columns:
         df[col] = pd.to_datetime(df[col]).dt.date
+        
+    st.subheader("Preview of Your Data")
+    st.dataframe(df.head(100))
 
     if len(df) > 5000:
         st.warning(f"Large dataset detected ({len(df)} rows). Sampling 1000 rows for faster performance.")
