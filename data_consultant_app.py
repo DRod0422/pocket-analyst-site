@@ -55,6 +55,8 @@ if uploaded_file:
     else:
         df = pd.read_excel(uploaded_file)
         
+    st.session_state.ai_ran_once = False
+        
     st.subheader("Preview of Your Data")
     st.dataframe(df.head(100))
 
@@ -64,9 +66,9 @@ if uploaded_file:
     else:
         df_sample = df
         
-    # ✅ Reset AI trigger
-    if uploaded_file and "ai_ran_once" not in st.session_state: 
-        st.session_state.ai_ran_once = False
+    # # ✅ Reset AI trigger
+    # if uploaded_file and "ai_ran_once" not in st.session_state: 
+    #     st.session_state.ai_ran_once = False
     
     # --- Normalize Data ---
     with st.expander("🧹 Data Normalization & Encoding", expanded=False):
@@ -105,34 +107,41 @@ if uploaded_file:
             
                 
     # --- Quick AI Insights block ---
-    if uploaded_file and not st.session_state.ai_ran_once:
-        with st.expander("✨ AI Quick Insights", expanded=True):
-            try:
-                st.markdown("Here's what I noticed in your data:")
+    if uploaded_file:
+        if "ai_ran_once" not in st.session_state:
+            st.session_state.ai_ran_once = False
         
-                csv_snippet = df_sample.to_csv(index=False)[:4000]  # Keep it short for token limits
-                insight_prompt = f"""
-                You are a data analyst. Read the data below and write 3 short, plain-English insights.
-                Avoid technical jargon. Pretend you're talking to a small business owner.
+        if not st.session_state.ai_ran_once:
+            if st.button("🧠 Generate AI Insights"):
+                with st.expander("✨ AI Quick Insights", expanded=True):
+                    try:
+                        st.markdown("Here's what I noticed in your data:")
         
-                Data sample:
-                {csv_snippet}
-                """
+                        csv_snippet = df_sample.to_csv(index=False)[:4000]
+                        insight_prompt = f"""
+                        You are a data analyst. Read the data below and write 3 short, plain-English insights.
+                        Avoid technical jargon. Pretend you're talking to a small business owner.
         
-                response = openai.chat.completions.create(
-                    model="gpt-4o",
-                    messages=[
-                        {"role": "system", "content": "You are a helpful data analyst."},
-                        {"role": "user", "content": insight_prompt}
-                    ]
-                )
-                ai_insights = response.choices[0].message.content
+                        Data sample:
+                        {csv_snippet}
+                        """
         
-                st.markdown(ai_insights)
-                st.session_state.ai_ran_once = True 
-    
-            except Exception as e:
-                st.warning(f"Could not generate AI insights: {e}")
+                        response = openai.chat.completions.create(
+                            model="gpt-4o",
+                            messages=[
+                                {"role": "system", "content": "You are a helpful data analyst."},
+                                {"role": "user", "content": insight_prompt}
+                            ]
+                        )
+                        ai_insights = response.choices[0].message.content
+        
+                        st.markdown(ai_insights)
+                        st.session_state.ai_ran_once = True  # 🔒 Prevent re-run
+        
+                    except Exception as e:
+                        st.warning(f"Could not generate AI insights: {e}")
+        else:
+            st.success("✅ AI Insights already generated for this session.")
 
 
     # --- Go-By Suggestions ---
