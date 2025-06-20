@@ -105,27 +105,29 @@ if uploaded_file:
             st.dataframe(df_encoded.head())
 
             
-                
     # --- Quick AI Insights block ---
     if uploaded_file:
         if "ai_ran_once" not in st.session_state:
             st.session_state.ai_ran_once = False
-        
-        if not st.session_state.ai_ran_once:
+    
+        # Show disabled state if already run
+        if st.session_state.ai_ran_once:
+            st.success("✅ AI Insights already generated for this session.")
+        else:
             if st.button("🧠 Generate AI Insights"):
                 with st.expander("✨ AI Quick Insights", expanded=True):
                     try:
                         st.markdown("Here's what I noticed in your data:")
-        
+    
                         csv_snippet = df_sample.to_csv(index=False)[:4000]
                         insight_prompt = f"""
                         You are a data analyst. Read the data below and write 3 short, plain-English insights.
                         Avoid technical jargon. Pretend you're talking to a small business owner.
-        
+    
                         Data sample:
                         {csv_snippet}
                         """
-        
+    
                         response = openai.chat.completions.create(
                             model="gpt-4o",
                             messages=[
@@ -134,14 +136,12 @@ if uploaded_file:
                             ]
                         )
                         ai_insights = response.choices[0].message.content
-        
+    
                         st.markdown(ai_insights)
-                        st.session_state.ai_ran_once = True  # 🔒 Prevent re-run
-        
+                        st.session_state.ai_ran_once = True  # 🔒 Lock it
+    
                     except Exception as e:
                         st.warning(f"Could not generate AI insights: {e}")
-        else:
-            st.success("✅ AI Insights already generated for this session.")
 
 
     # --- Go-By Suggestions ---
