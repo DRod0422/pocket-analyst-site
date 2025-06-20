@@ -368,7 +368,7 @@ if uploaded_file:
                 # Combine past + forecast
                 full_df = pd.concat([
                     df_forecast[[date_col, target_col]].rename(columns={target_col: "Actual"}),
-                    forecast_df.rename(columns={'Forecast': "Actual"})
+                    forecast_df.rename(columns={'Forecast': "Actual"}, inplace=True)
                 ]).reset_index(drop=True)
     
                 # Plot
