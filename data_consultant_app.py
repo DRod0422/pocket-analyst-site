@@ -55,9 +55,17 @@ if uploaded_file:
     else:
         df = pd.read_excel(uploaded_file)
         
-     # Remove time from all datetime columns
+     # ✅ Normalize date columns by removing time (if present)
     for col in df.select_dtypes(include=["datetime", "datetimetz"]).columns:
         df[col] = pd.to_datetime(df[col]).dt.floor("D")
+
+    # 🔍 Bonus: Try parsing object columns that might be dates
+    for col in df.select_dtypes(include="object").columns:
+        try:
+            parsed = pd.to_datetime(df[col], format="%Y-%m-%d", errors="raise")
+            df[col] = parsed.dt.floor("D")
+        except:
+            pass  # Skip columns that can't be parsed as dates
         
     st.subheader("Preview of Your Data")
     st.dataframe(df.head(100))
@@ -153,14 +161,12 @@ if uploaded_file:
     user_question = st.text_input("Ask a question about your data:")
 
     # --- Light Sampling for Large Files ---
-    for col in df_sample.select_dtypes(include=["datetime", "datetimetz"]).columns:
-        df_sample[col] = pd.to_datetime(df_sample[col]).dt.floor("D")
         
-        if len(df) > 5000:
-            st.warning(f"Large dataset detected ({len(df)} rows). Sampling 1000 rows for efficiency.")
-            df_sample = df.sample(n=1000, random_state=42)
-        else:
-            df_sample = df
+    if len(df) > 5000:
+        st.warning(f"Large dataset detected ({len(df)} rows). Sampling 1000 rows for efficiency.")
+        df_sample = df.sample(n=1000, random_state=42)
+    else:
+        df_sample = df
         
     
 
