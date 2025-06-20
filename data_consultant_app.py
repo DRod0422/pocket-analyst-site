@@ -345,7 +345,12 @@ if uploaded_file:
     
                 # Prepare data
                 df_forecast = df_sample[[date_col, target_col]].dropna().copy()
-                df_forecast[date_col] = pd.to_datetime(df_forecast[date_col]).dt.normalize()
+                df_forecast[date_col] = pd.to_datetime(df_forecast[date_col], errors='coerce')
+                # Detect if any date has only a year (e.g., 2023) by checking if all dates are Jan 1
+                if (df_forecast[date_col].dt.month == 1).all() and (df_forecast[date_col].dt.day == 1).all():
+                    df_forecast[date_col] = df_forecast[date_col].dt.to_period("Y").dt.to_timestamp()
+                else:
+                    df_forecast[date_col] = df_forecast[date_col].dt.normalize()
                 df_forecast = df_forecast.sort_values(date_col)
 
                 # Convert dates to ordinal for regression
@@ -368,15 +373,24 @@ if uploaded_file:
                     'Forecast': predictions
                 })
                 forecast_df[date_col] = pd.to_datetime(forecast_df[date_col]).dt.normalize()
+
+                # Rename forecast column first
+                forecast_df_renamed = forecast_df.rename(columns={'Forecast': "Actual"})
     
                 # Combine past + forecast
                 full_df = pd.concat([
                     df_forecast[[date_col, target_col]].rename(columns={target_col: "Actual"}),
-                    forecast_df.rename(columns={'Forecast': "Actual"}, inplace=True)
+                    forecast_df_renamed
                 ]).reset_index(drop=True)
-    
+
+                # 🔍 Detect if the dates are yearly or monthly
+                if (df_forecast[date_col].dt.month == 1).all() and (df_forecast[date_col].dt.day == 1).all():
+                    forecast_title = f"📅 Yearly Forecast for {target_col}"
+                else:
+                    forecast_title = f"📆 Monthly Forecast for {target_col}"
+
                 # Plot
-                fig = px.line(full_df, x=date_col, y="Actual", title=f"{target_col} Forecast", markers=True)
+                fig = px.line(full_df, x=date_col, y="Actual", title=forecast_title, markers=True)
                 fig.add_scatter(x=forecast_df[date_col], y=forecast_df["Actual"], mode="lines+markers", name="Forecast")
     
                 st.plotly_chart(fig, use_container_width=True)
