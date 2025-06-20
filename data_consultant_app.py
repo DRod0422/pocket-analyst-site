@@ -346,6 +346,7 @@ if uploaded_file:
                 # Prepare data
                 df_forecast = df_sample[[date_col, target_col]].dropna().copy()
                 df_forecast[date_col] = pd.to_datetime(df_forecast[date_col], errors='coerce')
+                
                 # Detect if any date has only a year (e.g., 2023) by checking if all dates are Jan 1
                 if (df_forecast[date_col].dt.month == 1).all() and (df_forecast[date_col].dt.day == 1).all():
                     df_forecast[date_col] = df_forecast[date_col].dt.to_period("Y").dt.to_timestamp()
@@ -375,7 +376,7 @@ if uploaded_file:
                 forecast_df[date_col] = pd.to_datetime(forecast_df[date_col]).dt.normalize()
 
                 # Rename forecast column first
-                forecast_df_renamed = forecast_df.rename(columns={'Forecast': "Actual"})
+                forecast_df_renamed = forecast_df.rename(columns={'Forecast': "Actual"}, inplace=True)
     
                 # Combine past + forecast
                 full_df = pd.concat([
