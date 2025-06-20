@@ -55,7 +55,7 @@ if uploaded_file:
     else:
         df = pd.read_excel(uploaded_file)
         
-     if "last_uploaded_name" not in st.session_state or st.session_state.last_uploaded_name != uploaded_file.name:
+    if "last_uploaded_name" not in st.session_state or st.session_state.last_uploaded_name != uploaded_file.name:
         st.session_state.last_uploaded_name = uploaded_file.name
         st.session_state.ai_ran_once = False  # ✅ Reset ONLY on new file
         
