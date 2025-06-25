@@ -381,7 +381,7 @@ if uploaded_file:
 
         st.markdown("---")
         
-        st.subheader("📸 Exportable Dashboard Snapshot")
+        st.subheader("📸 Exportable Dashboard Snapshot **BETA**")
         if st.button("📥 Generate & Download Image Summary"):
             try:
                 fig, axes = plt.subplots(nrows=2, ncols=2, figsize=(14, 10))
