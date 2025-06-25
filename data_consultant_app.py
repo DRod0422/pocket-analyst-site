@@ -309,7 +309,7 @@ if uploaded_file:
         for col in cat_cols[:3]:  # Show only top 3 for brevity
             st.markdown(f"**{col}** - Top Categories")
             st.dataframe(df_sample[col].value_counts().head(5))
-
+        
         st.subheader("🧪 Auto-Generated Chart Gallery")
         chart_type = st.radio("Chart style:", ["Bar (Counts)", "Line (Counts)"], horizontal=True)
         
@@ -344,6 +344,9 @@ if uploaded_file:
                     st.warning(f"Could not generate chart for {col}: {e}")
         else:
             st.info("No numeric columns found.")
+            
+        #Divider
+        st.markdown("---")    
 
         st.subheader("Categorical Count Explorer")
         cat_cols = df_sample.select_dtypes(include='object').columns.tolist()
