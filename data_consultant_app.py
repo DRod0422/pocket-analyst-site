@@ -374,7 +374,49 @@ if uploaded_file:
                     fig = px.pie(count_df, names=selected_cat, values="Count", title=f"{selected_cat} Distribution")
         
                 st.plotly_chart(fig, use_container_width=True)
-
+                
+    # --- 📊 Dashboard View ---
+    with st.expander("📊 Dashboard View (Auto Summary)", expanded=False):
+        st.markdown("A summary of your uploaded dataset including AI insights, sample view, and chart visualizations.")
+    
+        # Dataset preview
+        st.subheader("📁 Data Preview")
+        st.dataframe(df_sample.head(10), use_container_width=True)
+    
+        # AI Insights if available
+        if st.session_state.get("ai_ran_once"):
+            st.subheader("🧠 AI Quick Insights")
+            st.markdown(ai_insights)  # Make sure ai_insights is stored globally or in session_state
+    
+        # Normalized data preview (if available)
+        if "normalized_data" in st.session_state:
+            st.subheader("🧪 Normalized Dataset Preview")
+            st.dataframe(st.session_state["normalized_data"].head(10), use_container_width=True)
+    
+        # Numeric charts
+        st.subheader("📉 Auto-Generated Numeric Charts")
+        for col in df_sample.select_dtypes(include="number").columns.tolist():
+            st.markdown(f"**{col}**")
+            try:
+                binned_col = pd.cut(df_sample[col], bins=10)
+                counts = binned_col.value_counts().sort_index()
+                vc_df = pd.DataFrame({f"{col} (binned)": counts.index.astype(str), "Count": counts.values})
+                fig = px.bar(vc_df, x=f"{col} (binned)", y="Count", title=f"{col} - Distribution")
+                st.plotly_chart(fig, use_container_width=True)
+            except Exception as e:
+                st.warning(f"Couldn't generate chart for {col}: {e}")
+    
+        # Categorical charts
+        st.subheader("🧾 Category Distributions (Object Columns)")
+        for col in df_sample.select_dtypes(include="object").columns.tolist():
+            st.markdown(f"**{col}**")
+            try:
+                value_counts = df_sample[col].value_counts().reset_index()
+                value_counts.columns = [col, "Count"]
+                fig = px.pie(value_counts, names=col, values="Count", title=f"{col} - Distribution")
+                st.plotly_chart(fig, use_container_width=True)
+            except Exception as e:
+                st.warning(f"Couldn't generate chart for {col}: {e}")
                 
     # --- Guidance for ML Tools --
     st.markdown("---")
