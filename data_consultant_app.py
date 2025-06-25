@@ -88,23 +88,39 @@ if uploaded_file:
         - Optionally: Drop columns manually before running ML models.
         """)
         
-        normalize_data = st.button("⚙️ Normalize & Encode Dataset")
-    
         drop_columns = st.multiselect("Optional: Drop Columns Before Processing", df.columns.tolist())
+
+        # Select scaler
+        scaler_choice = st.selectbox(
+            "Choose a normalization method:",
+            ("MinMaxScaler", "StandardScaler", "RobustScaler")
+        )
+
+        skip_scaling = st.checkbox("⚠️ Skip normalization (my data is already scaled)")
         
+        normalize_data = st.button("⚙️ Normalize & Encode Dataset")
+
         if normalize_data:
-            from sklearn.preprocessing import MinMaxScaler
-        
-            # Drop selected columns
+            from sklearn.preprocessing import MinMaxScaler, StandardScaler, RobustScaler
+    
+            # Prepare base dataframe
             df_encoded = df.drop(columns=drop_columns) if drop_columns else df.copy()
-        
-            # One-hot encode categorical columns
+    
+            # One-hot encode categoricals
             df_encoded = pd.get_dummies(df_encoded, drop_first=True)
-        
-            # Normalize numeric columns
+    
+            # Normalize numeric columns if not skipped
             numeric_cols = df_encoded.select_dtypes(include=["int64", "float64"]).columns
-            scaler = MinMaxScaler()
-            df_encoded[numeric_cols] = scaler.fit_transform(df_encoded[numeric_cols])
+    
+            if not skip_scaling and len(numeric_cols) > 0:
+                if scaler_choice == "MinMaxScaler":
+                    scaler = MinMaxScaler()
+                elif scaler_choice == "StandardScaler":
+                    scaler = StandardScaler()
+                else:
+                    scaler = RobustScaler()
+    
+                df_encoded[numeric_cols] = scaler.fit_transform(df_encoded[numeric_cols])
         
             # Store it in session state
             st.session_state["normalized_data"] = df_encoded
