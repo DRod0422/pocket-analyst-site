@@ -414,7 +414,7 @@ if uploaded_file:
                 plt.tight_layout()
         
                 # Save to BytesIO
-                buf = BytesIO()
+                buf = io.BytesIO()
                 plt.savefig(buf, format="png")
                 buf.seek(0)
         
