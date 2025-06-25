@@ -2,14 +2,17 @@
 
 import streamlit as st
 import pandas as pd
-import openai
-import plotly.express as px
+import numpy as np
 import io
 import datetime
+import base64
+import openai
 import matplotlib.pyplot as plt
 import seaborn as sns
+import plotly.express as px
+
 from sklearn.linear_model import LinearRegression
-import numpy as np
+from sklearn.preprocessing import MinMaxScaler
 from scipy.stats import skew, kurtosis
 
 # --- Config Section ---
@@ -375,49 +378,54 @@ if uploaded_file:
         
                 st.plotly_chart(fig, use_container_width=True)
                 
-        # --- 📊 Dashboard View ---
-        with st.expander("📊 Dashboard View (Auto Summary)", expanded=False):
-            st.markdown("A summary of your uploaded dataset including AI insights, sample view, and chart visualizations.")
+
+        st.markdown("---")
         
-            # Dataset preview
-            st.subheader("📁 Data Preview")
-            st.dataframe(df_sample.head(10), use_container_width=True)
+        st.subheader("📸 Exportable Dashboard Snapshot")
+        if st.button("📥 Generate & Download Image Summary"):
+            try:
+                fig, axes = plt.subplots(nrows=2, ncols=2, figsize=(14, 10))
+                axes = axes.flatten()
         
-            # AI Insights if available
-            if st.session_state.get("ai_ran_once"):
-                st.subheader("🧠 AI Quick Insights")
-                st.markdown(ai_insights)  # Make sure ai_insights is stored globally or in session_state
+                # Sample preview
+                sns.heatmap(df_sample.head(10).isnull(), ax=axes[0], cbar=False)
+                axes[0].set_title("Missing Values (Top 10 Rows)")
         
-            # Normalized data preview (if available)
-            if "normalized_data" in st.session_state:
-                st.subheader("🧪 Normalized Dataset Preview")
-                st.dataframe(st.session_state["normalized_data"].head(10), use_container_width=True)
+                # First numeric chart
+                if len(df_sample.select_dtypes(include="number").columns) > 0:
+                    col1 = df_sample.select_dtypes(include="number").columns[0]
+                    sns.histplot(df_sample[col1], ax=axes[1], kde=True)
+                    axes[1].set_title(f"Distribution: {col1}")
         
-            # Numeric charts
-            st.subheader("📉 Auto-Generated Numeric Charts")
-            for col in df_sample.select_dtypes(include="number").columns.tolist():
-                st.markdown(f"**{col}**")
-                try:
-                    binned_col = pd.cut(df_sample[col], bins=10)
-                    counts = binned_col.value_counts().sort_index()
-                    vc_df = pd.DataFrame({f"{col} (binned)": counts.index.astype(str), "Count": counts.values})
-                    fig = px.bar(vc_df, x=f"{col} (binned)", y="Count", title=f"{col} - Distribution")
-                    st.plotly_chart(fig, use_container_width=True)
-                except Exception as e:
-                    st.warning(f"Couldn't generate chart for {col}: {e}")
+                # First object chart
+                if len(df_sample.select_dtypes(include="object").columns) > 0:
+                    col2 = df_sample.select_dtypes(include="object").columns[0]
+                    vc = df_sample[col2].value_counts().nlargest(5)
+                    sns.barplot(x=vc.values, y=vc.index, ax=axes[2])
+                    axes[2].set_title(f"Top Categories: {col2}")
         
-            # Categorical charts
-            st.subheader("🧾 Category Distributions (Object Columns)")
-            for col in df_sample.select_dtypes(include="object").columns.tolist():
-                st.markdown(f"**{col}**")
-                try:
-                    value_counts = df_sample[col].value_counts().reset_index()
-                    value_counts.columns = [col, "Count"]
-                    fig = px.pie(value_counts, names=col, values="Count", title=f"{col} - Distribution")
-                    st.plotly_chart(fig, use_container_width=True)
-                except Exception as e:
-                    st.warning(f"Couldn't generate chart for {col}: {e}")
-                
+                # Forecast line (if exists)
+                if 'forecast_df' in locals():
+                    axes[3].plot(forecast_df[date_col], forecast_df["Forecast"], marker='o')
+                    axes[3].set_title("Forecast Preview")
+                else:
+                    axes[3].axis('off')
+        
+                plt.tight_layout()
+        
+                # Save to BytesIO
+                buf = BytesIO()
+                plt.savefig(buf, format="png")
+                buf.seek(0)
+        
+                b64 = base64.b64encode(buf.read()).decode()
+                href = f'<a href="data:file/png;base64,{b64}" download="dashboard_snapshot.png">📥 Click to download image</a>'
+                st.markdown(href, unsafe_allow_html=True)
+        
+                st.success("✅ Snapshot ready!")
+            except Exception as e:
+                st.warning(f"Something went wrong: {e}")
+        
     # --- Guidance for ML Tools --
     st.markdown("---")
     st.markdown("## 🔬 Modeling & Advanced Analysis")
