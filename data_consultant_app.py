@@ -345,6 +345,30 @@ if uploaded_file:
         else:
             st.info("No numeric columns found.")
 
+        st.subheader("Categorical Count Explorer")
+        cat_cols = df_sample.select_dtypes(include='object').columns.tolist()
+        
+        if not cat_cols:
+            st.info("No categorical columns found in your dataset.")
+        else:
+            selected_cat = st.selectbox("Select a categorical column", cat_cols)
+        
+            if selected_cat:
+                top_n = st.slider("Limit to top N values", min_value=5, max_value=30, value=10)
+                count_df = df_sample[selected_cat].value_counts().head(top_n).reset_index()
+                count_df.columns = [selected_cat, "Count"]
+        
+                chart_style = st.radio("Chart style:", ["Bar", "Pie"], horizontal=True)
+        
+                st.dataframe(count_df)
+        
+                if chart_style == "Bar":
+                    fig = px.bar(count_df, x=selected_cat, y="Count", title=f"Top {top_n} {selected_cat}")
+                else:
+                    fig = px.pie(count_df, names=selected_cat, values="Count", title=f"{selected_cat} Distribution")
+        
+                st.plotly_chart(fig, use_container_width=True)
+
                 
     # --- Guidance for ML Tools --
     st.markdown("---")
