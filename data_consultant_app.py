@@ -309,6 +309,9 @@ if uploaded_file:
         for col in cat_cols[:3]:  # Show only top 3 for brevity
             st.markdown(f"**{col}** - Top Categories")
             st.dataframe(df_sample[col].value_counts().head(5))
+
+          #Divider
+        st.markdown("---")
         
         st.subheader("🧪 Auto-Generated Chart Gallery")
         chart_type = st.radio("Chart style:", ["Bar (Counts)", "Line (Counts)"], horizontal=True)
