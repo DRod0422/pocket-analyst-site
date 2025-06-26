@@ -695,7 +695,7 @@ if uploaded_file:
                         st.info("Please upload a file to get started.")
 
             
-# --- Footer ---
-st.markdown("---")
-st.caption("Built with ❤️ using Streamlit + OpenAI + Pandas + Plotly")
-st.markdown("📬 Need help? Contact us at [pocketanalyst.help@gmail.com](mailto:pocketanalyst.help@gmail.com)")
+    # --- Footer ---
+    st.markdown("---")
+    st.caption("Built with ❤️ using Streamlit + OpenAI + Pandas + Plotly")
+    st.markdown("📬 Need help? Contact us at [pocketanalyst.help@gmail.com](mailto:pocketanalyst.help@gmail.com)")
