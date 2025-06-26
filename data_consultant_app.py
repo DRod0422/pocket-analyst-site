@@ -14,6 +14,9 @@ import plotly.express as px
 from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import MinMaxScaler
 from scipy.stats import skew, kurtosis
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.model_selection import train_test_split, cross_val_score
+from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 
 # --- Config Section ---
 openai.api_key = st.secrets["OPENAI_API_KEY"]
@@ -611,12 +614,7 @@ if uploaded_file:
                         """)
 
                     if st.button("🌲 Run Random Forest Model"):
-                        from sklearn.ensemble import RandomForestRegressor
-                        from sklearn.model_selection import train_test_split, cross_val_score
-                        from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
-                        import numpy as np
-                        import pandas as pd
-                        import plotly.express as px
+                     try:
                     
                         # Step 1: Get user-selected hyperparameters
                         st.sidebar.header("🛠️ Model Settings")
@@ -693,8 +691,8 @@ if uploaded_file:
                         st.error(f"❌ Error running advanced analysis: {e}")
 
     
-else:
-    st.info("Please upload a file to get started.")
+                else:
+                    st.info("Please upload a file to get started.")
 
             
 # --- Footer ---
