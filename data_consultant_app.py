@@ -612,68 +612,85 @@ if uploaded_file:
 
                     if st.button("🌲 Run Random Forest Model"):
                         from sklearn.ensemble import RandomForestRegressor
-                        from sklearn.model_selection import train_test_split
-    
+                        from sklearn.model_selection import train_test_split, cross_val_score
+                        from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
+                        import numpy as np
+                        import pandas as pd
+                        import plotly.express as px
+                    
+                        # Step 1: Get user-selected hyperparameters
+                        st.sidebar.header("🛠️ Model Settings")
+                        n_estimators = st.sidebar.slider("Number of Trees (n_estimators)", 10, 500, 100, step=10)
+                        max_depth = st.sidebar.slider("Max Depth", 1, 50, 10)
+                        min_samples_split = st.sidebar.slider("Min Samples Split", 2, 20, 5)
+                        min_samples_leaf = st.sidebar.slider("Min Samples Leaf", 1, 20, 2)
+                    
+                        # Step 2: Prepare data
                         X = data_for_modeling[features]
                         y = data_for_modeling[target_col]
-
                         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-    
-                        model = RandomForestRegressor(random_state=42)
+                    
+                        # Step 3: Train model with chosen hyperparameters
+                        model = RandomForestRegressor(
+                            n_estimators=n_estimators,
+                            max_depth=max_depth,
+                            min_samples_split=min_samples_split,
+                            min_samples_leaf=min_samples_leaf,
+                            max_features='sqrt',
+                            random_state=42,
+                            n_jobs=-1
+                        )
                         model.fit(X_train, y_train)
-    
+                    
+                        # Step 4: Feature importances
                         importances = model.feature_importances_
                         feature_df = pd.DataFrame({
                             "Feature": features,
                             "Importance": importances
                         }).sort_values(by="Importance", ascending=False)
-    
+                    
                         st.subheader("🔍 Feature Importances")
                         st.dataframe(feature_df)
-    
-                        import plotly.express as px
                         fig = px.bar(feature_df, x="Feature", y="Importance", title="Feature Importance (Random Forest)")
                         st.plotly_chart(fig)
-
-                        # Show prediction samples
-                        st.subheader("Prediction Samples (Actual vs. Predicted)")
-                        sample_df = X_test.copy()
-                        sample_df["Actual"] = y_test.values
-                        sample_df["Predicted"] = model.predict(X_test)
-
-                        st.caption("Compare model predictions to actual values for a sample of test data.")
-                        st.dataframe(sample_df.head(10), use_container_width=True)
-
-                        # Evaluate model performance
-                        from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
-                        import numpy as np
-                        
-                        # Generate predictions on test set
+                    
+                        # Step 5: Predictions
                         y_pred = model.predict(X_test)
-                        
-                        # Create a DataFrame of actual vs. predicted
+                    
                         sample_df = pd.DataFrame({
                             "Actual": y_test.values,
                             "Predicted": y_pred
                         }).reset_index(drop=True)
-                        
+                    
                         st.subheader("🎯 Prediction Samples (Actual vs. Predicted)")
                         st.dataframe(sample_df.head(10))
-                        
-                        # Show performance metrics
+                    
+                        # Step 6: Metrics
                         mae = mean_absolute_error(y_test, y_pred)
                         rmse = np.sqrt(mean_squared_error(y_test, y_pred))
                         r2 = r2_score(y_test, y_pred)
-                        
+                    
                         st.subheader("📈 Model Performance Metrics")
                         st.markdown(f"- **MAE (Mean Absolute Error):** `{mae:.2f}`")
                         st.markdown(f"- **RMSE (Root Mean Squared Error):** `{rmse:.2f}`")
-                        st.markdown(f"- **R² Score:** `{r2:.2f}`")
-
-    
-            except Exception as e:
-                st.error(f"❌ Error running advanced analysis: {e}")
-
+                        st.markdown(f"- **R² Score (Test Set):** `{r2:.2f}`")
+                    
+                        # Step 7: Cross-validated score
+                        with st.spinner("Running 5-fold Cross-Validation..."):
+                            cv_score = cross_val_score(model, X, y, cv=5, scoring='r2').mean()
+                        st.markdown(f"- **Cross-Validated R² Score:** `{cv_score:.2f}`")
+                    
+                        # Step 8: Warn about bad performance
+                        st.subheader("⚠️ Model Diagnostic")
+                        if r2 < 0.2:
+                            st.warning("Model R² is low. This suggests the model isn't explaining much variance.")
+                        elif r2 > 0.9 and (r2 - cv_score) > 0.1:
+                            st.warning("Model may be overfitting: high test score but much lower cross-val score.")
+                    
+                        st.success("Random Forest model completed!")
+                        
+                                except Exception as e:
+                                    st.error(f"❌ Error running advanced analysis: {e}")
 
     
 else:
