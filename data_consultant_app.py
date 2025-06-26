@@ -691,8 +691,8 @@ if uploaded_file:
                             st.error(f"❌ Error running advanced analysis: {e}")
     
         
-                        else:
-                            st.info("Please upload a file to get started.")
+                    else:
+                        st.info("Please upload a file to get started.")
 
             
 # --- Footer ---
