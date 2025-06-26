@@ -689,13 +689,12 @@ if uploaded_file:
                             
                          except Exception as e:
                             st.error(f"❌ Error running advanced analysis: {e}")
-    
         
-                    else:
-                        st.info("Please upload a file to get started.")
+        else:
+            st.info("Please upload a file to get started.")
 
             
-    # --- Footer ---
-    st.markdown("---")
-    st.caption("Built with ❤️ using Streamlit + OpenAI + Pandas + Plotly")
-    st.markdown("📬 Need help? Contact us at [pocketanalyst.help@gmail.com](mailto:pocketanalyst.help@gmail.com)")
+# --- Footer ---
+st.markdown("---")
+st.caption("Built with ❤️ using Streamlit + OpenAI + Pandas + Plotly")
+st.markdown("📬 Need help? Contact us at [pocketanalyst.help@gmail.com](mailto:pocketanalyst.help@gmail.com)")
