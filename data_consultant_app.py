@@ -577,13 +577,12 @@ if uploaded_file:
     st.markdown("---")
     st.markdown("## Data Science & Machine Learning Modeling")
     st.info("This section includes advanced machine learning tools for data scientists and experienced analysts.")
-    
+
     # --- Advanced Data Scientist Tools (Expandable Section) ---
     with st.expander("🔬 Data Scientist Tools (Pro Preview) *Beta* ", expanded=False):
-        
-        # 👇 This handles switching between original or normalized data
+    
         data_for_modeling = st.session_state.get("normalized_data", df)
-        
+    
         if uploaded_file is not None:
             try:
                 numeric_cols = data_for_modeling.select_dtypes(include="number").columns.tolist()
@@ -592,43 +591,29 @@ if uploaded_file:
                     st.warning("Not enough numeric columns to run advanced models.")
                 else:
                     target_col = st.selectbox("🎯 Select a target column", numeric_cols)
-    
                     features = [col for col in numeric_cols if col != target_col]
-    
                     st.write(f"📊 Using {len(features)} features to predict **{target_col}**")
-
+    
                     if st.checkbox("📘 What This Model Does"):
                         st.markdown("""
-                        The **Random Forest** model is a machine learning algorithm that builds multiple decision trees and averages their results for better accuracy.
-                    
-                        - **Feature Importance** shows which variables influence the prediction the most.
-                        - **Actual vs Predicted** helps you evaluate how well the model is performing.
-                        - **Performance Metrics (MAE, RMSE, R²)** indicate how reliable the model is.
-                    
-                        **Example Use Cases:**
-                        - Predict loan duration based on age, income, and credit score.
-                        - Discover which features most impact an outcome.
-                        - Explore "what-if" scenarios to understand data sensitivity.
-                    
-                        Use this model to gain deeper, data-backed insight into trends and patterns hidden in your dataset.
+                        _[Your explanation content]_
                         """)
-
+    
                     if st.button("🌲 Run Random Forest Model"):
                         try:
-                    
-                            # Step 1: Get user-selected hyperparameters
+                            # 🛠️ Hyperparameters
                             st.sidebar.header("🛠️ Model Settings")
                             n_estimators = st.sidebar.slider("Number of Trees (n_estimators)", 10, 500, 100, step=10)
                             max_depth = st.sidebar.slider("Max Depth", 1, 50, 10)
                             min_samples_split = st.sidebar.slider("Min Samples Split", 2, 20, 5)
                             min_samples_leaf = st.sidebar.slider("Min Samples Leaf", 1, 20, 2)
-                        
-                            # Step 2: Prepare data
+    
+                            # 📊 Data prep
                             X = data_for_modeling[features]
                             y = data_for_modeling[target_col]
                             X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-                        
-                            # Step 3: Train model with chosen hyperparameters
+    
+                            # 🌲 Train model
                             model = RandomForestRegressor(
                                 n_estimators=n_estimators,
                                 max_depth=max_depth,
@@ -639,62 +624,59 @@ if uploaded_file:
                                 n_jobs=-1
                             )
                             model.fit(X_train, y_train)
-                        
-                            # Step 4: Feature importances
+    
+                            # 🔍 Feature Importances
                             importances = model.feature_importances_
                             feature_df = pd.DataFrame({
                                 "Feature": features,
                                 "Importance": importances
                             }).sort_values(by="Importance", ascending=False)
-                        
                             st.subheader("🔍 Feature Importances")
                             st.dataframe(feature_df)
                             fig = px.bar(feature_df, x="Feature", y="Importance", title="Feature Importance (Random Forest)")
                             st.plotly_chart(fig)
-                        
-                            # Step 5: Predictions
+    
+                            # 🎯 Predictions
                             y_pred = model.predict(X_test)
-                        
                             sample_df = pd.DataFrame({
                                 "Actual": y_test.values,
                                 "Predicted": y_pred
                             }).reset_index(drop=True)
-                        
                             st.subheader("🎯 Prediction Samples (Actual vs. Predicted)")
                             st.dataframe(sample_df.head(10))
-                        
-                            # Step 6: Metrics
+    
+                            # 📈 Metrics
                             mae = mean_absolute_error(y_test, y_pred)
                             rmse = np.sqrt(mean_squared_error(y_test, y_pred))
                             r2 = r2_score(y_test, y_pred)
-                        
                             st.subheader("📈 Model Performance Metrics")
-                            st.markdown(f"- **MAE (Mean Absolute Error):** `{mae:.2f}`")
-                            st.markdown(f"- **RMSE (Root Mean Squared Error):** `{rmse:.2f}`")
-                            st.markdown(f"- **R² Score (Test Set):** `{r2:.2f}`")
-                        
-                            # Step 7: Cross-validated score
+                            st.markdown(f"- **MAE:** `{mae:.2f}`")
+                            st.markdown(f"- **RMSE:** `{rmse:.2f}`")
+                            st.markdown(f"- **R² Score:** `{r2:.2f}`")
+    
+                            # 🔁 Cross-validation
                             with st.spinner("Running 5-fold Cross-Validation..."):
                                 cv_score = cross_val_score(model, X, y, cv=5, scoring='r2').mean()
                             st.markdown(f"- **Cross-Validated R² Score:** `{cv_score:.2f}`")
-                        
-                            # Step 8: Warn about bad performance
+    
+                            # ⚠️ Warnings
                             st.subheader("⚠️ Model Diagnostic")
                             if r2 < 0.2:
-                                st.warning("Model R² is low. This suggests the model isn't explaining much variance.")
+                                st.warning("Model R² is low.")
                             elif r2 > 0.9 and (r2 - cv_score) > 0.1:
-                                st.warning("Model may be overfitting: high test score but much lower cross-val score.")
-                        
+                                st.warning("Possible overfitting.")
+    
                             st.success("Random Forest model completed!")
-                            
+    
                         except Exception as e:
-                            st.error(f"❌ Error running advanced analysis: {e}")
-                            
-                except Exception as e:
-                        st.error(f"❌ Error preparing: {e}")
-        
+                            st.error(f"❌ Error running model: {e}")
+    
+            except Exception as e:
+                st.error(f"❌ Error preparing data: {e}")
+    
         else:
             st.info("Please upload a file to get started.")
+
 
             
 # --- Footer ---
