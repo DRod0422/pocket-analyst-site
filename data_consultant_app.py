@@ -614,7 +614,7 @@ if uploaded_file:
                         """)
 
                     if st.button("🌲 Run Random Forest Model"):
-                         try:
+                        try:
                     
                             # Step 1: Get user-selected hyperparameters
                             st.sidebar.header("🛠️ Model Settings")
@@ -687,8 +687,11 @@ if uploaded_file:
                         
                             st.success("Random Forest model completed!")
                             
-                         except Exception as e:
+                        except Exception as e:
                             st.error(f"❌ Error running advanced analysis: {e}")
+                            
+                except Exception as e:
+                        st.error(f"❌ Error preparing: {e}")
         
         else:
             st.info("Please upload a file to get started.")
