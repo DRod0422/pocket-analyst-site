@@ -687,12 +687,12 @@ if uploaded_file:
                     
                         st.success("Random Forest model completed!")
                         
-                    except Exception as e:
-                        st.error(f"❌ Error running advanced analysis: {e}")
+                except Exception as e:
+                    st.error(f"❌ Error running advanced analysis: {e}")
 
     
-                else:
-                    st.info("Please upload a file to get started.")
+            else:
+                st.info("Please upload a file to get started.")
 
             
 # --- Footer ---
