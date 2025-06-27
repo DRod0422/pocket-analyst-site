@@ -113,7 +113,7 @@ if uploaded_file:
         - Optionally: Drop columns manually before running ML models.
         """)
         
-        drop_columns = st.multiselect("Optional: Drop Columns Before Processing", df.columns.tolist())
+        drop_columns = st.multiselect("Optional: Drop Columns Before Processing", df_clean.columns.tolist())
 
         # Select scaler
         scaler_choice = st.selectbox(
@@ -129,7 +129,7 @@ if uploaded_file:
             from sklearn.preprocessing import MinMaxScaler, StandardScaler, RobustScaler
     
             # Prepare base dataframe
-            df_encoded = df.drop(columns=drop_columns) if drop_columns else df.copy()
+            df_encoded = df_clean.drop(columns=drop_columns) if drop_columns else df_clean.copy()
     
             # One-hot encode categoricals
             df_encoded = pd.get_dummies(df_encoded, drop_first=True)
@@ -211,8 +211,6 @@ if uploaded_file:
     if len(df) > 5000:
         st.warning(f"Large dataset detected ({len(df)} rows). Sampling 1000 rows for efficiency.")
         df_sample = df.sample(n=1000, random_state=42)
-    else:
-        df_clean = df
         
     
 
@@ -600,7 +598,7 @@ if uploaded_file:
     # --- Advanced Data Scientist Tools (Expandable Section) ---
     with st.expander("🔬 Data Scientist Tools (Pro Preview) *Beta* ", expanded=False):
     
-        data_for_modeling = st.session_state.get("normalized_data", df)
+        data_for_modeling = st.session_state.get("normalized_data", df_clean)
     
         if uploaded_file is not None:
             try:
