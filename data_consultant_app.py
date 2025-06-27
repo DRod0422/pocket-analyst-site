@@ -101,9 +101,9 @@ if uploaded_file:
     if len(df) > 5000:
         st.warning(f"Large dataset detected ({len(df)} rows). Sampling 1000 rows for faster performance.")
         if len(df_clean) > 5000:
-            df_sample = df_clean.sample(n=1000, random_state=42)
+            df_clean = df_clean.sample(n=1000, random_state=42)
         else:
-            df_sample = df_clean
+            df_clean = df_clean
 
         
     # # ✅ Reset AI trigger
