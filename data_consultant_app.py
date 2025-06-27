@@ -89,9 +89,11 @@ if uploaded_file:
 
     if len(df) > 5000:
         st.warning(f"Large dataset detected ({len(df)} rows). Sampling 1000 rows for faster performance.")
-        df_sample = df.sample(n=1000, random_state=42)
-    else:
-        df_sample = df
+        if len(df_clean) > 5000:
+            df_sample = df_clean.sample(n=1000, random_state=42)
+        else:
+            df_sample = df_clean
+
         
     # # ✅ Reset AI trigger
     # if uploaded_file and "ai_ran_once" not in st.session_state: 
@@ -206,7 +208,7 @@ if uploaded_file:
         st.warning(f"Large dataset detected ({len(df)} rows). Sampling 1000 rows for efficiency.")
         df_sample = df.sample(n=1000, random_state=42)
     else:
-        df_sample = df
+        df_clean = df
         
     
 
@@ -224,9 +226,9 @@ if uploaded_file:
             st.warning("You've reached your free question limit for today. Please upgrade to unlock more features.")
         else:
             st.session_state.query_count += 1
-            csv_snippet = df_sample.head(10).to_string(index=False)
+            csv_snippet = df_clean.head(10).to_string(index=False)
 
-            row_count, col_count = df_sample.shape
+            row_count, col_count = df_clean.shape
             
             prompt = f"""
             You are an expert data analyst. The dataset has {row_count} rows and {col_count} columns.
