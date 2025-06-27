@@ -97,8 +97,10 @@ if uploaded_file:
     
     
     # Select which dataset to use for downstream tasks
+    apply_cleaning = st.checkbox("🧼 Apply Auto-Cleaning to Dataset", value=True)
+    # Decide which dataset to use
     df_current = st.session_state["df_clean"] if apply_cleaning and "df_clean" in st.session_state else df_raw
-     # Show preview 
+    # Show preview 
     st.subheader("Preview of Your Data")
     if apply_cleaning and "df_clean" in st.session_state:
         st.dataframe(st.session_state["df_clean"].head(100))
