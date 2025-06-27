@@ -214,7 +214,7 @@ if uploaded_file:
         
     if len(df) > 5000:
         st.warning(f"Large dataset detected ({len(df)} rows). Sampling 1000 rows for efficiency.")
-        df_sample = df.sample(n=1000, random_state=42)
+        df_clean = df.clean(n=1000, random_state=42)
         
     
 
