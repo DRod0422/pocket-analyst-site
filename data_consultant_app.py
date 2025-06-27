@@ -76,34 +76,31 @@ if uploaded_file:
         if apply_cleaning:
             from utils import clean_and_format_data
             df_clean, clean_log = clean_and_format_data(df_raw, log=True)
-            st.success("✅ File cleaned and loaded.")
+            st.success("✅ File cleaned and loaded with auto-formatting.")
             for entry in clean_log:
                 st.markdown(f"🧼 {entry}")
         else:
             df_clean = df_raw
-            st.success("✅ File loaded without cleaning.")
+            st.success("✅ File loaded without auto-cleaning.")
     
         st.session_state["df_clean"] = df_clean
-    
     else:
         if "df_clean" in st.session_state:
             df_clean = st.session_state["df_clean"]
         else:
             st.warning("⚠️ Cleaned data not found in session. Please re-upload your file.")
             st.stop()
-
-
-    # Show cleaned data
+    
+    # ✅ Show data preview
     st.subheader("Preview of Your Data")
     st.dataframe(df_clean.head(100))
 
+    if len(df_clean) > 5000:
+    st.warning(f"Large dataset detected ({len(df_clean)} rows). Sampling 1000 rows for faster performance.")
+    df_sample = df_clean.sample(n=1000, random_state=42)
+else:
+    df_sample = df_clean
 
-    if len(df) > 5000:
-        st.warning(f"Large dataset detected ({len(df)} rows). Sampling 1000 rows for faster performance.")
-        if len(df_clean) > 5000:
-            df_clean = df_clean.sample(n=1000, random_state=42)
-        else:
-            df_clean = df_clean
 
         
     # # ✅ Reset AI trigger
