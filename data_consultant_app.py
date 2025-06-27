@@ -617,7 +617,7 @@ if uploaded_file:
     # --- Advanced Data Scientist Tools (Expandable Section) ---
     with st.expander("🔬 Data Scientist Tools (Pro Preview) *Beta* ", expanded=False):
     
-        data_for_modeling = st.session_state.get("normalized_data", df_clean)
+        data_for_modeling = st.session_state.get("normalized_data", df_sample)
     
         if uploaded_file is not None:
             try:
