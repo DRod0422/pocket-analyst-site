@@ -95,25 +95,21 @@ if uploaded_file:
     else:
         working_df = df_raw
     
-    # Light sampling if large
+    
     # Select which dataset to use for downstream tasks
     df_current = st.session_state["df_clean"] if apply_cleaning and "df_clean" in st.session_state else df_raw
-    
-    if len(df_current) > 5000:
-        st.warning(f"Large dataset detected ({len(df_current)} rows). Sampling 1000 rows for faster performance.")
-        df_sample = df_current.sample(n=1000, random_state=42)
-    else:
-        df_sample = df_current
-    
-    # Show preview
-    
+     # Show preview 
     st.subheader("Preview of Your Data")
     if apply_cleaning and "df_clean" in st.session_state:
         st.dataframe(st.session_state["df_clean"].head(100))
     else:
         st.dataframe(df_raw.head(100))
-
-
+    # Sample if needed
+    if len(df_current) > 5000:
+        st.warning(f"Large dataset detected ({len(df_current)} rows). Sampling 1000 rows for faster performance.")
+        df_sample = df_current.sample(n=1000, random_state=42)
+    else:
+        df_sample = df_current
 
 
         
