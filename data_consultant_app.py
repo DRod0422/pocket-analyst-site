@@ -70,21 +70,28 @@ if uploaded_file:
     if "last_uploaded_name" not in st.session_state or st.session_state.last_uploaded_name != uploaded_file.name:
         st.session_state.last_uploaded_name = uploaded_file.name
         st.session_state.ai_ran_once = False  # Reset AI insights on new file
-
-        # 🔧 Apply auto-cleaning
-        from utils import clean_and_format_data
-        df_clean, clean_log = clean_and_format_data(df_raw, log=True)
+    
+        apply_cleaning = st.checkbox("🧼 Automatically clean and format my data", value=True)
+    
+        if apply_cleaning:
+            from utils import clean_and_format_data
+            df_clean, clean_log = clean_and_format_data(df_raw, log=True)
+            st.success("✅ File cleaned and loaded.")
+            for entry in clean_log:
+                st.markdown(f"🧼 {entry}")
+        else:
+            df_clean = df_raw
+            st.success("✅ File loaded without cleaning.")
+    
         st.session_state["df_clean"] = df_clean
-
-        st.success("✅ File cleaned and loaded.")
-        for entry in clean_log:
-            st.markdown(f"🧼 {entry}")
+    
     else:
         if "df_clean" in st.session_state:
             df_clean = st.session_state["df_clean"]
         else:
             st.warning("⚠️ Cleaned data not found in session. Please re-upload your file.")
             st.stop()
+
 
     # Show cleaned data
     st.subheader("Preview of Your Data")
