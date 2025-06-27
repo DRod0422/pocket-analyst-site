@@ -96,10 +96,10 @@ if uploaded_file:
     st.dataframe(df_clean.head(100))
 
     if len(df_clean) > 5000:
-    st.warning(f"Large dataset detected ({len(df_clean)} rows). Sampling 1000 rows for faster performance.")
-    df_sample = df_clean.sample(n=1000, random_state=42)
-else:
-    df_sample = df_clean
+        st.warning(f"Large dataset detected ({len(df_clean)} rows). Sampling 1000 rows for faster performance.")
+        df_sample = df_clean.sample(n=1000, random_state=42)
+    else:
+        df_sample = df_clean
 
 
         
