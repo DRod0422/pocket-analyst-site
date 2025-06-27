@@ -44,7 +44,20 @@ def clean_and_format_data(df_raw, log=False):
         .str.replace(" ", "_")
     )
     # Handle duplicate columns
-    df.columns = pd.io.parsers.ParserBase({'names': df.columns})._maybe_dedup_names(df.columns)
+    from collections import Counter
+    def deduplicate_columns(columns):
+        counts = Counter()
+        new_cols = []
+        for col in columns:
+            counts[col] += 1
+            if counts[col] == 1:
+                new_cols.append(col)
+            else:
+                new_cols.append(f"{col}.{counts[col]-1}")
+        return new_cols
+    
+    df.columns = deduplicate_columns(df.columns)
+
     change_log.append("Standardized column names")
 
     # Step 4: Normalize missing values
