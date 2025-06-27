@@ -212,9 +212,12 @@ if uploaded_file:
 
     # --- Light Sampling for Large Files ---
         
-    if len(df) > 5000:
-        st.warning(f"Large dataset detected ({len(df)} rows). Sampling 1000 rows for efficiency.")
-        df_clean = df.clean(n=1000, random_state=42)
+    if len(df_clean) > 5000:
+        st.warning(f"Large dataset detected ({len(df_clean)} rows). Sampling 1000 rows for efficiency.")
+        df_sample = df_clean.sample(n=1000, random_state=42)
+    else:
+        df_sample = df_clean
+
         
     
 
