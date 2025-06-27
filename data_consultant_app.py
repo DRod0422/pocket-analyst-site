@@ -58,22 +58,34 @@ uploaded_file = st.file_uploader("Upload a CSV or XLSX file", type=["csv", "xlsx
 
 if uploaded_file:
     if uploaded_file.name.endswith(".csv"):
-        df = pd.read_csv(uploaded_file)
+        df_raw = pd.read_csv(uploaded_file)
     else:
         # Get available sheet names
         xls = pd.ExcelFile(uploaded_file)
         sheet_names = xls.sheet_names
         selected_sheet = st.selectbox("Select a sheet to load", sheet_names)
-        
-        # Load only the selected sheet
-        df = pd.read_excel(xls, sheet_name=selected_sheet)
-        
+        df_raw = pd.read_excel(xls, sheet_name=selected_sheet)
+
+    # ✅ Only clean the data if it's new
     if "last_uploaded_name" not in st.session_state or st.session_state.last_uploaded_name != uploaded_file.name:
         st.session_state.last_uploaded_name = uploaded_file.name
-        st.session_state.ai_ran_once = False  # ✅ Reset ONLY on new file
-        
+        st.session_state.ai_ran_once = False  # Reset AI insights on new file
+
+        # 🔧 Apply auto-cleaning
+        from utils import clean_and_format_data
+        df_clean, clean_log = clean_and_format_data(df_raw, log=True)
+        st.session_state["df_clean"] = df_clean
+
+        st.success("✅ File cleaned and loaded.")
+        for entry in clean_log:
+            st.markdown(f"🧼 {entry}")
+    else:
+        df_clean = st.session_state["df_clean"]
+
+    # Show cleaned data
     st.subheader("Preview of Your Data")
-    st.dataframe(df.head(100))
+    st.dataframe(df_clean.head(100))
+
 
     if len(df) > 5000:
         st.warning(f"Large dataset detected ({len(df)} rows). Sampling 1000 rows for faster performance.")
