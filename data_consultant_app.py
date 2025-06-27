@@ -80,7 +80,11 @@ if uploaded_file:
         for entry in clean_log:
             st.markdown(f"🧼 {entry}")
     else:
-        df_clean = st.session_state["df_clean"]
+        if "df_clean" in st.session_state:
+            df_clean = st.session_state["df_clean"]
+        else:
+            st.warning("⚠️ Cleaned data not found in session. Please re-upload your file.")
+            st.stop()
 
     # Show cleaned data
     st.subheader("Preview of Your Data")
