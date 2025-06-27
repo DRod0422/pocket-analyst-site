@@ -66,40 +66,46 @@ if uploaded_file:
         selected_sheet = st.selectbox("Select a sheet to load", sheet_names)
         df_raw = pd.read_excel(xls, sheet_name=selected_sheet)
 
-    # ✅ Only clean the data if it's new
+    # ✅ Only clean the data if it's new or changed
     if "last_uploaded_name" not in st.session_state or st.session_state.last_uploaded_name != uploaded_file.name:
         st.session_state.last_uploaded_name = uploaded_file.name
         st.session_state.ai_ran_once = False  # Reset AI insights on new file
     
-        apply_cleaning = st.checkbox("🧼 Automatically clean and format my data", value=True)
+        # Ask user if they want cleaning
+        use_cleaning = st.checkbox("🧼 Auto-clean uploaded data?", value=True)
+        st.session_state["use_cleaning"] = use_cleaning
     
-        if apply_cleaning:
+        if use_cleaning:
             from utils import clean_and_format_data
             df_clean, clean_log = clean_and_format_data(df_raw, log=True)
-            st.success("✅ File cleaned and loaded with auto-formatting.")
+            st.session_state["df_clean"] = df_clean
+    
+            st.success("✅ File cleaned and loaded.")
             for entry in clean_log:
                 st.markdown(f"🧼 {entry}")
         else:
-            df_clean = df_raw
-            st.success("✅ File loaded without auto-cleaning.")
-    
-        st.session_state["df_clean"] = df_clean
+            st.session_state["df_clean"] = None
     else:
-        if "df_clean" in st.session_state:
-            df_clean = st.session_state["df_clean"]
-        else:
-            st.warning("⚠️ Cleaned data not found in session. Please re-upload your file.")
-            st.stop()
+        use_cleaning = st.session_state.get("use_cleaning", True)
+        df_clean = st.session_state.get("df_clean")
     
-    # ✅ Show data preview
+    # Define df_sample from correct source
+    if use_cleaning and df_clean is not None:
+        working_df = df_clean
+    else:
+        working_df = df_raw
+    
+    # Light sampling if large
+    if len(working_df) > 5000:
+        st.warning(f"Large dataset detected ({len(working_df)} rows). Sampling 1000 rows for performance.")
+        df_sample = working_df.sample(n=1000, random_state=42)
+    else:
+        df_sample = working_df
+    
+    # Show preview
     st.subheader("Preview of Your Data")
-    st.dataframe(df_clean.head(100))
+    st.dataframe(working_df.head(100))
 
-    if len(df_clean) > 5000:
-        st.warning(f"Large dataset detected ({len(df_clean)} rows). Sampling 1000 rows for faster performance.")
-        df_sample = df_clean.sample(n=1000, random_state=42)
-    else:
-        df_sample = df_clean
 
 
         
