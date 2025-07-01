@@ -18,6 +18,7 @@ from scipy.stats import skew, kurtosis
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import train_test_split, cross_val_score
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
+from prophet import Prophet
 
 # --- Config Section ---
 openai.api_key = st.secrets["OPENAI_API_KEY"]
@@ -551,11 +552,19 @@ if uploaded_file:
         except Exception as e:
             st.error(f"Forecasting failed: {e}")
             
+    # --- Divider ---        
+    st.markdown("---")        
     # --- Advanced Forecasting with Prophet ---
+    with st.expander("ℹ️ Prophet Forecasting Requirements", expanded=False):
+    st.markdown("""
+    - **Data must be time series** (e.g., monthly sales)
+    - Minimum of **12 time points** for meaningful predictions
+    - Prophet expects **consistent intervals** (no gaps)
+    - Date column will be automatically converted to `ds`
+    - Value to forecast will be used as `y`
+    """)
     with st.expander("🔮 Advanced Forecasting (Prophet)", expanded=False):
         try:
-            from prophet import Prophet
-    
             date_cols = [col for col in df_sample.columns if pd.api.types.is_datetime64_any_dtype(df_sample[col])]
             numeric_cols = df_sample.select_dtypes(include='number').columns.tolist()
     
