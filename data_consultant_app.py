@@ -556,13 +556,13 @@ if uploaded_file:
     st.markdown("---")        
     # --- Advanced Forecasting with Prophet ---
     with st.expander("ℹ️ Prophet Forecasting Requirements", expanded=False):
-    st.markdown("""
-    - **Data must be time series** (e.g., monthly sales)
-    - Minimum of **12 time points** for meaningful predictions
-    - Prophet expects **consistent intervals** (no gaps)
-    - Date column will be automatically converted to `ds`
-    - Value to forecast will be used as `y`
-    """)
+        st.markdown("""
+        - **Data must be time series** (e.g., monthly sales)
+        - Minimum of **12 time points** for meaningful predictions
+        - Prophet expects **consistent intervals** (no gaps)
+        - Date column will be automatically converted to `ds`
+        - Value to forecast will be used as `y`
+        """)
     with st.expander("🔮 Advanced Forecasting (Prophet)", expanded=False):
         try:
             date_cols = [col for col in df_sample.columns if pd.api.types.is_datetime64_any_dtype(df_sample[col])]
