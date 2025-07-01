@@ -7,3 +7,5 @@ scikit-learn
 matplotlib
 seaborn
 openpyxl
+prophet
+cmdstanpy
