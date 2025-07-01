@@ -550,7 +550,46 @@ if uploaded_file:
     
         except Exception as e:
             st.error(f"Forecasting failed: {e}")
-
+            
+    # --- Advanced Forecasting with Prophet ---
+    with st.expander("🔮 Advanced Forecasting (Prophet)", expanded=False):
+        try:
+            from prophet import Prophet
+    
+            date_cols = [col for col in df_sample.columns if pd.api.types.is_datetime64_any_dtype(df_sample[col])]
+            numeric_cols = df_sample.select_dtypes(include='number').columns.tolist()
+    
+            if not date_cols:
+                st.warning("No datetime column found. Please include a date column to enable Prophet forecasting.")
+            else:
+                date_col = st.selectbox("📅 Select date column (Prophet):", date_cols, key="prophet_date")
+                target_col = st.selectbox("📈 Select value to forecast (Prophet):", numeric_cols, key="prophet_target")
+                forecast_months = st.slider("⏩ Months to forecast (Prophet)", 1, 12, 6, key="prophet_months")
+    
+                df_prophet = df_sample[[date_col, target_col]].dropna().copy()
+                df_prophet.columns = ["ds", "y"]
+                df_prophet["ds"] = pd.to_datetime(df_prophet["ds"], errors="coerce")
+                df_prophet = df_prophet.dropna()
+    
+                m = Prophet()
+                m.fit(df_prophet)
+    
+                future = m.make_future_dataframe(periods=forecast_months * 30, freq='D')  # roughly 1 month = 30 days
+                forecast = m.predict(future)
+    
+                st.write("📊 Forecast Table:")
+                st.dataframe(forecast[["ds", "yhat", "yhat_lower", "yhat_upper"]].tail(forecast_months * 30))
+    
+                st.write("📈 Forecast Plot:")
+                fig1 = m.plot(forecast)
+                st.pyplot(fig1)
+    
+                st.write("📉 Forecast Components:")
+                fig2 = m.plot_components(forecast)
+                st.pyplot(fig2)
+    
+        except Exception as e:
+            st.error(f"Prophet forecasting failed: {e}")
     
     # --- Univariate Analysis ---
     with st.expander("📈 Univariate Analysis"):
