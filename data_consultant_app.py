@@ -267,7 +267,7 @@ if uploaded_file:
                 response = openai.chat.completions.create(
                     model=GPT_MODEL,
                     messages=[
-                        {"role": "system", "content": "You are a helpful data analyst."},
+                        {"role": "system", "content": "You are a helpful Analyst. Be concise by default. Provide direct answers unless the user asks for explanation or calculation steps."},
                         {"role": "user", "content": prompt}
                     ]
                 )
@@ -468,7 +468,7 @@ if uploaded_file:
         
     # --- Guidance for ML Tools --
     st.markdown("---")
-    st.markdown("## 🔬 Modeling & Advanced Analysis")
+    st.markdown("## 🔬 Forecast Modeling & Advanced Analysis")
     st.info(
         """
         The following tools include **univariate analysis**, **variable relationships**, and **predictive forecasting analysis**.
