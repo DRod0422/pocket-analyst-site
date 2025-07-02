@@ -491,52 +491,52 @@ with tab3:
                         st.plotly_chart(fig, use_container_width=True)
                         
         
-                st.markdown("---")
+                # st.markdown("---")
                 
-                st.subheader("📸 Exportable Dashboard Snapshot (**BETA**)")
-                if st.button("📥 Generate & Download Image Summary"):
-                    try:
-                        fig, axes = plt.subplots(nrows=2, ncols=2, figsize=(14, 10))
-                        axes = axes.flatten()
+                # st.subheader("📸 Exportable Dashboard Snapshot (**BETA**)")
+                # if st.button("📥 Generate & Download Image Summary"):
+                #     try:
+                #         fig, axes = plt.subplots(nrows=2, ncols=2, figsize=(14, 10))
+                #         axes = axes.flatten()
                 
-                        # Sample preview
-                        sns.heatmap(df_sample.head(10).isnull(), ax=axes[0], cbar=False)
-                        axes[0].set_title("Missing Values (Top 10 Rows)")
+                #         # Sample preview
+                #         sns.heatmap(df_sample.head(10).isnull(), ax=axes[0], cbar=False)
+                #         axes[0].set_title("Missing Values (Top 10 Rows)")
                 
-                        # First numeric chart
-                        if len(df_sample.select_dtypes(include="number").columns) > 0:
-                            col1 = df_sample.select_dtypes(include="number").columns[0]
-                            sns.histplot(df_sample[col1], ax=axes[1], kde=True)
-                            axes[1].set_title(f"Distribution: {col1}")
+                #         # First numeric chart
+                #         if len(df_sample.select_dtypes(include="number").columns) > 0:
+                #             col1 = df_sample.select_dtypes(include="number").columns[0]
+                #             sns.histplot(df_sample[col1], ax=axes[1], kde=True)
+                #             axes[1].set_title(f"Distribution: {col1}")
                 
-                        # First object chart
-                        if len(df_sample.select_dtypes(include="object").columns) > 0:
-                            col2 = df_sample.select_dtypes(include="object").columns[0]
-                            vc = df_sample[col2].value_counts().nlargest(5)
-                            sns.barplot(x=vc.values, y=vc.index, ax=axes[2])
-                            axes[2].set_title(f"Top Categories: {col2}")
+                #         # First object chart
+                #         if len(df_sample.select_dtypes(include="object").columns) > 0:
+                #             col2 = df_sample.select_dtypes(include="object").columns[0]
+                #             vc = df_sample[col2].value_counts().nlargest(5)
+                #             sns.barplot(x=vc.values, y=vc.index, ax=axes[2])
+                #             axes[2].set_title(f"Top Categories: {col2}")
                 
-                        # Forecast line (if exists)
-                        if 'forecast_df' in locals():
-                            axes[3].plot(forecast_df[date_col], forecast_df["Forecast"], marker='o')
-                            axes[3].set_title("Forecast Preview")
-                        else:
-                            axes[3].axis('off')
+                #         # Forecast line (if exists)
+                #         if 'forecast_df' in locals():
+                #             axes[3].plot(forecast_df[date_col], forecast_df["Forecast"], marker='o')
+                #             axes[3].set_title("Forecast Preview")
+                #         else:
+                #             axes[3].axis('off')
                 
-                        plt.tight_layout()
+                #         plt.tight_layout()
                 
-                        # Save to BytesIO
-                        buf = io.BytesIO()
-                        plt.savefig(buf, format="png")
-                        buf.seek(0)
+                #         # Save to BytesIO
+                #         buf = io.BytesIO()
+                #         plt.savefig(buf, format="png")
+                #         buf.seek(0)
                 
-                        b64 = base64.b64encode(buf.read()).decode()
-                        href = f'<a href="data:file/png;base64,{b64}" download="dashboard_snapshot.png">📥 Click to download image</a>'
-                        st.markdown(href, unsafe_allow_html=True)
+                #         b64 = base64.b64encode(buf.read()).decode()
+                #         href = f'<a href="data:file/png;base64,{b64}" download="dashboard_snapshot.png">📥 Click to download image</a>'
+                #         st.markdown(href, unsafe_allow_html=True)
                 
-                        st.success("✅ Snapshot ready!")
-                    except Exception as e:
-                        st.warning(f"Something went wrong: {e}")
+                #         st.success("✅ Snapshot ready!")
+                #     except Exception as e:
+                #         st.warning(f"Something went wrong: {e}")
         
     # --- Guidance for ML Tools --
 with tab4:
