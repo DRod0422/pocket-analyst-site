@@ -964,47 +964,89 @@ with tab5:
                 t_stat, p_val = stats.ttest_ind(group1, group2)
                 st.write(f"T-statistic: {t_stat:.4f}")
                 st.write(f"P-value: {p_val:.4f}")
-                
-                if p_val < 0.05:
-                    st.success(f"📌 Significant difference between **{unique_vals[0]}** and **{unique_vals[1]}**")
-                else:
-                    st.info(f"📌 No significant difference between **{unique_vals[0]}** and **{unique_vals[1]}**")
+        
+                # AI-style toggle
+                ai_key = f"ai_ttest2_{num_col}_{cat_col}"
+                if ai_key not in st.session_state:
+                    st.session_state[ai_key] = False
+        
+                if not st.session_state[ai_key]:
+                    if st.checkbox("🧠 Show AI-style interpretation", key=ai_key):
+                        st.session_state[ai_key] = True
+        
+                if st.session_state[ai_key]:
+                    if p_val < 0.05:
+                        st.markdown(f"🧠 **Insight:** A p-value of `{p_val:.4f}` suggests a statistically significant difference in **{num_col}** between the two groups of **{cat_col}**.")
+                    else:
+                        st.markdown(f"🧠 **Insight:** A p-value of `{p_val:.4f}` suggests there is **no significant difference** in **{num_col}** between the groups of **{cat_col}**.")
             else:
                 st.warning("Please select a categorical column with exactly 2 unique values.")
+
         
         elif test_type == "Z-test":
-            st.subheader("Z-Test (Known Population Std Dev)")
-            column = st.selectbox("Select numeric column", df_sample.select_dtypes(include='number').columns)
-            popmean = st.number_input("Population mean", value=0.0)
-            popstd = st.number_input("Population standard deviation", value=1.0)
+            st.subheader("Z-Test (1-sample)")
+            column = st.selectbox("Select numeric column", df_sample.select_dtypes(include='number').columns, key="z_col")
+            pop_mean = st.number_input("Population Mean", value=0.0, key="z_mean")
+            pop_std = st.number_input("Population Std Dev", value=1.0, key="z_std")
         
             sample = df_sample[column].dropna()
-            z_stat = (sample.mean() - popmean) / (popstd / np.sqrt(len(sample)))
-            p_val = 2 * (1 - stats.norm.cdf(abs(z_stat)))
+            if len(sample) > 1:
+                sample_mean = sample.mean()
+                sample_size = len(sample)
+                z_stat = (sample_mean - pop_mean) / (pop_std / np.sqrt(sample_size))
+                p_val = 2 * (1 - stats.norm.cdf(abs(z_stat)))
         
-            st.write(f"Z-statistic: {z_stat:.4f}")
-            st.write(f"P-value: {p_val:.4f}")
+                st.write(f"Z-statistic: {z_stat:.4f}")
+                st.write(f"P-value: {p_val:.4f}")
         
-            if p_val < 0.05:
-                st.success("📌 Result: Statistically significant difference")
+                ai_key = f"ai_ztest_{column}"
+                if ai_key not in st.session_state:
+                    st.session_state[ai_key] = False
+        
+                if not st.session_state[ai_key]:
+                    if st.checkbox("🧠 Show AI-style interpretation", key=ai_key):
+                        st.session_state[ai_key] = True
+        
+                if st.session_state[ai_key]:
+                    if p_val < 0.05:
+                        st.markdown(f"🧠 **Insight:** The p-value of `{p_val:.4f}` indicates a statistically significant difference from the population mean of `{pop_mean}`.")
+                    else:
+                        st.markdown(f"🧠 **Insight:** The p-value of `{p_val:.4f}` suggests no significant difference from the expected population mean.")
             else:
-                st.info("📌 Result: No significant difference")
+                st.warning("Not enough valid values to perform the test.")
+
         
         elif test_type == "Chi-square test":
             st.subheader("Chi-Square Test of Independence")
-            col1 = st.selectbox("Select first categorical column", df_sample.select_dtypes(include='object').columns, key="chi1")
-            col2 = st.selectbox("Select second categorical column", df_sample.select_dtypes(include='object').columns, key="chi2")
+            col1 = st.selectbox("Select first categorical column", df_sample.select_dtypes(include='object').columns, key="chi_col1")
+            col2 = st.selectbox("Select second categorical column", df_sample.select_dtypes(include='object').columns, key="chi_col2")
         
-            contingency = pd.crosstab(df_sample[col1], df_sample[col2])
-            chi2, p_val, dof, expected = stats.chi2_contingency(contingency)
+            if col1 != col2:
+                contingency = pd.crosstab(df_sample[col1], df_sample[col2])
+                chi2, p_val, dof, expected = stats.chi2_contingency(contingency)
         
-            st.write(f"Chi-square statistic: {chi2:.4f}")
-            st.write(f"P-value: {p_val:.4f}")
+                st.write(f"Chi-square statistic: {chi2:.4f}")
+                st.write(f"P-value: {p_val:.4f}")
+                st.write(f"Degrees of freedom: {dof}")
+                st.markdown("**Expected Frequencies:**")
+                st.dataframe(pd.DataFrame(expected, index=contingency.index, columns=contingency.columns))
         
-            if p_val < 0.05:
-                st.success(f"📌 Association found between **{col1}** and **{col2}**")
+                ai_key = f"ai_chi_{col1}_{col2}"
+                if ai_key not in st.session_state:
+                    st.session_state[ai_key] = False
+        
+                if not st.session_state[ai_key]:
+                    if st.checkbox("🧠 Show AI-style interpretation", key=ai_key):
+                        st.session_state[ai_key] = True
+        
+                if st.session_state[ai_key]:
+                    if p_val < 0.05:
+                        st.markdown(f"🧠 **Insight:** The p-value of `{p_val:.4f}` suggests a **statistically significant relationship** between **{col1}** and **{col2}**.")
+                    else:
+                        st.markdown(f"🧠 **Insight:** The p-value of `{p_val:.4f}` indicates **no significant association** between **{col1}** and **{col2}**.")
             else:
-                st.info(f"📌 No significant association between **{col1}** and **{col2}**")
+                st.warning("Please select two **different** categorical columns.")
+
 
             
 # --- Footer ---
