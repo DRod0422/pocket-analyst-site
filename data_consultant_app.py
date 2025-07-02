@@ -913,6 +913,83 @@ with tab5:
         else:
             st.warning("⚠️ Please upload and load your dataset in Tab 1.")
 
+        # Hypothesis Testing Block
+        st.markdown("---")
+        st.markdown("<h2 style='text-align: center;'>📊 Hypothesis Testing</h2>", unsafe_allow_html=True)
+        st.markdown("Use t-tests, z-tests, or chi-square to test your assumptions about the data.")
+        
+        # Choose test type
+        test_type = st.radio("Select a test type:", ["One-sample t-test", "Two-sample t-test", "Z-test", "Chi-square test"], horizontal=True)
+        
+        if test_type == "One-sample t-test":
+            st.subheader("One-Sample T-Test")
+            column = st.selectbox("Select numeric column", df_sample.select_dtypes(include='number').columns)
+            popmean = st.number_input("Enter population mean to test against", value=0.0)
+        
+            t_stat, p_val = stats.ttest_1samp(df_sample[column].dropna(), popmean)
+            st.write(f"T-statistic: {t_stat:.4f}")
+            st.write(f"P-value: {p_val:.4f}")
+        
+            if p_val < 0.05:
+                st.success("📌 Result: The difference is statistically significant (p < 0.05)")
+            else:
+                st.info("📌 Result: No significant difference found (p ≥ 0.05)")
+        
+        elif test_type == "Two-sample t-test":
+            st.subheader("Two-Sample T-Test")
+            num_col = st.selectbox("Select numeric column", df_sample.select_dtypes(include='number').columns)
+            cat_col = st.selectbox("Select a binary categorical column (2 groups only)", df_sample.select_dtypes(include='object').columns)
+        
+            unique_vals = df_sample[cat_col].dropna().unique()
+            if len(unique_vals) == 2:
+                group1 = df_sample[df_sample[cat_col] == unique_vals[0]][num_col].dropna()
+                group2 = df_sample[df_sample[cat_col] == unique_vals[1]][num_col].dropna()
+        
+                t_stat, p_val = stats.ttest_ind(group1, group2)
+                st.write(f"T-statistic: {t_stat:.4f}")
+                st.write(f"P-value: {p_val:.4f}")
+                
+                if p_val < 0.05:
+                    st.success(f"📌 Significant difference between **{unique_vals[0]}** and **{unique_vals[1]}**")
+                else:
+                    st.info(f"📌 No significant difference between **{unique_vals[0]}** and **{unique_vals[1]}**")
+            else:
+                st.warning("Please select a categorical column with exactly 2 unique values.")
+        
+        elif test_type == "Z-test":
+            st.subheader("Z-Test (Known Population Std Dev)")
+            column = st.selectbox("Select numeric column", df_sample.select_dtypes(include='number').columns)
+            popmean = st.number_input("Population mean", value=0.0)
+            popstd = st.number_input("Population standard deviation", value=1.0)
+        
+            sample = df_sample[column].dropna()
+            z_stat = (sample.mean() - popmean) / (popstd / np.sqrt(len(sample)))
+            p_val = 2 * (1 - stats.norm.cdf(abs(z_stat)))
+        
+            st.write(f"Z-statistic: {z_stat:.4f}")
+            st.write(f"P-value: {p_val:.4f}")
+        
+            if p_val < 0.05:
+                st.success("📌 Result: Statistically significant difference")
+            else:
+                st.info("📌 Result: No significant difference")
+        
+        elif test_type == "Chi-square test":
+            st.subheader("Chi-Square Test of Independence")
+            col1 = st.selectbox("Select first categorical column", df_sample.select_dtypes(include='object').columns, key="chi1")
+            col2 = st.selectbox("Select second categorical column", df_sample.select_dtypes(include='object').columns, key="chi2")
+        
+            contingency = pd.crosstab(df_sample[col1], df_sample[col2])
+            chi2, p_val, dof, expected = stats.chi2_contingency(contingency)
+        
+            st.write(f"Chi-square statistic: {chi2:.4f}")
+            st.write(f"P-value: {p_val:.4f}")
+        
+            if p_val < 0.05:
+                st.success(f"📌 Association found between **{col1}** and **{col2}**")
+            else:
+                st.info(f"📌 No significant association between **{col1}** and **{col2}**")
+
             
 # --- Footer ---
 st.markdown("---")
