@@ -123,6 +123,8 @@ with tab1:
             df_sample = df_current.sample(n=1000, random_state=42)
         else:
             df_sample = df_current
+        # ✅ Save it for use in other tabs
+        st.session_state["df_sample"] = df_sample
     
     
             
