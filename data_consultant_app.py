@@ -335,7 +335,7 @@ with tab2:
 
     # --- Smart Auto Insights ---
 with tab3:    
-            st.markdown("<h2 style='text-align: left;'>📊 Smart Auto Insights</h2>", unsafe_allow_html=True)
+            st.markdown("<h2 style='text-align: left;'>📱 Smart Auto Insights</h2>", unsafe_allow_html=True)
             st.markdown("Get an instant overview of your dataset without lifting a finger. This section auto-generates summaries, stats, and visuals for quick insight.")
             st.markdown("---")
             # --- Safety check ---
