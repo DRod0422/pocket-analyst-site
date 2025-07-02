@@ -927,19 +927,29 @@ with tab5:
             column = st.selectbox("Select numeric column", df_sample.select_dtypes(include='number').columns)
             popmean = st.number_input("Enter population mean to test against", value=0.0)
         
-            if column and df_sample[column].dropna().shape[0] > 1:
-                try:
-                    t_stat, p_val = stats.ttest_1samp(df_sample[column].dropna(), popmean)
-                    st.write(f"**T-statistic:** {t_stat:.4f}")
-                    st.write(f"**P-value:** {p_val:.4f}")
+            if column and len(df_sample[column].dropna()) > 1:
+                t_stat, p_val = stats.ttest_1samp(df_sample[column].dropna(), popmean)
+                st.write(f"T-statistic: {t_stat:.4f}")
+                st.write(f"P-value: {p_val:.4f}")
+        
+                # --- AI-style interpretation block ---
+                ai_key = f"ai_ttest_{column}_{popmean}"
+        
+                if ai_key not in st.session_state:
+                    st.session_state[ai_key] = False
+        
+                if not st.session_state[ai_key]:
+                    if st.checkbox("🧠 Show AI-style interpretation", key=ai_key):
+                        st.session_state[ai_key] = True
+        
+                if st.session_state[ai_key]:
                     if p_val < 0.05:
-                        st.success("📌 Result: The difference is statistically significant (p < 0.05)")
+                        st.markdown(f"🧠 **Insight:** The p-value of `{p_val:.4f}` indicates a statistically significant difference from the population mean of `{popmean}`. This suggests the sample mean is **likely different** than expected.")
                     else:
-                        st.info("📌 Result: No significant difference found (p ≥ 0.05)")
-                except Exception as e:
-                    st.warning(f"Something went wrong: {e}")
+                        st.markdown(f"🧠 **Insight:** The p-value of `{p_val:.4f}` suggests there is **no statistically significant difference** from the population mean of `{popmean}`. The observed difference is likely due to **random variation**.")
             else:
-                st.info("Please select a numeric column with enough data.")
+                st.warning("Please select a valid numeric column with more than 1 value.")
+
         
         elif test_type == "Two-sample t-test":
             st.subheader("Two-Sample T-Test")
