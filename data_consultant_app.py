@@ -402,9 +402,10 @@ with tab3:
                                         st.markdown(f"**{col}**")
                                         binned_col = pd.cut(df_sample[col], bins=10)
                                         counts = binned_col.value_counts().sort_index()
-                                        vc_df = pd.DataFrame({
-                                            f"{col} (binned)": counts.index.astype(str),
-                                            "Count": counts.values
+                                        # Clean bin labels by rounding left/right edges to whole numbers
+                                        clean_bin_labels = [f"{int(interval.left)}–{int(interval.right)}" for interval in counts.index]
+                                        vc_df = pd.DataFrame({f"{col} (binned)": clean_bin_labels, "Count": counts.values})
+
                                         })
                 
                                         if chart_type == "Bar (Counts)":
