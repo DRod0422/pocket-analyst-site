@@ -367,6 +367,9 @@ with tab3:
                     st.dataframe(stats_df.round(2))
                 else:
                     st.info("No numeric columns detected.")
+                    
+                #Divider
+                st.markdown("---")
         
                 st.subheader("Top Categorical Distributions")
                 cat_cols = df_sample.select_dtypes(include='object').columns.tolist()
