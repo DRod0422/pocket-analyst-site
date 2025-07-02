@@ -384,7 +384,7 @@ with tab3:
                             if i + j < len(cat_cols):
                                 col_name = cat_cols[i + j]
                                 with cols[j]:
-                                    st.markdown(f"**{col_name}** - Top Categories")
+                                    st.markdown(f"<h5 style='text-align: center;'>{col_name} - Top Categories</h5>", unsafe_allow_html=True)
                                     count_df = df_sample[col_name].value_counts().head(5).reset_index()
                                     count_df.columns = [col_name, "Count"]
                                     st.dataframe(count_df, use_container_width=True)
