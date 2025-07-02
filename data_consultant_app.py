@@ -190,14 +190,14 @@ with tab1:
                 
             # --- Divider ---
             st.markdown("---")
-            st.markdown("<h2 style='text-align: left;'>🧠 Generate AI Insights with a Click</h2>", unsafe_allow_html=True)
+            st.markdown("<h2 style='text-align: left;'>✨ Generate AI Insights with a Click</h2>", unsafe_allow_html=True)
             st.markdown("Get a quick summary of your dataset in plain English. Ideal for small business owners and analysts alike.")
 
             # Show disabled state if already run
             if st.session_state.ai_ran_once:
                 st.success("✅ AI Insights already generated for this session.")
             else:
-                if st.button("🧠 Generate AI Insights"):
+                if st.button("Generate AI Insights"):
                     with st.expander("✨ AI Quick Insights", expanded=True):
                         try:
                             st.markdown("Here's what I noticed in your data:")
