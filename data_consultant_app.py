@@ -226,7 +226,7 @@ with tab1:
 with tab2:  
         with st.sidebar:
             st.markdown("💬 **Ask about your data**")
-            st.markdown("Try asking questions like:"
+            st.markdown("Try asking questions like:")
             st.markdown("""
             - What are the key trends in this dataset?
             - What is the average sale price?
