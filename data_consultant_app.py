@@ -335,155 +335,163 @@ with tab2:
 with tab3:    
         with st.expander("Smart Auto Insights", expanded=True):
             st.markdown("Get an instant overview of your dataset without lifting a finger. This section auto-generates summaries, stats, and visuals for quick insight.")
-    
-            st.subheader("🔍 Dataset Summary")
-            st.write(f"**Shape:** {df_sample.shape[0]} rows × {df_sample.shape[1]} columns")
-            st.write("**Data Types:**")
-            st.dataframe(df_sample.dtypes)
-    
-            missing_counts = df_sample.isnull().sum()
-            missing_percent = (missing_counts / len(df_sample)) * 100
-            missing_df = pd.DataFrame({
-            'Missing Values': missing_counts,
-            'Percent Missing': missing_percent
-            }).round(2)
-            st.write("**Missing Data Overview:**")
-            st.dataframe(missing_df[missing_df['Missing Values'] > 0])
-    
-            dup_count = df_sample.duplicated().sum()
-            st.write(f"**Duplicate Rows:** {dup_count}")
-    
-            st.subheader("📈 Quick Distribution Check (Numeric Columns)")
-            numeric_cols = df_sample.select_dtypes(include=np.number).columns.tolist()
-            if numeric_cols:
-                stats_df = df_sample[numeric_cols].describe().T
-                stats_df['skew'] = df_sample[numeric_cols].skew()
-                stats_df['kurtosis'] = df_sample[numeric_cols].kurtosis()
-                st.dataframe(stats_df.round(2))
-            else:
-                st.info("No numeric columns detected.")
-    
-            st.subheader("Top Categorical Distributions")
-            cat_cols = df_sample.select_dtypes(include='object').columns.tolist()
-            for col in cat_cols[:3]:  # Show only top 3 for brevity
-                st.markdown(f"**{col}** - Top Categories")
-                st.dataframe(df_sample[col].value_counts().head(5))
-    
-              #Divider
-            st.markdown("---")
-            
-            st.subheader("🧪 Auto-Generated Chart Gallery")
-            chart_type = st.radio("Chart style:", ["Bar (Counts)", "Line (Counts)"], horizontal=True)
-            
-            # Convert float columns to rounded integers (safe for counting)
-            float_cols = df_sample.select_dtypes(include=["float"]).columns
-            for col in float_cols:
-                df_sample.loc[:, col] = df_sample[col].round().astype("Int64")
-            
-            # Recompute numeric columns after transformation
-            numeric_cols = df_sample.select_dtypes(include="number").columns.tolist()
-    
-            if numeric_cols:
-                st.markdown("Quick glance at value distributions:")
-    
-                for col in numeric_cols:
-                    st.markdown(f"**{col}**")
-                    try:
-                        # Bin the numeric column into discrete intervals before counting
-                        binned_col = pd.cut(df_sample[col], bins=10)  # You can tweak bin count if needed
-                        counts = binned_col.value_counts().sort_index()
-                        vc_df = pd.DataFrame({f"{col} (binned)": counts.index.astype(str), "Count": counts.values})
-    
-                        if chart_type == "Bar (Counts)":
-                            fig = px.bar(vc_df, x=f"{col} (binned)", y="Count", title=f"{col} - Bar Chart (Binned)")
-                        elif chart_type == "Line (Counts)":
-                            fig = px.line(vc_df, x=f"{col} (binned)", y="Count", title=f"{col} - Line Chart (Binned)")
-                        else:
-                            st.warning("Chart type not recognized.")
-                            
-                        st.plotly_chart(fig, use_container_width=True)
-                    except Exception as e:
-                        st.warning(f"Could not generate chart for {col}: {e}")
-            else:
-                st.info("No numeric columns found.")
+            # --- Safety check ---
+            if 'df_sample' in st.session_state and st.session_state['df_sample'] is not None:
+                df_sample = st.session_state['df_sample']
                 
-            #Divider
-            st.markdown("---")    
-    
-            st.subheader("Categorical Count Explorer")
-            cat_cols = df_sample.select_dtypes(include='object').columns.tolist()
-            
-            if not cat_cols:
-                st.info("No categorical columns found in your dataset.")
-            else:
-                selected_cat = st.selectbox("Select a categorical column", cat_cols)
-            
-                if selected_cat:
-                    top_n = st.slider("Limit to top N values", min_value=5, max_value=30, value=10)
-                    count_df = df_sample[selected_cat].value_counts().head(top_n).reset_index()
-                    count_df.columns = [selected_cat, "Count"]
-            
-                    chart_style = st.radio("Chart style:", ["Bar", "Pie"], horizontal=True)
-            
-                    st.dataframe(count_df)
-            
-                    if chart_style == "Bar":
-                        fig = px.bar(count_df, x=selected_cat, y="Count", title=f"Top {top_n} {selected_cat}")
-                    else:
-                        fig = px.pie(count_df, names=selected_cat, values="Count", title=f"{selected_cat} Distribution")
-            
-                    st.plotly_chart(fig, use_container_width=True)
+                st.subheader("🔍 Dataset Summary")
+                st.write(f"**Shape:** {df_sample.shape[0]} rows × {df_sample.shape[1]} columns")
+                st.write("**Data Types:**")
+                st.dataframe(df_sample.dtypes)
+        
+                missing_counts = df_sample.isnull().sum()
+                missing_percent = (missing_counts / len(df_sample)) * 100
+                missing_df = pd.DataFrame({
+                'Missing Values': missing_counts,
+                'Percent Missing': missing_percent
+                }).round(2)
+                st.write("**Missing Data Overview:**")
+                st.dataframe(missing_df[missing_df['Missing Values'] > 0])
+        
+                dup_count = df_sample.duplicated().sum()
+                st.write(f"**Duplicate Rows:** {dup_count}")
+        
+                st.subheader("📈 Quick Distribution Check (Numeric Columns)")
+                numeric_cols = df_sample.select_dtypes(include=np.number).columns.tolist()
+                if numeric_cols:
+                    stats_df = df_sample[numeric_cols].describe().T
+                    stats_df['skew'] = df_sample[numeric_cols].skew()
+                    stats_df['kurtosis'] = df_sample[numeric_cols].kurtosis()
+                    st.dataframe(stats_df.round(2))
+                else:
+                    st.info("No numeric columns detected.")
+        
+                st.subheader("Top Categorical Distributions")
+                cat_cols = df_sample.select_dtypes(include='object').columns.tolist()
+                for col in cat_cols[:3]:  # Show only top 3 for brevity
+                    st.markdown(f"**{col}** - Top Categories")
+                    st.dataframe(df_sample[col].value_counts().head(5))
+        
+                  #Divider
+                st.markdown("---")
+                
+                st.subheader("🧪 Auto-Generated Chart Gallery")
+                chart_type = st.radio("Chart style:", ["Bar (Counts)", "Line (Counts)"], horizontal=True)
+                
+                # Convert float columns to rounded integers (safe for counting)
+                float_cols = df_sample.select_dtypes(include=["float"]).columns
+                for col in float_cols:
+                    df_sample.loc[:, col] = df_sample[col].round().astype("Int64")
+                
+                # Recompute numeric columns after transformation
+                numeric_cols = df_sample.select_dtypes(include="number").columns.tolist()
+        
+                if numeric_cols:
+                    st.markdown("Quick glance at value distributions:")
+        
+                    for col in numeric_cols:
+                        st.markdown(f"**{col}**")
+                        try:
+                            # Bin the numeric column into discrete intervals before counting
+                            binned_col = pd.cut(df_sample[col], bins=10)  # You can tweak bin count if needed
+                            counts = binned_col.value_counts().sort_index()
+                            vc_df = pd.DataFrame({f"{col} (binned)": counts.index.astype(str), "Count": counts.values})
+        
+                            if chart_type == "Bar (Counts)":
+                                fig = px.bar(vc_df, x=f"{col} (binned)", y="Count", title=f"{col} - Bar Chart (Binned)")
+                            elif chart_type == "Line (Counts)":
+                                fig = px.line(vc_df, x=f"{col} (binned)", y="Count", title=f"{col} - Line Chart (Binned)")
+                            else:
+                                st.warning("Chart type not recognized.")
+                                
+                            st.plotly_chart(fig, use_container_width=True)
+                        except Exception as e:
+                            st.warning(f"Could not generate chart for {col}: {e}")
+                else:
+                    st.info("No numeric columns found.")
                     
-    
-            st.markdown("---")
-            
-            st.subheader("📸 Exportable Dashboard Snapshot (**BETA**)")
-            if st.button("📥 Generate & Download Image Summary"):
-                try:
-                    fig, axes = plt.subplots(nrows=2, ncols=2, figsize=(14, 10))
-                    axes = axes.flatten()
-            
-                    # Sample preview
-                    sns.heatmap(df_sample.head(10).isnull(), ax=axes[0], cbar=False)
-                    axes[0].set_title("Missing Values (Top 10 Rows)")
-            
-                    # First numeric chart
-                    if len(df_sample.select_dtypes(include="number").columns) > 0:
-                        col1 = df_sample.select_dtypes(include="number").columns[0]
-                        sns.histplot(df_sample[col1], ax=axes[1], kde=True)
-                        axes[1].set_title(f"Distribution: {col1}")
-            
-                    # First object chart
-                    if len(df_sample.select_dtypes(include="object").columns) > 0:
-                        col2 = df_sample.select_dtypes(include="object").columns[0]
-                        vc = df_sample[col2].value_counts().nlargest(5)
-                        sns.barplot(x=vc.values, y=vc.index, ax=axes[2])
-                        axes[2].set_title(f"Top Categories: {col2}")
-            
-                    # Forecast line (if exists)
-                    if 'forecast_df' in locals():
-                        axes[3].plot(forecast_df[date_col], forecast_df["Forecast"], marker='o')
-                        axes[3].set_title("Forecast Preview")
-                    else:
-                        axes[3].axis('off')
-            
-                    plt.tight_layout()
-            
-                    # Save to BytesIO
-                    buf = io.BytesIO()
-                    plt.savefig(buf, format="png")
-                    buf.seek(0)
-            
-                    b64 = base64.b64encode(buf.read()).decode()
-                    href = f'<a href="data:file/png;base64,{b64}" download="dashboard_snapshot.png">📥 Click to download image</a>'
-                    st.markdown(href, unsafe_allow_html=True)
-            
-                    st.success("✅ Snapshot ready!")
-                except Exception as e:
-                    st.warning(f"Something went wrong: {e}")
+                #Divider
+                st.markdown("---")    
+        
+                st.subheader("Categorical Count Explorer")
+                cat_cols = df_sample.select_dtypes(include='object').columns.tolist()
+                
+                if not cat_cols:
+                    st.info("No categorical columns found in your dataset.")
+                else:
+                    selected_cat = st.selectbox("Select a categorical column", cat_cols)
+                
+                    if selected_cat:
+                        top_n = st.slider("Limit to top N values", min_value=5, max_value=30, value=10)
+                        count_df = df_sample[selected_cat].value_counts().head(top_n).reset_index()
+                        count_df.columns = [selected_cat, "Count"]
+                
+                        chart_style = st.radio("Chart style:", ["Bar", "Pie"], horizontal=True)
+                
+                        st.dataframe(count_df)
+                
+                        if chart_style == "Bar":
+                            fig = px.bar(count_df, x=selected_cat, y="Count", title=f"Top {top_n} {selected_cat}")
+                        else:
+                            fig = px.pie(count_df, names=selected_cat, values="Count", title=f"{selected_cat} Distribution")
+                
+                        st.plotly_chart(fig, use_container_width=True)
+                        
+        
+                st.markdown("---")
+                
+                st.subheader("📸 Exportable Dashboard Snapshot (**BETA**)")
+                if st.button("📥 Generate & Download Image Summary"):
+                    try:
+                        fig, axes = plt.subplots(nrows=2, ncols=2, figsize=(14, 10))
+                        axes = axes.flatten()
+                
+                        # Sample preview
+                        sns.heatmap(df_sample.head(10).isnull(), ax=axes[0], cbar=False)
+                        axes[0].set_title("Missing Values (Top 10 Rows)")
+                
+                        # First numeric chart
+                        if len(df_sample.select_dtypes(include="number").columns) > 0:
+                            col1 = df_sample.select_dtypes(include="number").columns[0]
+                            sns.histplot(df_sample[col1], ax=axes[1], kde=True)
+                            axes[1].set_title(f"Distribution: {col1}")
+                
+                        # First object chart
+                        if len(df_sample.select_dtypes(include="object").columns) > 0:
+                            col2 = df_sample.select_dtypes(include="object").columns[0]
+                            vc = df_sample[col2].value_counts().nlargest(5)
+                            sns.barplot(x=vc.values, y=vc.index, ax=axes[2])
+                            axes[2].set_title(f"Top Categories: {col2}")
+                
+                        # Forecast line (if exists)
+                        if 'forecast_df' in locals():
+                            axes[3].plot(forecast_df[date_col], forecast_df["Forecast"], marker='o')
+                            axes[3].set_title("Forecast Preview")
+                        else:
+                            axes[3].axis('off')
+                
+                        plt.tight_layout()
+                
+                        # Save to BytesIO
+                        buf = io.BytesIO()
+                        plt.savefig(buf, format="png")
+                        buf.seek(0)
+                
+                        b64 = base64.b64encode(buf.read()).decode()
+                        href = f'<a href="data:file/png;base64,{b64}" download="dashboard_snapshot.png">📥 Click to download image</a>'
+                        st.markdown(href, unsafe_allow_html=True)
+                
+                        st.success("✅ Snapshot ready!")
+                    except Exception as e:
+                        st.warning(f"Something went wrong: {e}")
         
     # --- Guidance for ML Tools --
 with tab4:
+    if "df_sample" not in st.session_state or st.session_state["df_sample"] is None:
+        st.warning("⚠️ No dataset loaded yet. Please upload your file in Tab 1.")
+    else:
+        df_sample = st.session_state["df_sample"]
+        
         st.markdown("---")
         st.markdown("## 🔬 Forecast Modeling & Advanced Analysis")
         st.info(
@@ -677,105 +685,109 @@ with tab5:
         st.markdown("---")
         st.markdown("## Data Science & Machine Learning Modeling")
         st.info("This section includes advanced machine learning tools for data scientists and experienced analysts.")
+
+        if "df_sample" not in st.session_state or st.session_state["df_sample"] is None:
+            st.warning("⚠️ No dataset loaded yet. Please upload your file in Tab 1.")
+        else:
+            df_sample = st.session_state["df_sample"]
     
         # --- Advanced Data Scientist Tools (Expandable Section) ---
-        with st.expander("🔬 Data Scientist Tools (Pro Preview) *Beta* ", expanded=False):
-        
-            data_for_modeling = st.session_state.get("normalized_data", df_sample)
-        
-            if uploaded_file is not None:
-                try:
-                    numeric_cols = data_for_modeling.select_dtypes(include="number").columns.tolist()
-        
-                    if len(numeric_cols) < 2:
-                        st.warning("Not enough numeric columns to run advanced models.")
-                    else:
-                        target_col = st.selectbox("🎯 Select a target column", numeric_cols)
-                        features = [col for col in numeric_cols if col != target_col]
-                        st.write(f"📊 Using {len(features)} features to predict **{target_col}**")
-        
-                        if st.checkbox("📘 What This Model Does"):
-                            st.markdown("""
-                            _[Your explanation content]_
-                            """)
-        
-                        if st.button("🌲 Run Random Forest Model"):
-                            try:
-                                # 🛠️ Hyperparameters
-                                st.sidebar.header("🛠️ Model Settings")
-                                n_estimators = st.sidebar.slider("Number of Trees (n_estimators)", 10, 500, 100, step=10)
-                                max_depth = st.sidebar.slider("Max Depth", 1, 50, 10)
-                                min_samples_split = st.sidebar.slider("Min Samples Split", 2, 20, 5)
-                                min_samples_leaf = st.sidebar.slider("Min Samples Leaf", 1, 20, 2)
-        
-                                # 📊 Data prep
-                                X = data_for_modeling[features]
-                                y = data_for_modeling[target_col]
-                                X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-        
-                                # 🌲 Train model
-                                model = RandomForestRegressor(
-                                    n_estimators=n_estimators,
-                                    max_depth=max_depth,
-                                    min_samples_split=min_samples_split,
-                                    min_samples_leaf=min_samples_leaf,
-                                    max_features='sqrt',
-                                    random_state=42,
-                                    n_jobs=-1
-                                )
-                                model.fit(X_train, y_train)
-        
-                                # 🔍 Feature Importances
-                                importances = model.feature_importances_
-                                feature_df = pd.DataFrame({
-                                    "Feature": features,
-                                    "Importance": importances
-                                }).sort_values(by="Importance", ascending=False)
-                                st.subheader("🔍 Feature Importances")
-                                st.dataframe(feature_df)
-                                fig = px.bar(feature_df, x="Feature", y="Importance", title="Feature Importance (Random Forest)")
-                                st.plotly_chart(fig)
-        
-                                # 🎯 Predictions
-                                y_pred = model.predict(X_test)
-                                sample_df = pd.DataFrame({
-                                    "Actual": y_test.values,
-                                    "Predicted": y_pred
-                                }).reset_index(drop=True)
-                                st.subheader("🎯 Prediction Samples (Actual vs. Predicted)")
-                                st.dataframe(sample_df.head(10))
-        
-                                # 📈 Metrics
-                                mae = mean_absolute_error(y_test, y_pred)
-                                rmse = np.sqrt(mean_squared_error(y_test, y_pred))
-                                r2 = r2_score(y_test, y_pred)
-                                st.subheader("📈 Model Performance Metrics")
-                                st.markdown(f"- **MAE:** `{mae:.2f}`")
-                                st.markdown(f"- **RMSE:** `{rmse:.2f}`")
-                                st.markdown(f"- **R² Score:** `{r2:.2f}`")
-        
-                                # 🔁 Cross-validation
-                                with st.spinner("Running 5-fold Cross-Validation..."):
-                                    cv_score = cross_val_score(model, X, y, cv=5, scoring='r2').mean()
-                                st.markdown(f"- **Cross-Validated R² Score:** `{cv_score:.2f}`")
-        
-                                # ⚠️ Warnings
-                                st.subheader("⚠️ Model Diagnostic")
-                                if r2 < 0.2:
-                                    st.warning("Model R² is low.")
-                                elif r2 > 0.9 and (r2 - cv_score) > 0.1:
-                                    st.warning("Possible overfitting.")
-        
-                                st.success("Random Forest model completed!")
-        
-                            except Exception as e:
-                                st.error(f"❌ Error running model: {e}")
-        
-                except Exception as e:
-                    st.error(f"❌ Error preparing data: {e}")
-        
-            else:
-                st.info("Please upload a file to get started.")
+            with st.expander("🔬 Data Scientist Tools (Pro Preview) *Beta* ", expanded=False):
+                data_for_modeling = st.session_state.get("normalized_data", df_sample)
+            
+                if uploaded_file is not None:
+                    try:
+                        numeric_cols = data_for_modeling.select_dtypes(include="number").columns.tolist()
+            
+                        if len(numeric_cols) < 2:
+                            st.warning("Not enough numeric columns to run advanced models.")
+                        else:
+                            target_col = st.selectbox("🎯 Select a target column", numeric_cols)
+                            features = [col for col in numeric_cols if col != target_col]
+                            st.write(f"📊 Using {len(features)} features to predict **{target_col}**")
+            
+                            if st.checkbox("📘 What This Model Does"):
+                                st.markdown("""
+                                _[Your explanation content]_
+                                """)
+            
+                            if st.button("🌲 Run Random Forest Model"):
+                                try:
+                                    # 🛠️ Hyperparameters
+                                    st.sidebar.header("🛠️ Model Settings")
+                                    n_estimators = st.sidebar.slider("Number of Trees (n_estimators)", 10, 500, 100, step=10)
+                                    max_depth = st.sidebar.slider("Max Depth", 1, 50, 10)
+                                    min_samples_split = st.sidebar.slider("Min Samples Split", 2, 20, 5)
+                                    min_samples_leaf = st.sidebar.slider("Min Samples Leaf", 1, 20, 2)
+            
+                                    # 📊 Data prep
+                                    X = data_for_modeling[features]
+                                    y = data_for_modeling[target_col]
+                                    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+            
+                                    # 🌲 Train model
+                                    model = RandomForestRegressor(
+                                        n_estimators=n_estimators,
+                                        max_depth=max_depth,
+                                        min_samples_split=min_samples_split,
+                                        min_samples_leaf=min_samples_leaf,
+                                        max_features='sqrt',
+                                        random_state=42,
+                                        n_jobs=-1
+                                    )
+                                    model.fit(X_train, y_train)
+            
+                                    # 🔍 Feature Importances
+                                    importances = model.feature_importances_
+                                    feature_df = pd.DataFrame({
+                                        "Feature": features,
+                                        "Importance": importances
+                                    }).sort_values(by="Importance", ascending=False)
+                                    st.subheader("🔍 Feature Importances")
+                                    st.dataframe(feature_df)
+                                    fig = px.bar(feature_df, x="Feature", y="Importance", title="Feature Importance (Random Forest)")
+                                    st.plotly_chart(fig)
+            
+                                    # 🎯 Predictions
+                                    y_pred = model.predict(X_test)
+                                    sample_df = pd.DataFrame({
+                                        "Actual": y_test.values,
+                                        "Predicted": y_pred
+                                    }).reset_index(drop=True)
+                                    st.subheader("🎯 Prediction Samples (Actual vs. Predicted)")
+                                    st.dataframe(sample_df.head(10))
+            
+                                    # 📈 Metrics
+                                    mae = mean_absolute_error(y_test, y_pred)
+                                    rmse = np.sqrt(mean_squared_error(y_test, y_pred))
+                                    r2 = r2_score(y_test, y_pred)
+                                    st.subheader("📈 Model Performance Metrics")
+                                    st.markdown(f"- **MAE:** `{mae:.2f}`")
+                                    st.markdown(f"- **RMSE:** `{rmse:.2f}`")
+                                    st.markdown(f"- **R² Score:** `{r2:.2f}`")
+            
+                                    # 🔁 Cross-validation
+                                    with st.spinner("Running 5-fold Cross-Validation..."):
+                                        cv_score = cross_val_score(model, X, y, cv=5, scoring='r2').mean()
+                                    st.markdown(f"- **Cross-Validated R² Score:** `{cv_score:.2f}`")
+            
+                                    # ⚠️ Warnings
+                                    st.subheader("⚠️ Model Diagnostic")
+                                    if r2 < 0.2:
+                                        st.warning("Model R² is low.")
+                                    elif r2 > 0.9 and (r2 - cv_score) > 0.1:
+                                        st.warning("Possible overfitting.")
+            
+                                    st.success("Random Forest model completed!")
+            
+                                except Exception as e:
+                                    st.error(f"❌ Error running model: {e}")
+            
+                    except Exception as e:
+                        st.error(f"❌ Error preparing data: {e}")
+            
+                else:
+                    st.info("Please upload a file to get started.")
 
             
 # --- Footer ---
