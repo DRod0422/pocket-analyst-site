@@ -232,7 +232,7 @@ with tab2:
             - Which month had the highest revenue?
             - What insights can you provide from this data?
             """)
-            
+                
         # --- Chat Section ---
         user_question = st.text_input("Ask a question about your data:")
     
