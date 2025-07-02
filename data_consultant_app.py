@@ -378,16 +378,30 @@ with tab3:
                     st.info("No categorical columns found in your dataset.")
                 else:
                     for i in range(0, len(cat_cols), 2):
-                        cols = st.columns(2)  # Two side-by-side columns
+                        cols = st.columns(2)
                 
                         for j in range(2):
                             if i + j < len(cat_cols):
                                 col_name = cat_cols[i + j]
                                 with cols[j]:
+                                    # Centered section title
                                     st.markdown(f"<h5 style='text-align: center;'>{col_name} - Top Categories</h5>", unsafe_allow_html=True)
+                
+                                    # Get value counts
                                     count_df = df_sample[col_name].value_counts().head(5).reset_index()
                                     count_df.columns = [col_name, "Count"]
-                                    st.dataframe(count_df, use_container_width=True)
+                
+                                    # Create pie chart
+                                    fig = px.pie(
+                                        count_df,
+                                        names=col_name,
+                                        values="Count",
+                                        title="",  # Remove Plotly's default title
+                                        hole=0.3  # Optional: donut style
+                                    )
+                                    fig.update_layout(margin=dict(t=10, b=10), height=300)
+                
+                                    st.plotly_chart(fig, use_container_width=True)
         
                   #Divider
                 st.markdown("---")
