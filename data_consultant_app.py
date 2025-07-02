@@ -867,6 +867,48 @@ with tab5:
         
             else:
                 st.info("Please upload a file to get started.")
+                
+        # --- Core Statistical Summary ---
+        st.markdown("---")
+        st.markdown("## 🧮 Core Statistical Summary", unsafe_allow_html=True)
+        st.markdown("This section provides a statistical overview of your dataset, including central tendencies, spread, and distribution shape.")
+        
+        if "df_sample" in st.session_state and st.session_state["df_sample"] is not None:
+            df_stats = st.session_state["df_sample"]
+            numeric_cols = df_stats.select_dtypes(include=["number"]).columns.tolist()
+        
+            if numeric_cols:
+                st.markdown("### 📊 Descriptive Stats (Mean, Median, Std Dev, etc.)")
+        
+                # Compute summary stats
+                desc_df = df_stats[numeric_cols].describe().T
+                desc_df["iqr"] = df_stats[numeric_cols].quantile(0.75) - df_stats[numeric_cols].quantile(0.25)
+                desc_df["skew"] = df_stats[numeric_cols].skew()
+                desc_df["kurtosis"] = df_stats[numeric_cols].kurtosis()
+        
+                desc_df = desc_df.rename(columns={
+                    "mean": "Mean", "50%": "Median", "std": "Std Dev", "min": "Min", 
+                    "max": "Max", "iqr": "IQR", "skew": "Skew", "kurtosis": "Kurtosis"
+                })
+        
+                st.dataframe(desc_df[["Mean", "Median", "Std Dev", "Min", "Max", "IQR", "Skew", "Kurtosis"]].round(2))
+        
+                # Optional AI-style interpretation
+                if st.checkbox("🤖 Explain Stats with AI-style Insight"):
+                    for col in numeric_cols[:5]:  # Limit for brevity
+                        skew = df_stats[col].skew()
+                        if skew > 1:
+                            note = "right-skewed (long tail to the right)"
+                        elif skew < -1:
+                            note = "left-skewed (long tail to the left)"
+                        else:
+                            note = "fairly symmetrical"
+        
+                        st.markdown(f"**{col}** is *{note}* with a skewness of `{skew:.2f}`.")
+            else:
+                st.info("No numeric columns found for statistical summary.")
+        else:
+            st.warning("⚠️ Please upload and load your dataset in Tab 1.")
 
             
 # --- Footer ---
