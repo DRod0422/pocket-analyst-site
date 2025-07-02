@@ -234,8 +234,7 @@ with tab2:
         # --- Chat Section ---
         user_question = st.text_input("Ask a question about your data:")
     
-        # --- Light Sampling for Large Files ---
-            
+        # --- Light Sampling for Large Files ---    
         if len(df_clean) > 5000:
             st.warning(f"Large dataset detected ({len(df_sample)} rows). Sampling 1000 rows for efficiency.")
             df_sample = df_sample.sample(n=1000, random_state=42)
