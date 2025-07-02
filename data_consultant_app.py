@@ -926,14 +926,17 @@ with tab5:
             column = st.selectbox("Select numeric column", df_sample.select_dtypes(include='number').columns)
             popmean = st.number_input("Enter population mean to test against", value=0.0)
         
-            t_stat, p_val = stats.ttest_1samp(df_sample[column].dropna(), popmean)
-            st.write(f"T-statistic: {t_stat:.4f}")
-            st.write(f"P-value: {p_val:.4f}")
+            if column and len(df_sample[column].dropna()) > 1:
+                t_stat, p_val = stats.ttest_1samp(df_sample[column].dropna(), popmean)
+                st.write(f"T-statistic: {t_stat:.4f}")
+                st.write(f"P-value: {p_val:.4f}")
         
-            if p_val < 0.05:
-                st.success("📌 Result: The difference is statistically significant (p < 0.05)")
+                if p_val < 0.05:
+                    st.success("📌 Result: The difference is statistically significant (p < 0.05)")
+                else:
+                    st.info("📌 Result: No significant difference found (p ≥ 0.05)")
             else:
-                st.info("📌 Result: No significant difference found (p ≥ 0.05)")
+                st.warning("Please select a valid numeric column with more than 1 value.")
         
         elif test_type == "Two-sample t-test":
             st.subheader("Two-Sample T-Test")
