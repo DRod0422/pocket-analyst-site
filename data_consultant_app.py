@@ -341,7 +341,7 @@ with tab3:
             if 'df_sample' in st.session_state and st.session_state['df_sample'] is not None:
                 df_sample = st.session_state['df_sample']
                 
-                st.subheader("🔍 Dataset Summary")
+                st.markdown("<h3 style='text-align: center;'>🔍 Dataset Summary</h3>", unsafe_allow_html=True)
                 st.write(f"**Shape:** {df_sample.shape[0]} rows × {df_sample.shape[1]} columns")
                 st.write("**Data Types:**")
                 st.dataframe(df_sample.dtypes)
@@ -358,7 +358,7 @@ with tab3:
                 dup_count = df_sample.duplicated().sum()
                 st.write(f"**Duplicate Rows:** {dup_count}")
         
-                st.subheader("📈 Quick Distribution Check (Numeric Columns)")
+                st.markdown("<h3 style='text-align: center;'>📈 Quick Distribution Check (Numeric Columns)</h3>", unsafe_allow_html=True)
                 numeric_cols = df_sample.select_dtypes(include=np.number).columns.tolist()
                 if numeric_cols:
                     stats_df = df_sample[numeric_cols].describe().T
