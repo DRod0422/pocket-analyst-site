@@ -34,6 +34,15 @@ st.set_page_config(
 st.title("🤖 AI Pocket Analyst")
 st.caption("Upload your file. Ask questions. Predict outcomes. Get insights.")
 
+# --- Tabs Layout ---
+tab1, tab2, tab3, tab4, tab5 = st.tabs([
+    "📁 Upload & Clean Data", 
+    "📊 Quick Analysis", 
+    "🤖 AI Assistant", 
+    "📈 Forecasting", 
+    "📐 Statistical Tools"
+])
+
 # --- Chart Type Detector ---
 def detect_chart_type_and_columns(question, df):
     q = question.lower()
@@ -467,6 +476,7 @@ if uploaded_file:
                 st.warning(f"Something went wrong: {e}")
         
     # --- Guidance for ML Tools --
+with tab1:
     st.markdown("---")
     st.markdown("## 🔬 Forecast Modeling & Advanced Analysis")
     st.info(
@@ -656,6 +666,7 @@ if uploaded_file:
             st.pyplot(fig)
 
     # --- Divider ---
+with tab2:
     st.markdown("---")
     st.markdown("## Data Science & Machine Learning Modeling")
     st.info("This section includes advanced machine learning tools for data scientists and experienced analysts.")
@@ -758,7 +769,6 @@ if uploaded_file:
     
         else:
             st.info("Please upload a file to get started.")
-
 
             
 # --- Footer ---
