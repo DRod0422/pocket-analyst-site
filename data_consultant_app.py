@@ -311,22 +311,22 @@ with tab2:
             st.warning("Please upload and clean your dataset first in Tab 1.")
               
     
-        # --- Optional Chart Builder ---
-        with st.expander("🛠️ Create a Custom Chart (optional)"):
-            chart_type = st.selectbox("Chart Type", ["Bar", "Line", "Scatter"])
-            x_col = st.selectbox("Select X-axis column", options=df_sample.columns)
-            y_col = st.selectbox("Select Y-axis column", options=df_sample.columns)
-            if st.button("Generate Custom Chart"):
-                try:
-                    if chart_type == "Bar":
-                        fig = px.bar(df_sample, x=x_col, y=y_col)
-                    elif chart_type == "Line":
-                        fig = px.line(df_sample, x=x_col, y=y_col)
-                    elif chart_type == "Scatter":
-                        fig = px.scatter(df_sample, x=x_col, y=y_col)
-                    st.plotly_chart(fig)
-                except Exception as e:
-                    st.error(f"Chart creation failed: {e}")
+        # # --- Optional Chart Builder ---
+        # with st.expander("🛠️ Create a Custom Chart (optional)"):
+        #     chart_type = st.selectbox("Chart Type", ["Bar", "Line", "Scatter"])
+        #     x_col = st.selectbox("Select X-axis column", options=df_sample.columns)
+        #     y_col = st.selectbox("Select Y-axis column", options=df_sample.columns)
+        #     if st.button("Generate Custom Chart"):
+        #         try:
+        #             if chart_type == "Bar":
+        #                 fig = px.bar(df_sample, x=x_col, y=y_col)
+        #             elif chart_type == "Line":
+        #                 fig = px.line(df_sample, x=x_col, y=y_col)
+        #             elif chart_type == "Scatter":
+        #                 fig = px.scatter(df_sample, x=x_col, y=y_col)
+        #             st.plotly_chart(fig)
+        #         except Exception as e:
+        #             st.error(f"Chart creation failed: {e}")
                 
         # --- Divider --
         st.markdown("---")            
