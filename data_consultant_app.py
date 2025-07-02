@@ -40,7 +40,7 @@ tab1, tab2, tab3, tab4, tab5 = st.tabs([
     "🤖 AI Assistant",                         #📊 Quick Analysis
     "📊 Quick Analysis", 
     "📈 Forecasting", 
-    "📐 Statistical Tools"
+    "📐 Data Science & Statistical Tools"
 ])
 
 # --- Chart Type Detector ---
