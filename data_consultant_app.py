@@ -11,6 +11,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import plotly.express as px
 from utils import clean_and_format_data
+import pingouin as pg
 
 from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import MinMaxScaler
