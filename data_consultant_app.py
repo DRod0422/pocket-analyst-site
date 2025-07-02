@@ -771,102 +771,105 @@ with tab5:
                 st.warning("⚠️ Normalized dataset not found. Please normalize your data in Tab 1 for better model performance.")
     
         # --- Advanced Data Scientist Tools (Expandable Section) ---
-        with st.expander("🔬 Data Scientist Tools (Pro Preview) *Beta* ", expanded=False):
-            data_for_modeling = st.session_state.get("normalized_data", df_sample)
-        
-            if uploaded_file is not None:
-                try:
-                    numeric_cols = data_for_modeling.select_dtypes(include="number").columns.tolist()
-        
-                    if len(numeric_cols) < 2:
-                        st.warning("Not enough numeric columns to run advanced models.")
-                    else:
-                        target_col = st.selectbox("🎯 Select a target column", numeric_cols)
-                        features = [col for col in numeric_cols if col != target_col]
-                        st.write(f"📊 Using {len(features)} features to predict **{target_col}**")
-        
-                        if st.checkbox("📘 What This Model Does"):
-                            st.markdown("""
-                            _[Your explanation content]_
-                            """)
-        
-                        if st.button("🌲 Run Random Forest Model"):
-                            try:
-                                # 🛠️ Hyperparameters
-                                st.sidebar.header("🛠️ Model Settings")
-                                n_estimators = st.sidebar.slider("Number of Trees (n_estimators)", 10, 500, 100, step=10)
-                                max_depth = st.sidebar.slider("Max Depth", 1, 50, 10)
-                                min_samples_split = st.sidebar.slider("Min Samples Split", 2, 20, 5)
-                                min_samples_leaf = st.sidebar.slider("Min Samples Leaf", 1, 20, 2)
-        
-                                # 📊 Data prep
-                                X = data_for_modeling[features]
-                                y = data_for_modeling[target_col]
-                                X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-        
-                                # 🌲 Train model
-                                model = RandomForestRegressor(
-                                    n_estimators=n_estimators,
-                                    max_depth=max_depth,
-                                    min_samples_split=min_samples_split,
-                                    min_samples_leaf=min_samples_leaf,
-                                    max_features='sqrt',
-                                    random_state=42,
-                                    n_jobs=-1
-                                )
-                                model.fit(X_train, y_train)
-        
-                                # 🔍 Feature Importances
-                                importances = model.feature_importances_
-                                feature_df = pd.DataFrame({
-                                    "Feature": features,
-                                    "Importance": importances
-                                }).sort_values(by="Importance", ascending=False)
-                                st.subheader("🔍 Feature Importances")
-                                st.dataframe(feature_df)
-                                fig = px.bar(feature_df, x="Feature", y="Importance", title="Feature Importance (Random Forest)")
-                                st.plotly_chart(fig)
-        
-                                # 🎯 Predictions
-                                y_pred = model.predict(X_test)
-                                sample_df = pd.DataFrame({
-                                    "Actual": y_test.values,
-                                    "Predicted": y_pred
-                                }).reset_index(drop=True)
-                                st.subheader("🎯 Prediction Samples (Actual vs. Predicted)")
-                                st.dataframe(sample_df.head(10))
-        
-                                # 📈 Metrics
-                                mae = mean_absolute_error(y_test, y_pred)
-                                rmse = np.sqrt(mean_squared_error(y_test, y_pred))
-                                r2 = r2_score(y_test, y_pred)
-                                st.subheader("📈 Model Performance Metrics")
-                                st.markdown(f"- **MAE:** `{mae:.2f}`")
-                                st.markdown(f"- **RMSE:** `{rmse:.2f}`")
-                                st.markdown(f"- **R² Score:** `{r2:.2f}`")
-        
-                                # 🔁 Cross-validation
-                                with st.spinner("Running 5-fold Cross-Validation..."):
-                                    cv_score = cross_val_score(model, X, y, cv=5, scoring='r2').mean()
-                                st.markdown(f"- **Cross-Validated R² Score:** `{cv_score:.2f}`")
-        
-                                # ⚠️ Warnings
-                                st.subheader("⚠️ Model Diagnostic")
-                                if r2 < 0.2:
-                                    st.warning("Model R² is low.")
-                                elif r2 > 0.9 and (r2 - cv_score) > 0.1:
-                                    st.warning("Possible overfitting.")
-        
-                                st.success("Random Forest model completed!")
-        
-                            except Exception as e:
-                                st.error(f"❌ Error running model: {e}")
-        
-                except Exception as e:
-                    st.error(f"❌ Error preparing data: {e}")
-        
-            else:
-                st.info("Please upload a file to get started.")
+        # --- ML Section Header ---
+        st.markdown("## 🔬 Data Scientist Tools (Pro Preview) *Beta*")
+        st.markdown("Use normalized data or raw cleaned data for training machine learning models like Random Forests.")
+
+        data_for_modeling = st.session_state.get("normalized_data", df_sample)
+    
+        if uploaded_file is not None:
+            try:
+                numeric_cols = data_for_modeling.select_dtypes(include="number").columns.tolist()
+    
+                if len(numeric_cols) < 2:
+                    st.warning("Not enough numeric columns to run advanced models.")
+                else:
+                    target_col = st.selectbox("🎯 Select a target column", numeric_cols)
+                    features = [col for col in numeric_cols if col != target_col]
+                    st.write(f"📊 Using {len(features)} features to predict **{target_col}**")
+    
+                    if st.checkbox("📘 What This Model Does"):
+                        st.markdown("""
+                        _[Your explanation content]_
+                        """)
+    
+                    if st.button("🌲 Run Random Forest Model"):
+                        try:
+                            # 🛠️ Hyperparameters
+                            st.sidebar.header("🛠️ Model Settings")
+                            n_estimators = st.sidebar.slider("Number of Trees (n_estimators)", 10, 500, 100, step=10)
+                            max_depth = st.sidebar.slider("Max Depth", 1, 50, 10)
+                            min_samples_split = st.sidebar.slider("Min Samples Split", 2, 20, 5)
+                            min_samples_leaf = st.sidebar.slider("Min Samples Leaf", 1, 20, 2)
+    
+                            # 📊 Data prep
+                            X = data_for_modeling[features]
+                            y = data_for_modeling[target_col]
+                            X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+    
+                            # 🌲 Train model
+                            model = RandomForestRegressor(
+                                n_estimators=n_estimators,
+                                max_depth=max_depth,
+                                min_samples_split=min_samples_split,
+                                min_samples_leaf=min_samples_leaf,
+                                max_features='sqrt',
+                                random_state=42,
+                                n_jobs=-1
+                            )
+                            model.fit(X_train, y_train)
+    
+                            # 🔍 Feature Importances
+                            importances = model.feature_importances_
+                            feature_df = pd.DataFrame({
+                                "Feature": features,
+                                "Importance": importances
+                            }).sort_values(by="Importance", ascending=False)
+                            st.subheader("🔍 Feature Importances")
+                            st.dataframe(feature_df)
+                            fig = px.bar(feature_df, x="Feature", y="Importance", title="Feature Importance (Random Forest)")
+                            st.plotly_chart(fig)
+    
+                            # 🎯 Predictions
+                            y_pred = model.predict(X_test)
+                            sample_df = pd.DataFrame({
+                                "Actual": y_test.values,
+                                "Predicted": y_pred
+                            }).reset_index(drop=True)
+                            st.subheader("🎯 Prediction Samples (Actual vs. Predicted)")
+                            st.dataframe(sample_df.head(10))
+    
+                            # 📈 Metrics
+                            mae = mean_absolute_error(y_test, y_pred)
+                            rmse = np.sqrt(mean_squared_error(y_test, y_pred))
+                            r2 = r2_score(y_test, y_pred)
+                            st.subheader("📈 Model Performance Metrics")
+                            st.markdown(f"- **MAE:** `{mae:.2f}`")
+                            st.markdown(f"- **RMSE:** `{rmse:.2f}`")
+                            st.markdown(f"- **R² Score:** `{r2:.2f}`")
+    
+                            # 🔁 Cross-validation
+                            with st.spinner("Running 5-fold Cross-Validation..."):
+                                cv_score = cross_val_score(model, X, y, cv=5, scoring='r2').mean()
+                            st.markdown(f"- **Cross-Validated R² Score:** `{cv_score:.2f}`")
+    
+                            # ⚠️ Warnings
+                            st.subheader("⚠️ Model Diagnostic")
+                            if r2 < 0.2:
+                                st.warning("Model R² is low.")
+                            elif r2 > 0.9 and (r2 - cv_score) > 0.1:
+                                st.warning("Possible overfitting.")
+    
+                            st.success("Random Forest model completed!")
+    
+                        except Exception as e:
+                            st.error(f"❌ Error running model: {e}")
+    
+            except Exception as e:
+                st.error(f"❌ Error preparing data: {e}")
+    
+        else:
+            st.info("Please upload a file to get started.")
                 
         # --- Core Statistical Summary ---
         st.markdown("---")
