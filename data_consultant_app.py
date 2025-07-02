@@ -331,7 +331,7 @@ with tab2:
         #             st.error(f"Chart creation failed: {e}")
                 
         # --- Divider --
-        st.markdown("---")            
+        #st.markdown("---")            
 
     # --- Smart Auto Insights ---
 with tab3:    
