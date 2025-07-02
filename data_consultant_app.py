@@ -135,55 +135,58 @@ with tab1:
         # --Divider--
         st.markdown("---")
         
+    
         # --- Normalize Data ---
-            st.markdown("<h2 style='text-align: left;'>🧹 Data Normalization & Encoding</h2>", unsafe_allow_html=True)
-            st.markdown("""
-            Prepare your dataset for analysis by normalizing numeric values and encoding categories.
-            
-            - **One-hot encoding**: Converts categories into numeric flags.
-            - **Normalization**: Scales numbers between 0 and 1.
-            - Optionally: Drop columns manually before running ML models.
-            """)
-            
-            drop_columns = st.multiselect("Optional: Drop Columns Before Processing", df_clean.columns.tolist())
-    
-            # Select scaler
-            scaler_choice = st.selectbox(
-                "Choose a normalization method:",
-                ("MinMaxScaler", "StandardScaler", "RobustScaler")
-            )
-    
-            skip_scaling = st.checkbox("⚠️ Skip normalization (my data is already scaled)")
-            
-            normalize_data = st.button("⚙️ Normalize & Encode Dataset")
-    
-            if normalize_data:
-                from sklearn.preprocessing import MinMaxScaler, StandardScaler, RobustScaler
+        st.markdown("---")
+        st.markdown("<h2 style='text-align: center;'>🧹 Data Normalization & Encoding</h2>", unsafe_allow_html=True)
+        st.markdown("""
+        <div style='text-align: center;'>
+        Prepare your dataset for analysis by normalizing numeric values and encoding categories.
+        </div>
         
-                # Prepare base dataframe
-                df_encoded = df_clean.drop(columns=drop_columns) if drop_columns else df_clean.copy()
+        - **One-hot encoding**: Converts categories into numeric flags  
+        - **Normalization**: Scales numbers between 0 and 1  
+        - Optionally: Drop columns manually before running ML models
+        """, unsafe_allow_html=True)
         
-                # One-hot encode categoricals
-                df_encoded = pd.get_dummies(df_encoded, drop_first=True)
+        drop_columns = st.multiselect("Optional: Drop Columns Before Processing", df_clean.columns.tolist())
         
-                # Normalize numeric columns if not skipped
-                numeric_cols = df_encoded.select_dtypes(include=["int64", "float64"]).columns
+        # Select scaler
+        scaler_choice = st.selectbox(
+            "Choose a normalization method:",
+            ("MinMaxScaler", "StandardScaler", "RobustScaler")
+        )
         
-                if not skip_scaling and len(numeric_cols) > 0:
-                    if scaler_choice == "MinMaxScaler":
-                        scaler = MinMaxScaler()
-                    elif scaler_choice == "StandardScaler":
-                        scaler = StandardScaler()
-                    else:
-                        scaler = RobustScaler()
+        skip_scaling = st.checkbox("⚠️ Skip normalization (my data is already scaled)")
         
-                    df_encoded[numeric_cols] = scaler.fit_transform(df_encoded[numeric_cols])
-            
-                # Store it in session state
-                st.session_state["normalized_data"] = df_encoded
-            
-                st.success("✅ Dataset normalized and one-hot encoded!")
-                st.dataframe(df_encoded.head())
+        normalize_data = st.button("⚙️ Normalize & Encode Dataset")
+        
+        if normalize_data:
+            from sklearn.preprocessing import MinMaxScaler, StandardScaler, RobustScaler
+        
+            # Prepare base dataframe
+            df_encoded = df_clean.drop(columns=drop_columns) if drop_columns else df_clean.copy()
+        
+            # One-hot encode categoricals
+            df_encoded = pd.get_dummies(df_encoded, drop_first=True)
+        
+            # Normalize numeric columns if not skipped
+            numeric_cols = df_encoded.select_dtypes(include=["int64", "float64"]).columns
+        
+            if not skip_scaling and len(numeric_cols) > 0:
+                scaler = {
+                    "MinMaxScaler": MinMaxScaler(),
+                    "StandardScaler": StandardScaler(),
+                    "RobustScaler": RobustScaler()
+                }[scaler_choice]
+        
+                df_encoded[numeric_cols] = scaler.fit_transform(df_encoded[numeric_cols])
+        
+            # Store it in session state
+            st.session_state["normalized_data"] = df_encoded
+        
+            st.success("✅ Dataset normalized and one-hot encoded!")
+            st.dataframe(df_encoded.head())
     
         
         # --- Quick AI Insights block ---
