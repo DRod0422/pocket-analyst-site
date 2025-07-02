@@ -324,8 +324,8 @@ with tab2:
                 except Exception as e:
                     st.error(f"Chart creation failed: {e}")
                 
-    # --- Divider --
-    st.markdown("---")            
+        # --- Divider --
+        st.markdown("---")            
 
     # --- Smart Auto Insights ---
 with tab3:    
