@@ -182,7 +182,10 @@ with tab1:
                 st.success("✅ Dataset normalized and one-hot encoded!")
                 st.dataframe(df_encoded.head())
     
-                
+        #---Divider ---
+        st.markdown("---")
+        st.markdown("## Generate AI Insights with a click of a button")
+        
         # --- Quick AI Insights block ---
         if uploaded_file:
             if "ai_ran_once" not in st.session_state:
