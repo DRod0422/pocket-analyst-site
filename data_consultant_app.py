@@ -405,8 +405,6 @@ with tab3:
                                         # Clean bin labels by rounding left/right edges to whole numbers
                                         clean_bin_labels = [f"{int(interval.left)}–{int(interval.right)}" for interval in counts.index]
                                         vc_df = pd.DataFrame({f"{col} (binned)": clean_bin_labels, "Count": counts.values})
-
-                                        })
                 
                                         if chart_type == "Bar (Counts)":
                                             fig = px.bar(vc_df, x=f"{col} (binned)", y="Count", title=f"{col}")
