@@ -371,7 +371,7 @@ with tab3:
                 #Divider
                 st.markdown("---")
         
-                st.subheader("Top Categorical Distributions")
+                st.markdown("<h3 style='text-align: center;'>Top Categorical Distributions</h3>", unsafe_allow_html=True)
                 cat_cols = df_sample.select_dtypes(include='object').columns.tolist()
 
                 if not cat_cols:
@@ -406,7 +406,7 @@ with tab3:
                   #Divider
                 st.markdown("---")
                 
-                st.subheader("🧪 Auto-Generated Chart Gallery")
+                st.markdown("<h3 style='text-align: center;'>🧪 Auto-Generated Chart Gallery</h3>", unsafe_allow_html=True)
                 chart_type = st.radio("Chart style:", ["Bar (Counts)", "Line (Counts)"], horizontal=True)
                 
                 # Convert float columns to rounded integers (safe for counting)
@@ -465,7 +465,7 @@ with tab3:
                 #Divider
                 st.markdown("---")    
         
-                st.subheader("Categorical Count Explorer")
+                st.markdown("<h3 style='text-align: center;'>Categorical Count Explorer</h3>", unsafe_allow_html=True)
                 cat_cols = df_sample.select_dtypes(include='object').columns.tolist()
                 
                 if not cat_cols:
