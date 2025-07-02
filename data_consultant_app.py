@@ -224,7 +224,7 @@ with tab1:
 
     # --- Go-By Suggestions ---
 with tab2:  
-        with st.expander:("💬 **Ask about your data**")
+        with st.expander("💬 **Ask about your data**")
             st.markdown("""
             - What are the key trends in this dataset?
             - What is the average sale price?
