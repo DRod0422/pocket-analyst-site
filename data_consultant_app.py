@@ -138,9 +138,9 @@ with tab1:
     
         # --- Normalize Data ---
         st.markdown("---")
-        st.markdown("<h2 style='text-align: center;'>🧹 Data Normalization & Encoding</h2>", unsafe_allow_html=True)
+        st.markdown("<h2 style='text-align: left;'>🧹 Data Normalization & Encoding</h2>", unsafe_allow_html=True)
         st.markdown("""
-        <div style='text-align: center;'>
+        <div style='text-align: left;'>
         Prepare your dataset for analysis by normalizing numeric values and encoding categories.
         </div>
         
