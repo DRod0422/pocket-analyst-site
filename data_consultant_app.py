@@ -370,9 +370,21 @@ with tab3:
         
                 st.subheader("Top Categorical Distributions")
                 cat_cols = df_sample.select_dtypes(include='object').columns.tolist()
-                for col in cat_cols[:3]:  # Show only top 3 for brevity
-                    st.markdown(f"**{col}** - Top Categories")
-                    st.dataframe(df_sample[col].value_counts().head(5))
+
+                if not cat_cols:
+                    st.info("No categorical columns found in your dataset.")
+                else:
+                    for i in range(0, len(cat_cols), 2):
+                        cols = st.columns(2)  # Two side-by-side columns
+                
+                        for j in range(2):
+                            if i + j < len(cat_cols):
+                                col_name = cat_cols[i + j]
+                                with cols[j]:
+                                    st.markdown(f"**{col_name}** - Top Categories")
+                                    count_df = df_sample[col_name].value_counts().head(5).reset_index()
+                                    count_df.columns = [col_name, "Count"]
+                                    st.dataframe(count_df, use_container_width=True)
         
                   #Divider
                 st.markdown("---")
