@@ -132,8 +132,11 @@ with tab1:
         # if uploaded_file and "ai_ran_once" not in st.session_state: 
         #     st.session_state.ai_ran_once = False
         
+        # --Divider--
+        st.markdown("---")
+        
         # --- Normalize Data ---
-        with st.expander("🧹 Data Normalization & Encoding", expanded=False):
+            st.markdown("<h2 style='text-align: left;'>🧹 Data Normalization & Encoding</h2>", unsafe_allow_html=True)
             st.markdown("""
             Prepare your dataset for analysis by normalizing numeric values and encoding categories.
             
