@@ -335,8 +335,9 @@ with tab2:
 
     # --- Smart Auto Insights ---
 with tab3:    
-        with st.expander("Smart Auto Insights", expanded=True):
+        with st.markdown("## Smart Auto Insights")
             st.markdown("Get an instant overview of your dataset without lifting a finger. This section auto-generates summaries, stats, and visuals for quick insight.")
+            st.markdown("---")
             # --- Safety check ---
             if 'df_sample' in st.session_state and st.session_state['df_sample'] is not None:
                 df_sample = st.session_state['df_sample']
