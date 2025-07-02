@@ -494,7 +494,7 @@ with tab4:
     else:
         df_sample = st.session_state["df_sample"]
         
-        st.markdown("---")
+        #st.markdown("---")
         st.markdown("## 🔬 Forecast Modeling & Advanced Analysis")
         st.info(
             """
@@ -684,7 +684,7 @@ with tab4:
 
     # --- Divider ---
 with tab5:
-        st.markdown("---")
+        #st.markdown("---")
         st.markdown("## Data Science & Machine Learning Modeling")
         st.info("This section includes advanced machine learning tools for data scientists and experienced analysts.")
         # --- Data Status Bar ---
