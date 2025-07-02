@@ -182,15 +182,17 @@ with tab1:
                 st.success("✅ Dataset normalized and one-hot encoded!")
                 st.dataframe(df_encoded.head())
     
-        #---Divider ---
-        st.markdown("---")
-        st.markdown("## Generate AI Insights with a click of a button")
         
         # --- Quick AI Insights block ---
         if uploaded_file:
             if "ai_ran_once" not in st.session_state:
                 st.session_state.ai_ran_once = False
-        
+                
+            # --- Divider ---
+            st.markdown("---")
+            st.markdown("<h2 style='text-align: left;'>🧠 Generate AI Insights with a Click</h2>", unsafe_allow_html=True)
+            st.markdown("Get a quick summary of your dataset in plain English. Ideal for small business owners and analysts alike.")
+
             # Show disabled state if already run
             if st.session_state.ai_ran_once:
                 st.success("✅ AI Insights already generated for this session.")
