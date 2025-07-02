@@ -390,27 +390,33 @@ with tab3:
         
                 if numeric_cols:
                     st.markdown("Quick glance at value distributions:")
-        
-                    for col in numeric_cols:
-                        st.markdown(f"**{col}**")
-                        try:
-                            # Bin the numeric column into discrete intervals before counting
-                            binned_col = pd.cut(df_sample[col], bins=10)  # You can tweak bin count if needed
-                            counts = binned_col.value_counts().sort_index()
-                            vc_df = pd.DataFrame({f"{col} (binned)": counts.index.astype(str), "Count": counts.values})
-        
-                            if chart_type == "Bar (Counts)":
-                                fig = px.bar(vc_df, x=f"{col} (binned)", y="Count", title=f"{col} - Bar Chart (Binned)")
-                            elif chart_type == "Line (Counts)":
-                                fig = px.line(vc_df, x=f"{col} (binned)", y="Count", title=f"{col} - Line Chart (Binned)")
-                            else:
-                                st.warning("Chart type not recognized.")
-                                
-                            st.plotly_chart(fig, use_container_width=True)
-                        except Exception as e:
-                            st.warning(f"Could not generate chart for {col}: {e}")
-                else:
-                    st.info("No numeric columns found.")
+                
+                    for i in range(0, len(numeric_cols), 2):  # Two charts per row
+                        cols = st.columns(2)
+                
+                        for j in range(2):
+                            if i + j < len(numeric_cols):
+                                col = numeric_cols[i + j]
+                                with cols[j]:
+                                    try:
+                                        st.markdown(f"**{col}**")
+                                        binned_col = pd.cut(df_sample[col], bins=10)
+                                        counts = binned_col.value_counts().sort_index()
+                                        vc_df = pd.DataFrame({
+                                            f"{col} (binned)": counts.index.astype(str),
+                                            "Count": counts.values
+                                        })
+                
+                                        if chart_type == "Bar (Counts)":
+                                            fig = px.bar(vc_df, x=f"{col} (binned)", y="Count", title=f"{col}")
+                                        elif chart_type == "Line (Counts)":
+                                            fig = px.line(vc_df, x=f"{col} (binned)", y="Count", title=f"{col}")
+                                        else:
+                                            st.warning("Chart type not recognized.")
+                
+                                        st.plotly_chart(fig, use_container_width=True)
+                                    except Exception as e:
+                                        st.warning(f"Could not generate chart for {col}: {e}")
                     
                 #Divider
                 st.markdown("---")    
