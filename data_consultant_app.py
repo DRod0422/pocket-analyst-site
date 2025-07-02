@@ -399,7 +399,7 @@ with tab3:
                                 col = numeric_cols[i + j]
                                 with cols[j]:
                                     try:
-                                        st.markdown(f"**{col}**")
+                                        #st.markdown(f"**{col}**")
                                         binned_col = pd.cut(df_sample[col], bins=10)
                                         counts = binned_col.value_counts().sort_index()
                                         # Clean bin labels by rounding left/right edges to whole numbers
@@ -408,8 +408,24 @@ with tab3:
                 
                                         if chart_type == "Bar (Counts)":
                                             fig = px.bar(vc_df, x=f"{col} (binned)", y="Count", title=f"{col}")
+                                            fig.update_layout(
+                                                title={
+                                                    'text': f"{col} - Bar Chart (Binned)",
+                                                    'x': 0.5,
+                                                    'xanchor': 'center',
+                                                    'font': dict(size=18)
+                                                }
+                                            )
                                         elif chart_type == "Line (Counts)":
                                             fig = px.line(vc_df, x=f"{col} (binned)", y="Count", title=f"{col}")
+                                            fig.update_layout(
+                                                title={
+                                                    'text': f"{col} - Bar Chart (Binned)",
+                                                    'x': 0.5,
+                                                    'xanchor': 'center',
+                                                    'font': dict(size=18)
+                                                }
+                                            )
                                         else:
                                             st.warning("Chart type not recognized.")
                 
