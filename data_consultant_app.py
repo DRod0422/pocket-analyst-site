@@ -916,7 +916,7 @@ with tab5:
 
         # Hypothesis Testing Block
         st.markdown("---")
-        st.markdown("<h2 style='text-align: center;'>📊 Hypothesis Testing</h2>", unsafe_allow_html=True)
+        st.markdown("<h2 style='text-align: left;'>📊 Hypothesis Testing</h2>", unsafe_allow_html=True)
         st.markdown("Use t-tests, z-tests, or chi-square to test your assumptions about the data.")
         
         # Choose test type
