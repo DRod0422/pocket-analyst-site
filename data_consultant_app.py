@@ -1101,7 +1101,7 @@ with tab5:
 
         # --- Auto Statistical Insights ---
         st.markdown("---")
-        st.markdown("<h2 style='text-align: center;'>📊 Auto Statistical Insights (Beta)</h2>", unsafe_allow_html=True)
+        st.markdown("<h2 style='text-align: left;'>📊 Auto Statistical Insights (Beta)</h2>", unsafe_allow_html=True)
         st.markdown("Automatically scan your dataset for significant patterns, trends, and relationships using statistical tests.")
         
         if st.checkbox("Run Statistical Scan"):
