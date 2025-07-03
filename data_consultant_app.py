@@ -1048,7 +1048,7 @@ with tab5:
                 st.warning("Please select two **different** categorical columns.")
                 
             # ----Divider----    
-            from utils_statistics import run_auto_statistical_insights
+            from utils_statistics import run_auto_statistical_insights  # or utils.utils_statistics if in subfolder
 
             # --- Auto Statistical Insights ---
             st.markdown("---")
@@ -1056,6 +1056,7 @@ with tab5:
             st.markdown("Automatically scan your dataset for significant patterns, trends, and relationships using statistical tests.")
             
             if st.checkbox("Run Statistical Scan"):
+                st.write("📡 Running auto statistical insights...")  # ✅ Debug line
                 df_stats = st.session_state.get("df_sample")
             
                 if df_stats is not None:
