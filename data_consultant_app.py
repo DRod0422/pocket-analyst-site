@@ -1062,21 +1062,29 @@ with tab5:
                 st.write("📡 Running auto statistical insights...")
             
                 df_stats = st.session_state.get("df_sample")
-            
-                if df_stats is None:
-                    st.error("🚫 df_sample is None.")
+
+                if df_stats is not None:
+                    try:
+                        # 💥 Defensive conversion to avoid pyarrow type issues
+                        df_stats = df_stats.copy()
+                        for col in df_stats.columns:
+                            if df_stats[col].dtype.name.startswith("Float"):
+                                df_stats[col] = pd.to_numeric(df_stats[col], errors="coerce")
+                
+                        st.write("✅ df_sample is clean. Running insights...")
+                        results = run_auto_statistical_insights(df_stats)
+                
+                        if results:
+                            st.success("✅ Statistical insights generated:")
+                            for insight in results:
+                                st.markdown(insight)
+                        else:
+                            st.info("No statistically significant findings detected.")
+                    except Exception as e:
+                        st.error(f"❌ Error while running statistical insights: {e}")
                 else:
-                    st.write("✅ df_sample found with shape:", df_stats.shape)
-            
-                    # 🔍 Run the statistical insight function
-                    results = run_auto_statistical_insights(df_stats)
-            
-                    if results:
-                        st.success("✅ Statistical insights generated:")
-                        for insight in results:
-                            st.markdown(insight)
-                    else:
-                        st.info("No statistically significant findings detected.")
+                    st.warning("Dataset not loaded.")
+
 
 
 
