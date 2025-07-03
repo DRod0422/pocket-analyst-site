@@ -12,6 +12,7 @@ import seaborn as sns
 import plotly.express as px
 from utils import clean_and_format_data
 import pingouin as pg
+import scipy.stats as stats
 
 from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import MinMaxScaler
@@ -747,6 +748,47 @@ with tab4:
                 st.pyplot(fig)
 
     # --- Divider ---
+
+def run_auto_statistical_insights(df):
+    results = []
+
+    numeric_cols = df.select_dtypes(include="number").columns
+    for col in numeric_cols:
+        series = df[col].dropna()
+        if len(series) > 10:
+            t_stat, p_val = stats.ttest_1samp(series, 0)
+            if p_val < 0.05:
+                results.append(f"📌 **{col}** has a mean significantly different from 0 (p = {p_val:.4f}).")
+
+    cat_cols = df.select_dtypes(include="object").columns
+    for cat_col in cat_cols:
+        unique_vals = df[cat_col].dropna().unique()
+        if len(unique_vals) == 2:
+            for num_col in numeric_cols:
+                group1 = df[df[cat_col] == unique_vals[0]][num_col].dropna()
+                group2 = df[df[cat_col] == unique_vals[1]][num_col].dropna()
+                if len(group1) > 5 and len(group2) > 5:
+                    t_stat, p_val = stats.ttest_ind(group1, group2)
+                    if p_val < 0.05:
+                        results.append(f"🔍 **{num_col}** differs significantly between **{unique_vals[0]}** and **{unique_vals[1]}** (p = {p_val:.4f}).")
+
+    for i in range(len(cat_cols)):
+        for j in range(i + 1, len(cat_cols)):
+            tbl = pd.crosstab(df[cat_cols[i]], df[cat_cols[j]])
+            if tbl.shape[0] > 1 and tbl.shape[1] > 1:
+                chi2, p_val, _, _ = stats.chi2_contingency(tbl)
+                if p_val < 0.05:
+                    results.append(f"⚠️ **{cat_cols[i]}** and **{cat_cols[j]}** appear dependent (Chi² p = {p_val:.4f}).")
+
+    corr_matrix = df[numeric_cols].corr(method="pearson")
+    for i in range(len(numeric_cols)):
+        for j in range(i + 1, len(numeric_cols)):
+            corr_val = corr_matrix.iloc[i, j]
+            if abs(corr_val) > 0.7:
+                results.append(f"🔗 **{numeric_cols[i]}** and **{numeric_cols[j]}** are strongly correlated (r = {corr_val:.2f}).")
+
+    return results
+
 with tab5:
         #st.markdown("---")
         st.markdown("## Data Science & Machine Learning Modeling")
@@ -1057,6 +1099,25 @@ with tab5:
             else:
                 st.warning("Please select two **different** categorical columns.")
 
+        # --- Auto Statistical Insights ---
+        st.markdown("---")
+        st.markdown("<h2 style='text-align: center;'>📊 Auto Statistical Insights (Beta)</h2>", unsafe_allow_html=True)
+        st.markdown("Automatically scan your dataset for significant patterns, trends, and relationships using statistical tests.")
+        
+        if st.checkbox("Run Statistical Scan"):
+            df_stats = st.session_state.get("df_sample")
+        
+            if df_stats is not None:
+                results = run_auto_statistical_insights(df_stats)
+        
+                if results:
+                    st.success("✅ Statistical insights generated:")
+                    for insight in results:
+                        st.markdown(insight)
+                else:
+                    st.info("No statistically significant findings detected.")
+            else:
+                st.warning("Dataset not loaded.")
 
 
             
