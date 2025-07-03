@@ -1056,6 +1056,7 @@ with tab5:
             st.markdown("Automatically scan your dataset for significant patterns, trends, and relationships using statistical tests.")
             
             if st.checkbox("Run Statistical Scan"):
+                st.write("🚨 Checkbox triggered!")
                 st.write("📡 Running auto statistical insights...")  # ✅ Debug line
                 df_stats = st.session_state.get("df_sample")
             
