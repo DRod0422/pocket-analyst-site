@@ -1054,14 +1054,18 @@ with tab5:
             st.markdown("---")
             st.markdown("<h2 style='text-align: center;'>📊 Auto Statistical Insights (Beta)</h2>", unsafe_allow_html=True)
             st.markdown("Automatically scan your dataset for significant patterns, trends, and relationships using statistical tests.")
-            
+            st.markdown("🧪 Debug: Reached auto stats block")
             if st.checkbox("Run Statistical Scan"):
+                st.markdown("✅ Checkbox activated")
                 st.write("🚨 Checkbox triggered!")
                 st.write("📡 Running auto statistical insights...")  # ✅ Debug line
                 df_stats = st.session_state.get("df_sample")
+ 
             
-                if df_stats is not None:
-                    results = run_auto_statistical_insights(df_stats)
+                if df_stats is None:
+                    st.error("🚫 df_sample is None.")
+                else:
+                    st.write("✅ df_sample found with shape:", df_stats.shape)
             
                     if results:
                         st.success("✅ Statistical insights generated:")
