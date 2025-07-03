@@ -1056,45 +1056,6 @@ with tab5:
                         st.markdown(f"🧠 **Insight:** The p-value of `{p_val:.4f}` indicates **no significant association** between **{col1}** and **{col2}**.")
             else:
                 st.warning("Please select two **different** categorical columns.")
-                
-            # ----Divider----     
-            from utils_statistics import run_auto_statistical_insights  # or utils.utils_statistics if in subfolder
-            
-            # --- Auto Statistical Insights ---
-            st.markdown("---")
-            st.markdown("<h2 style='text-align: center;'>📊 Auto Statistical Insights (Beta)</h2>", unsafe_allow_html=True)
-            st.markdown("Automatically scan your dataset for significant patterns, trends, and relationships using statistical tests.")
-            st.markdown("🧪 Debug: Reached auto stats block")
-            
-            if st.checkbox("Run Statistical Scan"):
-                st.markdown("✅ Checkbox activated")
-                st.write("🚨 Checkbox triggered!")
-                st.write("📡 Running auto statistical insights...")
-            
-                df_stats = st.session_state.get("df_sample")
-
-                if df_stats is not None:
-                    try:
-                        # 💥 Defensive conversion to avoid pyarrow type issues
-                        df_stats = df_stats.copy()
-                        for col in df_stats.columns:
-                            if df_stats[col].dtype.name.startswith("Float"):
-                                df_stats[col] = pd.to_numeric(df_stats[col], errors="coerce")
-                
-                        st.write("✅ df_sample is clean. Running insights...")
-                        results = run_auto_statistical_insights(df_stats)
-                
-                        if results:
-                            st.success("✅ Statistical insights generated:")
-                            for insight in results:
-                                st.markdown(insight)
-                        else:
-                            st.info("No statistically significant findings detected.")
-                    except Exception as e:
-                        st.error(f"❌ Error while running statistical insights: {e}")
-                else:
-                    st.warning("Dataset not loaded.")
-
 
 
 
