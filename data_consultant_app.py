@@ -756,6 +756,16 @@ with tab5:
         df_sample = st.session_state.get("df_sample")
         df_norm = st.session_state.get("normalized_data")
 
+        # 🔧 Fix Arrow serialization issues
+        if df_sample is not None:
+            df_sample = df_sample.copy()
+            for col in df_sample.columns:
+                try:
+                    df_sample[col] = pd.to_numeric(df_sample[col], errors="coerce")
+                except:
+                    pass
+            st.session_state["df_sample"] = df_sample
+
         if df_sample is None:
             st.error("🚫 No dataset loaded. Please upload your data in Tab 1.")
             st.stop()
