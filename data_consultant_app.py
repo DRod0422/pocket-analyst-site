@@ -1047,25 +1047,29 @@ with tab5:
             else:
                 st.warning("Please select two **different** categorical columns.")
                 
-            # ----Divider----    
+            # ----Divider----     
             from utils_statistics import run_auto_statistical_insights  # or utils.utils_statistics if in subfolder
-
+            
             # --- Auto Statistical Insights ---
             st.markdown("---")
             st.markdown("<h2 style='text-align: center;'>📊 Auto Statistical Insights (Beta)</h2>", unsafe_allow_html=True)
             st.markdown("Automatically scan your dataset for significant patterns, trends, and relationships using statistical tests.")
             st.markdown("🧪 Debug: Reached auto stats block")
+            
             if st.checkbox("Run Statistical Scan"):
                 st.markdown("✅ Checkbox activated")
                 st.write("🚨 Checkbox triggered!")
-                st.write("📡 Running auto statistical insights...")  # ✅ Debug line
+                st.write("📡 Running auto statistical insights...")
+            
                 df_stats = st.session_state.get("df_sample")
- 
             
                 if df_stats is None:
                     st.error("🚫 df_sample is None.")
                 else:
                     st.write("✅ df_sample found with shape:", df_stats.shape)
+            
+                    # 🔍 Run the statistical insight function
+                    results = run_auto_statistical_insights(df_stats)
             
                     if results:
                         st.success("✅ Statistical insights generated:")
@@ -1073,8 +1077,6 @@ with tab5:
                             st.markdown(insight)
                     else:
                         st.info("No statistically significant findings detected.")
-                else:
-                    st.warning("Dataset not loaded.")
 
 
 
