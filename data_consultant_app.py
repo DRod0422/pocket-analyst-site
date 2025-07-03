@@ -1048,7 +1048,7 @@ with tab5:
                 st.warning("Please select two **different** categorical columns.")
                 
             # ----Divider----    
-            from utils.statistics import run_auto_statistical_insights
+            from utils_statistics import run_auto_statistical_insights
 
             # --- Auto Statistical Insights ---
             st.markdown("---")
