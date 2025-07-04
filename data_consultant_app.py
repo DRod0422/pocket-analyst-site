@@ -756,7 +756,7 @@ with tab4:
             st.pyplot(fig)
 
 # --- Divider ---
-st.markdown('---')
+
 def run_auto_statistical_insights(df):
     results = []
 
