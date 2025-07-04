@@ -270,66 +270,66 @@ with tab2:
         
         st.session_state["df_sample"] = df_sample
      
-            # Session usage tracking (limit free users to 5 questions/day)
-            if "query_count" not in st.session_state:
-                st.session_state.query_count = 0
-                st.session_state.query_reset_time = datetime.datetime.now()
-        
-            if datetime.datetime.now() - st.session_state.query_reset_time > datetime.timedelta(days=1):
-                st.session_state.query_count = 0
-                st.session_state.query_reset_time = datetime.datetime.now()
-        
-            if user_question:
-                if st.session_state.query_count >= 5:
-                    st.warning("You've reached your free question limit for today. Please upgrade to unlock more features.")
-                else:
-                    st.session_state.query_count += 1
-                    csv_snippet = df_sample.head(10).to_string(index=False)
-        
-                    row_count, col_count = df_sample.shape
-                    
-                    prompt = f"""
-                    You are an expert data analyst. The dataset has {row_count} rows and {col_count} columns.
-                    Below is a preview of the first 10 rows. Use it to understand the structure and help answer the user's question.
-        
-                    Sample Data:
-                    {csv_snippet}
-                    
-        
-                    Question: {user_question}
-                    """
-        
-                    try:
-                        response = openai.chat.completions.create(
-                            model=GPT_MODEL,
-                            messages=[
-                                {"role": "system", "content": "You are a helpful Analyst. Be concise by default. Provide direct answers unless the user asks for explanation or calculation steps."},
-                                {"role": "user", "content": prompt}
-                            ]
-                        )
-                        answer = response.choices[0].message.content
-        
-                        st.subheader("Bot's Answer")
-                        with st.expander("AI Response", expanded=True):
-                            st.write(answer)
-        
-                        # Dynamic chart rendering
-                        chart_type, chart_cols = detect_chart_type_and_columns(user_question, df_sample)
-        
-                        if chart_type == "bar" and chart_cols and chart_cols in df_sample.columns:
-                            fig = px.bar(df_sample, x=chart_cols)
-                            st.plotly_chart(fig)
-        
-                        elif chart_type == "line" and all(chart_cols):
-                            fig = px.line(df_sample, x=chart_cols[0], y=chart_cols[1])
-                            st.plotly_chart(fig)
-        
-                        elif chart_type == "scatter" and all(chart_cols):
-                            fig = px.scatter(df_sample, x=chart_cols[0], y=chart_cols[1], color=chart_cols[2])
-                            st.plotly_chart(fig)
-        
-                    except Exception as e:
-                        st.error(f"API Error: {e}")
+        # Session usage tracking (limit free users to 5 questions/day)
+        if "query_count" not in st.session_state:
+            st.session_state.query_count = 0
+            st.session_state.query_reset_time = datetime.datetime.now()
+    
+        if datetime.datetime.now() - st.session_state.query_reset_time > datetime.timedelta(days=1):
+            st.session_state.query_count = 0
+            st.session_state.query_reset_time = datetime.datetime.now()
+    
+        if user_question:
+            if st.session_state.query_count >= 5:
+                st.warning("You've reached your free question limit for today. Please upgrade to unlock more features.")
+            else:
+                st.session_state.query_count += 1
+                csv_snippet = df_sample.head(10).to_string(index=False)
+    
+                row_count, col_count = df_sample.shape
+                
+                prompt = f"""
+                You are an expert data analyst. The dataset has {row_count} rows and {col_count} columns.
+                Below is a preview of the first 10 rows. Use it to understand the structure and help answer the user's question.
+    
+                Sample Data:
+                {csv_snippet}
+                
+    
+                Question: {user_question}
+                """
+    
+                try:
+                    response = openai.chat.completions.create(
+                        model=GPT_MODEL,
+                        messages=[
+                            {"role": "system", "content": "You are a helpful Analyst. Be concise by default. Provide direct answers unless the user asks for explanation or calculation steps."},
+                            {"role": "user", "content": prompt}
+                        ]
+                    )
+                    answer = response.choices[0].message.content
+    
+                    st.subheader("Bot's Answer")
+                    with st.expander("AI Response", expanded=True):
+                        st.write(answer)
+    
+                    # Dynamic chart rendering
+                    chart_type, chart_cols = detect_chart_type_and_columns(user_question, df_sample)
+    
+                    if chart_type == "bar" and chart_cols and chart_cols in df_sample.columns:
+                        fig = px.bar(df_sample, x=chart_cols)
+                        st.plotly_chart(fig)
+    
+                    elif chart_type == "line" and all(chart_cols):
+                        fig = px.line(df_sample, x=chart_cols[0], y=chart_cols[1])
+                        st.plotly_chart(fig)
+    
+                    elif chart_type == "scatter" and all(chart_cols):
+                        fig = px.scatter(df_sample, x=chart_cols[0], y=chart_cols[1], color=chart_cols[2])
+                        st.plotly_chart(fig)
+    
+                except Exception as e:
+                    st.error(f"API Error: {e}")
         else:
             st.warning("Please upload and clean your dataset first in Tab 1.")
               
