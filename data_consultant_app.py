@@ -258,6 +258,7 @@ with tab2:
         # --- Get Cleaned or Raw Data ---
         df_clean = st.session_state.get("df_clean")
         df_raw = st.session_state.get("df_raw")
+        df_current = df_clean if df_clean is not None else df_raw
         
         if df_clean is not None:
             df_current = df_clean
