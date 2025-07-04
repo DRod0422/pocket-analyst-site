@@ -254,11 +254,25 @@ with tab2:
     
         # --- Get Cleaned Data ---
         df_clean = st.session_state.get("df_clean")
-        df_current = df_clean if df_clean is not None else st.session_state.get("df_raw")
+        df_raw = st.session_state.get("df_raw")
+        df_current = df_clean if df_clean is not None else df_raw
         
-        if df_current is not None:
-            # 🔘 Let user choose whether to use the full dataset or a sample
-            sample_option = st.checkbox("Use full dataset for analysis (may be slower)", value=False)
+        if df_current is None:
+            st.warning("Please upload and clean your dataset first in Tab 1.")
+            st.stop()
+        
+        # --- User Choice: Use Full or Sample ---
+        sample_option = st.checkbox("Use full dataset for AI analysis (may be slower)", value=False)
+        
+        if not sample_option and len(df_current) > 5000:
+            st.warning(f"Large dataset detected ({len(df_current)} rows). Sampling 1000 rows for performance.")
+            df_sample = df_current.sample(n=1000, random_state=42)
+        else:
+            df_sample = df_current
+        
+        # Save to session (for consistency across tabs)
+        st.session_state["df_sample"] = df_sample
+
         
             if not sample_option and len(df_current) > 5000:
                 st.warning(f"Large dataset detected ({len(df_current)} rows). Sampling 1000 rows for faster performance.")
