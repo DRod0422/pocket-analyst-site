@@ -564,7 +564,7 @@ with tab4:
     if "df_sample" not in st.session_state or st.session_state["df_sample"] is None:
         st.warning("⚠️ No dataset loaded yet. Please upload your file in Tab 1.")
     else:
-        df_current = st.session_state.get("df_clean") or st.session_state.get("df_raw")
+        df_current = st.session_state.get("df_clean") if st.session_state.get("df_clean") is not None else st.session_state.get("df_raw")
         
         #st.markdown("---")
         st.markdown("## 🔬 Forecast Modeling & Advanced Analysis")
