@@ -572,13 +572,18 @@ with tab3:
         
     # --- Guidance for ML Tools --
 with tab4:
+    df_clean = st.session_state.get("df_clean")
+    df_raw = st.session_state.get("df_raw")
+    df_current = df_clean if df_clean is not None else df_raw
     df_sample = st.session_state.get("df_sample")
-    df_current = st.session_state.get("df_current")
+
+    st.session_state["df_current"] = df_current  # Optional, for consistency
 
     if df_current is None:
         st.warning("⚠️ No dataset loaded yet. Please upload your file in Tab 1.")
+        st.stop()
     else:
-        st.info(f"Loaded dataset with `{df_current.shape[0]}` rows and `{df_current.shape[1]}` columns.")
+        st.info(f"📊 Loaded dataset with `{df_current.shape[0]}` rows and `{df_current.shape[1]}` columns.")
         
         #st.markdown("---")
         st.markdown("## 🔬 Forecast Modeling & Advanced Analysis")
@@ -902,7 +907,8 @@ with tab5:
     df_norm = st.session_state.get("normalized_data")
 
     # 🔁 Unified current dataset (cleaned if available, otherwise raw)
-    df_current = df_clean if df_clean is not None else st.session_state.get("df_raw")
+    df_raw = st.session_state.get("df_raw")
+    df_current = df_clean if df_clean is not None else df_raw
     st.session_state["df_current"] = df_current  # ✅ Save for use across tabs
 
     st.markdown(f"🧾 **Dataset Shape:** `{df_current.shape[0]}` rows × `{df_current.shape[1]}` columns")
