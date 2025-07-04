@@ -712,8 +712,19 @@ with tab4:
                 # st.write(col_data.describe().T)
                 # st.write(f"**Skewness:** {skew(col_data):.3f}")
                 # st.write(f"**Kurtosis:** {kurtosis(col_data):.3f}")
-                st.plotly_chart(px.histogram(col_data, nbins=30, title=f"Histogram of {selected_col}"))
-                st.plotly_chart(px.box(df_sample, y=selected_col, title=f"Boxplot of {selected_col}"))
+        
+                # Center the plots
+                left, center, right = st.columns([1, 2, 1])
+                with center:
+                    st.plotly_chart(
+                        px.histogram(col_data, nbins=30, title=f"📊 Histogram of {selected_col}"),
+                        use_container_width=True
+                    )
+                    st.plotly_chart(
+                        px.box(df_sample, y=selected_col, title=f"📦 Boxplot of {selected_col}"),
+                        use_container_width=True
+                    )
+
 
         elif analysis_option == "Histogram Grid for All Numeric Columns":
             if st.button("Generate Histograms"):
