@@ -258,23 +258,21 @@ with tab2:
         df_current = df_clean if df_clean is not None else df_raw
         
         if df_current is None:
-            st.warning("Please upload and clean your dataset first in Tab 1.")
+            st.warning("Please upload your dataset in Tab 1.")
             st.stop()
         
-        # Save to session (for consistency across tabs)
-        if df_current is not None:
-            sample_option = st.checkbox("Use full dataset for AI analysis (may be slower)", value=False, key="ai_sample_option")
+        # Let user choose full dataset or sample
+        sample_option = st.checkbox("Use full dataset for AI analysis (may be slower)", value=False, key="ai_sample_option")
         
-            if not sample_option and len(df_current) > 5000:
-                st.warning(f"Large dataset detected ({len(df_current)} rows). Sampling 1000 rows for faster performance.")
-                df_sample = df_current.sample(n=1000, random_state=42)
-            else:
-                df_sample = df_current
+        if not sample_option and len(df_current) > 5000:
+            st.warning(f"Large dataset detected ({len(df_current)} rows). Sampling 1000 rows for faster performance.")
+            df_sample = df_current.sample(n=1000, random_state=42)
         else:
-            st.warning("Please upload and clean your dataset first in Tab 1.")
-            st.stop()
+            df_sample = df_current
         
+        # Save to session
         st.session_state["df_sample"] = df_sample
+
      
         # Session usage tracking (limit free users to 5 questions/day)
         if "query_count" not in st.session_state:
