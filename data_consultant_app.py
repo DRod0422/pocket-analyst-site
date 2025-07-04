@@ -108,7 +108,8 @@ with tab1:
             working_df = df_clean
         else:
             working_df = df_raw
-        
+            
+        st.session_state["df_current"] = working_df
         
         # Select which dataset to use for downstream tasks
         apply_cleaning = st.checkbox("🧼 Apply Auto-Cleaning to Dataset", value=True)
@@ -120,16 +121,17 @@ with tab1:
             st.dataframe(st.session_state["df_clean"].head(100))
         else:
             st.dataframe(df_raw.head(100))
-        # Sample if needed
+        # --- Separate sample (for display) and full data (for logic/stats/modeling) ---
         if len(df_current) > 5000:
-            st.warning(f"Large dataset detected ({len(df_current)} rows). Sampling 1000 rows for faster performance.")
+            st.warning(f"Large dataset detected ({len(df_current)} rows). Sampling 1000 rows for fast UI performance.")
             df_sample = df_current.sample(n=1000, random_state=42)
         else:
             df_sample = df_current
-        # ✅ Save it for use in other tabs
-        st.session_state["df_sample"] = df_sample
-    
-    
+        
+        # ✅ Save both to session state
+        st.session_state["df_sample"] = df_sample              # For UI / visuals
+        st.session_state["df_current_full"] = df_current       # For modeling & insights
+ 
             
         # # ✅ Reset AI trigger
         # if uploaded_file and "ai_ran_once" not in st.session_state: 
@@ -211,7 +213,7 @@ with tab1:
                         try:
                             st.markdown("Here's what I noticed in your data:")
         
-                            csv_snippet = df_sample.to_csv(index=False)[:4000]
+                            csv_snippet = df_current.to_csv(index=False)[:4000]
                             insight_prompt = f"""
                             You are a data analyst. Read the data below and write 3 short, plain-English insights.
                             Avoid technical jargon. Pretend you're talking to a small business owner.
@@ -252,17 +254,22 @@ with tab2:
     
         # --- Get Cleaned Data ---
         df_clean = st.session_state.get("df_clean")
-        df_sample = st.session_state.get("df_sample")
+        df_current = df_clean or st.session_state.get("df_raw")
         
-        if df_clean is not None:
-            # --- Light Sampling for Large Files ---    
-            if len(df_clean) > 5000:
-                st.warning(f"Large dataset detected ({len(df_sample)} rows). Sampling 1000 rows for efficiency.")
-                df_sample = df_sample.sample(n=1000, random_state=42)
+        if df_current is not None:
+            # 🔘 Let user choose whether to use the full dataset or a sample
+            sample_option = st.checkbox("Use full dataset for analysis (may be slower)", value=False)
+        
+            if not sample_option and len(df_current) > 5000:
+                st.warning(f"Large dataset detected ({len(df_current)} rows). Sampling 1000 rows for faster performance.")
+                df_sample = df_current.sample(n=1000, random_state=42)
             else:
-                df_sample = df_sample
+                df_sample = df_current
+        else:
+            df_sample = None
         
-        
+        st.session_state["df_sample"] = df_sample
+     
             # Session usage tracking (limit free users to 5 questions/day)
             if "query_count" not in st.session_state:
                 st.session_state.query_count = 0
@@ -557,7 +564,7 @@ with tab4:
     if "df_sample" not in st.session_state or st.session_state["df_sample"] is None:
         st.warning("⚠️ No dataset loaded yet. Please upload your file in Tab 1.")
     else:
-        df_sample = st.session_state["df_sample"]
+        df_current = st.session_state.get("df_clean") or st.session_state.get("df_raw")
         
         #st.markdown("---")
         st.markdown("## 🔬 Forecast Modeling & Advanced Analysis")
@@ -579,7 +586,7 @@ with tab4:
         st.markdown("## 📈 Forecast Future Values (Beta)")
         try:
             date_cols = [col for col in df_sample.columns if pd.api.types.is_datetime64_any_dtype(df_sample[col])]
-            numeric_cols = df_sample.select_dtypes(include='number').columns.tolist()
+            numeric_cols = df_current.select_dtypes(include='number').columns.tolist()
     
             if not date_cols:
                 st.warning("No datetime column found. Please include a date column to enable forecasting.")
@@ -591,7 +598,7 @@ with tab4:
                 forecast_periods = st.slider("Months to forecast", min_value=1, max_value=12, value=6)
     
                 # Prepare data
-                df_forecast = df_sample[[date_col, target_col]].dropna().copy()
+                df_forecast = df_current[[date_col, target_col]].dropna().copy()
                 df_forecast[date_col] = pd.to_datetime(df_forecast[date_col], errors='coerce')
                 
                 # Detect if any date has only a year (e.g., 2023) by checking if all dates are Jan 1
@@ -657,8 +664,8 @@ with tab4:
             - Value to forecast will be used as `y`
             """)
         try:
-            date_cols = [col for col in df_sample.columns if pd.api.types.is_datetime64_any_dtype(df_sample[col])]
-            numeric_cols = df_sample.select_dtypes(include='number').columns.tolist()
+            date_cols = [col for col in df_sample.columns if pd.api.types.is_datetime64_any_dtype(df_current[col])]
+            numeric_cols = df_current.select_dtypes(include='number').columns.tolist()
     
             if not date_cols:
                 st.warning("No datetime column found. Please include a date column to enable Prophet forecasting.")
@@ -667,7 +674,7 @@ with tab4:
                 target_col = st.selectbox("📈 Select value to forecast (Prophet):", numeric_cols, key="prophet_target")
                 forecast_months = st.slider("⏩ Months to forecast (Prophet)", 1, 12, 6, key="prophet_months")
     
-                df_prophet = df_sample[[date_col, target_col]].dropna().copy()
+                df_prophet = df_current[[date_col, target_col]].dropna().copy()
                 df_prophet.columns = ["ds", "y"]
                 df_prophet["ds"] = pd.to_datetime(df_prophet["ds"], errors="coerce")
                 df_prophet = df_prophet.dropna()
@@ -697,7 +704,7 @@ with tab4:
         
         # --- Univariate Analysis ---
         st.markdown("## 📈 Univariate Analysis")
-        num_cols = df_sample.select_dtypes(include=np.number).columns.tolist()
+        num_cols = df_current.select_dtypes(include=np.number).columns.tolist()
         analysis_option = st.selectbox("Select a univariate analysis option:", [
             "Single Column Analysis",
             "Histogram Grid for All Numeric Columns",
@@ -707,7 +714,7 @@ with tab4:
         if analysis_option == "Single Column Analysis":
             selected_col = st.selectbox("Select a numeric column for analysis:", options=num_cols)
             if selected_col:
-                col_data = df_sample[selected_col].dropna()
+                col_data = df_current[selected_col].dropna()
                 # st.write(f"**Summary Statistics for {selected_col}:**")
                 # st.write(col_data.describe().T)
                 # st.write(f"**Skewness:** {skew(col_data):.3f}")
@@ -724,7 +731,7 @@ with tab4:
         
                 with col2:
                     st.plotly_chart(
-                        px.box(df_sample, y=selected_col, title=f"📦 Boxplot of {selected_col}"),
+                        px.box(df_current, y=selected_col, title=f"📦 Boxplot of {selected_col}"),
                         use_container_width=True
                     )
 
@@ -738,7 +745,7 @@ with tab4:
                 fig, axes = plt.subplots(rows, cols, figsize=(15, 5 * rows))
                 axes = axes.flatten()
                 for i, col in enumerate(num_cols):
-                    sns.histplot(data=df_sample, x=col, ax=axes[i], kde=True)
+                    sns.histplot(data=df_current, x=col, ax=axes[i], kde=True)
                     axes[i].set_title(f"Histogram of {col}")
                 for j in range(i + 1, len(axes)):
                     fig.delaxes(axes[j])
@@ -752,7 +759,7 @@ with tab4:
                 fig, axes = plt.subplots(rows, cols, figsize=(15, 5 * rows))
                 axes = axes.flatten()
                 for i, col in enumerate(num_cols):
-                    sns.boxplot(data=df_sample, x=col, ax=axes[i])
+                    sns.boxplot(data=df_current, x=col, ax=axes[i])
                     axes[i].set_title(f"Boxplot of {col}")
                 for j in range(i + 1, len(axes)):
                     fig.delaxes(axes[j])
@@ -765,7 +772,7 @@ with tab4:
         # st.markdown("## 🔍 Explore Variable Relationships")
         st.markdown("## 🔥 Correlation Heatmap")
         if st.button("Generate Correlation Heatmap"):
-            corr = df_sample.select_dtypes(include=np.number).corr()
+            corr = df_current.select_dtypes(include=np.number).corr()
             fig, ax = plt.subplots(figsize=(12, 7))
             sns.heatmap(corr, annot=True, vmin=-1, vmax=1, fmt=".2f", cmap="Spectral", ax=ax)
             st.pyplot(fig)
@@ -785,11 +792,11 @@ with tab4:
         
             if col1 and col2:
                 st.plotly_chart(
-                    px.scatter(df_sample, x=col1, y=col2, trendline="ols", title=f"{col1} vs {col2}"),
+                    px.scatter(df_current, x=col1, y=col2, trendline="ols", title=f"{col1} vs {col2}"),
                     use_container_width=True
                 )
         
-                corr_val = df_sample[col1].corr(df_sample[col2])
+                corr_val = df_current[col1].corr(df_current[col2])
                 st.markdown(f"**Pearson Correlation:** `{corr_val:.2f}`")
         
                 # Optional AI-style insight
@@ -856,38 +863,43 @@ def run_auto_statistical_insights(df):
     return results
 
 with tab5:
-        #st.markdown("---")
-        st.markdown("## Data Science & Machine Learning Modeling")
-        st.info("This section includes advanced machine learning tools for data scientists and experienced analysts.")
-        # --- Data Status Bar ---
-        df_clean = st.session_state.get("df_clean")
-        df_sample = st.session_state.get("df_sample")
-        df_norm = st.session_state.get("normalized_data")
+    st.markdown("## Data Science & Machine Learning Modeling")
+    st.info("This section includes advanced machine learning tools for data scientists and experienced analysts.")
 
-        # 🔧 Fix Arrow serialization issues
-        if df_sample is not None:
-            df_sample = df_sample.copy()
-            for col in df_sample.columns:
-                try:
-                    df_sample[col] = pd.to_numeric(df_sample[col], errors="coerce")
-                except:
-                    pass
-            st.session_state["df_sample"] = df_sample
+    # --- Data Status Bar ---
+    df_clean = st.session_state.get("df_clean")
+    df_sample = st.session_state.get("df_sample")
+    df_norm = st.session_state.get("normalized_data")
 
-        if df_sample is None:
-            st.error("🚫 No dataset loaded. Please upload your data in Tab 1.")
-            st.stop()
+    # 🔁 Unified current dataset (cleaned if available, otherwise raw)
+    df_current = df_clean if df_clean is not None else st.session_state.get("df_raw")
+    st.session_state["df_current"] = df_current  # ✅ Save for use across tabs
+
+    # 🔧 Fix Arrow serialization issues (optional: apply to df_sample)
+    if df_sample is not None:
+        df_sample = df_sample.copy()
+        for col in df_sample.columns:
+            try:
+                df_sample[col] = pd.to_numeric(df_sample[col], errors="coerce")
+            except:
+                pass
+        st.session_state["df_sample"] = df_sample
+
+    if df_sample is None:
+        st.error("🚫 No dataset loaded. Please upload your data in Tab 1.")
+        st.stop()
+    else:
+        st.success("✅ Dataset loaded.")
+        if df_clean is not None:
+            st.info("🧼 Cleaned data is being used.")
         else:
-            st.success("✅ Dataset loaded.")
-            if df_clean is not None:
-                st.info("🧼 Cleaned data is being used.")
-            else:
-                st.warning("⚠️ Using raw (uncleaned) data.")
-    
-            if df_norm is not None:
-                st.success("🧪 Normalized dataset will be used for ML modeling.")
-            else:
-                st.warning("⚠️ Normalized dataset not found. Please normalize your data in Tab 1 for better model performance.")
+            st.warning("⚠️ Using raw (uncleaned) data.")
+
+        if df_norm is not None:
+            st.success("🧪 Normalized dataset will be used for ML modeling.")
+        else:
+            st.warning("⚠️ Normalized dataset not found. Please normalize your data in Tab 1 for better model performance.")
+
     
         # --- Advanced Data Scientist Tools (Expandable Section) ---
         # --- ML Section Header ---
@@ -996,7 +1008,7 @@ with tab5:
         st.markdown("This section provides a statistical overview of your dataset, including central tendencies, spread, and distribution shape.")
         
         if "df_sample" in st.session_state and st.session_state["df_sample"] is not None:
-            df_stats = st.session_state["df_sample"]
+            df_stats = st.session_state.get("df_current")
             numeric_cols = df_stats.select_dtypes(include=["number"]).columns.tolist()
         
             if numeric_cols:
@@ -1042,11 +1054,11 @@ with tab5:
         
         if test_type == "One-sample t-test":
             st.subheader("One-Sample T-Test")
-            column = st.selectbox("Select numeric column", df_sample.select_dtypes(include='number').columns)
+            column = st.selectbox("Select numeric column", df_current.select_dtypes(include='number').columns)
             popmean = st.number_input("Enter population mean to test against", value=0.0)
         
-            if column and len(df_sample[column].dropna()) > 1:
-                t_stat, p_val = stats.ttest_1samp(df_sample[column].dropna(), popmean)
+            if column and len(df_current[column].dropna()) > 1:
+                t_stat, p_val = stats.ttest_1samp(df_current[column].dropna(), popmean)
                 st.write(f"T-statistic: {t_stat:.4f}")
                 st.write(f"P-value: {p_val:.4f}")
         
@@ -1071,13 +1083,13 @@ with tab5:
         
         elif test_type == "Two-sample t-test":
             st.subheader("Two-Sample T-Test")
-            num_col = st.selectbox("Select numeric column", df_sample.select_dtypes(include='number').columns)
-            cat_col = st.selectbox("Select a binary categorical column (2 groups only)", df_sample.select_dtypes(include='object').columns)
+            num_col = st.selectbox("Select numeric column", df_current.select_dtypes(include='number').columns)
+            cat_col = st.selectbox("Select a binary categorical column (2 groups only)", df_current.select_dtypes(include='object').columns)
         
-            unique_vals = df_sample[cat_col].dropna().unique()
+            unique_vals = df_current[cat_col].dropna().unique()
             if len(unique_vals) == 2:
-                group1 = df_sample[df_sample[cat_col] == unique_vals[0]][num_col].dropna()
-                group2 = df_sample[df_sample[cat_col] == unique_vals[1]][num_col].dropna()
+                group1 = df_current[df_current[cat_col] == unique_vals[0]][num_col].dropna()
+                group2 = df_current[df_current[cat_col] == unique_vals[1]][num_col].dropna()
         
                 t_stat, p_val = stats.ttest_ind(group1, group2)
                 st.write(f"T-statistic: {t_stat:.4f}")
@@ -1103,11 +1115,11 @@ with tab5:
         
         elif test_type == "Z-test":
             st.subheader("Z-Test (1-sample)")
-            column = st.selectbox("Select numeric column", df_sample.select_dtypes(include='number').columns, key="z_col")
+            column = st.selectbox("Select numeric column", df_current.select_dtypes(include='number').columns, key="z_col")
             pop_mean = st.number_input("Population Mean", value=0.0, key="z_mean")
             pop_std = st.number_input("Population Std Dev", value=1.0, key="z_std")
         
-            sample = df_sample[column].dropna()
+            sample = df_current[column].dropna()
             if len(sample) > 1:
                 sample_mean = sample.mean()
                 sample_size = len(sample)
@@ -1136,11 +1148,11 @@ with tab5:
         
         elif test_type == "Chi-square test":
             st.subheader("Chi-Square Test of Independence")
-            col1 = st.selectbox("Select first categorical column", df_sample.select_dtypes(include='object').columns, key="chi_col1")
-            col2 = st.selectbox("Select second categorical column", df_sample.select_dtypes(include='object').columns, key="chi_col2")
+            col1 = st.selectbox("Select first categorical column", df_current.select_dtypes(include='object').columns, key="chi_col1")
+            col2 = st.selectbox("Select second categorical column", df_current.select_dtypes(include='object').columns, key="chi_col2")
         
             if col1 != col2:
-                contingency = pd.crosstab(df_sample[col1], df_sample[col2])
+                contingency = pd.crosstab(df_current[col1], df_current[col2])
                 chi2, p_val, dof, expected = stats.chi2_contingency(contingency)
         
                 st.write(f"Chi-square statistic: {chi2:.4f}")
@@ -1171,7 +1183,7 @@ with tab5:
         st.markdown("Automatically scan your dataset for significant patterns, trends, and relationships using statistical tests.")
         
         if st.checkbox("Run Statistical Scan"):
-            df_stats = st.session_state.get("df_sample")
+            df_stats = st.session_state.get("df_current")
         
             if df_stats is not None:
                 results = run_auto_statistical_insights(df_stats)
