@@ -572,7 +572,9 @@ with tab4:
             ➤ Use these tools only when your data is appropriate for modeling.
             """
         )  
-    
+        
+        # --- Divider ---
+        st.markdown('---')
         # --- Predictive Forecasting (Simple Time Series) ---
         st.markdown("## 📈 Forecast Future Values (Beta)")
         try:
@@ -689,6 +691,9 @@ with tab4:
     
         except Exception as e:
             st.error(f"Prophet forecasting failed: {e}")
+
+        # --- Divider ---
+        st.markdown('---')
         
         # --- Univariate Analysis ---
         st.markdown("## 📈 Univariate Analysis")
@@ -737,6 +742,9 @@ with tab4:
                 for j in range(i + 1, len(axes)):
                     fig.delaxes(axes[j])
                 st.pyplot(fig)
+
+        # --- Divider ---
+        st.markdown('---')
     
         # --- Variable Relationships ---
         st.markdown("## 🔍 Explore Variable Relationships")
@@ -747,8 +755,8 @@ with tab4:
             sns.heatmap(corr, annot=True, vmin=-1, vmax=1, fmt=".2f", cmap="Spectral", ax=ax)
             st.pyplot(fig)
 
-    # --- Divider ---
-
+# --- Divider ---
+st.markdown('---')
 def run_auto_statistical_insights(df):
     results = []
 
