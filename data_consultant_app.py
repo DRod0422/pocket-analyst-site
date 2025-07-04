@@ -255,13 +255,9 @@ with tab2:
         # --- Chat Section ---
         user_question = st.text_input("Ask a question about your data:")
     
-        # --- Get Cleaned Data ---
+        # --- Get Cleaned or Raw Data ---
         df_clean = st.session_state.get("df_clean")
         df_raw = st.session_state.get("df_raw")
-        df_current = df_clean if df_clean is not None else df_raw
-    
-        # ✅ Save df_current to session
-        st.session_state["df_current"] = df_current
         
         if df_clean is not None:
             df_current = df_clean
@@ -270,6 +266,9 @@ with tab2:
         else:
             st.warning("⚠️ Please upload a dataset in Tab 1 before using the AI Assistant.")
             st.stop()
+            
+        # ✅ Save df_current to session
+        st.session_state["df_current"] = df_current
         
         # Let user choose full dataset or sample
         sample_option = st.checkbox("Use full dataset for AI analysis (may be slower)", value=False, key="ai_sample_option")
