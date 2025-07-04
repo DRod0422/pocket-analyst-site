@@ -79,7 +79,8 @@ with tab1:
             sheet_names = xls.sheet_names
             selected_sheet = st.selectbox("Select a sheet to load", sheet_names)
             df_raw = pd.read_excel(xls, sheet_name=selected_sheet)
-    
+        st.session_state["df-raw"] = df_raw
+        
         # ✅ Only clean the data if it's new or changed
         if "last_uploaded_name" not in st.session_state or st.session_state.last_uploaded_name != uploaded_file.name:
             st.session_state.last_uploaded_name = uploaded_file.name
@@ -110,6 +111,8 @@ with tab1:
             working_df = df_raw
             
         st.session_state["df_current"] = working_df
+        # ✅ Show dataset summary
+        st.info(f"Loaded dataset with `{working_df.shape[0]}` rows and `{working_df.shape[1]}` columns.")
         
         # Select which dataset to use for downstream tasks
         apply_cleaning = st.checkbox("🧼 Apply Auto-Cleaning to Dataset", value=True)
@@ -256,6 +259,9 @@ with tab2:
         df_clean = st.session_state.get("df_clean")
         df_raw = st.session_state.get("df_raw")
         df_current = df_clean if df_clean is not None else df_raw
+    
+        # ✅ Save df_current to session
+        st.session_state["df_current"] = df_current
         
         if df_current is None:
             st.warning("Please upload your dataset in Tab 1.")
@@ -288,18 +294,20 @@ with tab2:
                 st.warning("You've reached your free question limit for today. Please upgrade to unlock more features.")
             else:
                 st.session_state.query_count += 1
-                csv_snippet = df_sample.head(10).to_string(index=False)
-    
-                row_count, col_count = df_sample.shape
                 
+                # Use df_sample for preview but df_current for shape reporting
+                csv_snippet = df_sample.head(10).to_string(index=False)
+        
+                df_current = st.session_state.get("df_current")  # ✅ Get full working dataset
+                row_count, col_count = df_current.shape if df_current is not None else (0, 0)
+        
                 prompt = f"""
                 You are an expert data analyst. The dataset has {row_count} rows and {col_count} columns.
                 Below is a preview of the first 10 rows. Use it to understand the structure and help answer the user's question.
-    
+        
                 Sample Data:
                 {csv_snippet}
-                
-    
+        
                 Question: {user_question}
                 """
     
@@ -565,10 +573,13 @@ with tab3:
         
     # --- Guidance for ML Tools --
 with tab4:
-    if "df_sample" not in st.session_state or st.session_state["df_sample"] is None:
+    df_sample = st.session_state.get("df_sample")
+    df_current = st.session_state.get("df_current")
+
+    if df_current is None:
         st.warning("⚠️ No dataset loaded yet. Please upload your file in Tab 1.")
     else:
-        df_current = st.session_state.get("df_clean") if st.session_state.get("df_clean") is not None else st.session_state.get("df_raw")
+        st.info(f"Loaded dataset with `{df_current.shape[0]}` rows and `{df_current.shape[1]}` columns.")
         
         #st.markdown("---")
         st.markdown("## 🔬 Forecast Modeling & Advanced Analysis")
@@ -589,7 +600,7 @@ with tab4:
         # --- Predictive Forecasting (Simple Time Series) ---
         st.markdown("## 📈 Forecast Future Values (Beta)")
         try:
-            date_cols = [col for col in df_sample.columns if pd.api.types.is_datetime64_any_dtype(df_sample[col])]
+            date_cols = [col for col in df_current.columns if pd.api.types.is_datetime64_any_dtype(df_current[col])]
             numeric_cols = df_current.select_dtypes(include='number').columns.tolist()
     
             if not date_cols:
@@ -668,8 +679,23 @@ with tab4:
             - Value to forecast will be used as `y`
             """)
         try:
-            date_cols = [col for col in df_sample.columns if pd.api.types.is_datetime64_any_dtype(df_current[col])]
+            date_cols = [col for col in df_current.columns if pd.api.types.is_datetime64_any_dtype(df_current[col])]
             numeric_cols = df_current.select_dtypes(include='number').columns.tolist()
+    
+            if not date_cols:
+                st.warning("No datetime column found. Please include a date column to enable Prophet forecasting.")
+            else:
+                date_col = st.selectbox("📅 Select date column (Prophet):", date_cols, key="prophet_date")
+                target_col = st.selectbox("📈 Select value to forecast (Prophet):", numeric_cols, key="prophet_target")
+                forecast_months = st.slider("⏩ Months to forecast (Prophet)", 1, 12, 6, key="prophet_months")
+    
+                df_prophet = df_current[[date_col, target_col]].dropna().copy()
+                df_prophet.columns = ["ds", "y"]
+                df_prophet["ds"] = pd.to_datetime(df_prophet["ds"], errors="coerce")
+                df_prophet = df_prophet.dropna()
+    
+                m = Prophet()
+                m.fit(df_prophet)
     
             if not date_cols:
                 st.warning("No datetime column found. Please include a date column to enable Prophet forecasting.")
@@ -788,7 +814,7 @@ with tab4:
         st.markdown("## 🔁 Bivariate Analysis")
         st.markdown("Explore relationships between two numeric columns using scatter plots and correlation scores.")
         
-        num_cols = df_sample.select_dtypes(include="number").columns.tolist()
+        num_cols = df_current.select_dtypes(include="number").columns.tolist()
         
         if len(num_cols) >= 2:
             col1 = st.selectbox("Select first column", options=num_cols, key="biv_col1")
@@ -802,6 +828,7 @@ with tab4:
         
                 corr_val = df_current[col1].corr(df_current[col2])
                 st.markdown(f"**Pearson Correlation:** `{corr_val:.2f}`")
+
         
                 # Optional AI-style insight
                 ai_key = f"ai_bivar_{col1}_{col2}"
@@ -879,6 +906,8 @@ with tab5:
     df_current = df_clean if df_clean is not None else st.session_state.get("df_raw")
     st.session_state["df_current"] = df_current  # ✅ Save for use across tabs
 
+    st.markdown(f"🧾 **Dataset Shape:** `{df_current.shape[0]}` rows × `{df_current.shape[1]}` columns")
+
     # 🔧 Fix Arrow serialization issues (optional: apply to df_sample)
     if df_sample is not None:
         df_sample = df_sample.copy()
@@ -910,9 +939,9 @@ with tab5:
         st.markdown("## 🔬 Data Scientist Tools (Pro Preview) *Beta*")
         st.markdown("Use normalized data or raw cleaned data for training machine learning models like Random Forests.")
 
-        data_for_modeling = st.session_state.get("normalized_data", df_sample)
+        data_for_modeling = st.session_state.get("normalized_data") or st.session_state.get("df_current")
     
-        if uploaded_file is not None:
+        if data_for_modeling is not None:
             try:
                 numeric_cols = data_for_modeling.select_dtypes(include="number").columns.tolist()
     
@@ -953,6 +982,9 @@ with tab5:
                                 n_jobs=-1
                             )
                             model.fit(X_train, y_train)
+                            
+                            # ✅ Predict on test set
+                            y_pred = model.predict(X_test)
     
                             # 🔍 Feature Importances
                             importances = model.feature_importances_
@@ -965,14 +997,43 @@ with tab5:
                             fig = px.bar(feature_df, x="Feature", y="Importance", title="Feature Importance (Random Forest)")
                             st.plotly_chart(fig)
     
-                            # 🎯 Predictions
-                            y_pred = model.predict(X_test)
+                            # ✅ Actual vs Predicted Comparison
                             sample_df = pd.DataFrame({
                                 "Actual": y_test.values,
                                 "Predicted": y_pred
                             }).reset_index(drop=True)
+                            
+                            # --- Metric Summary ---
+                            from sklearn.metrics import mean_squared_error, r2_score
+                            
+                            mse = mean_squared_error(y_test, y_pred)
+                            r2 = r2_score(y_test, y_pred)
+                            
+                            st.markdown(f"📉 **Mean Squared Error (MSE):** `{mse:.2f}`")
+                            st.markdown(f"🧮 **R² Score:** `{r2:.2f}`")
+                            
+                            # --- Add Error Column for Highlighting
+                            sample_df["Error"] = sample_df["Actual"] - sample_df["Predicted"]
+                            
+                            def highlight_diff(val):
+                                return 'background-color: #ffe6e6' if abs(val) > 10 else ''
+                            
+                            styled_df = sample_df.head(10).style.applymap(highlight_diff, subset=["Error"])
+                            
                             st.subheader("🎯 Prediction Samples (Actual vs. Predicted)")
-                            st.dataframe(sample_df.head(10))
+                            st.dataframe(styled_df)
+                            
+                            # --- Optional Chart ---
+                            import plotly.express as px
+                            
+                            fig = px.scatter(
+                                sample_df,
+                                x="Actual",
+                                y="Predicted",
+                                title="Actual vs. Predicted (Scatter)",
+                                trendline="ols"
+                            )
+                            st.plotly_chart(fig, use_container_width=True)
     
                             # 📈 Metrics
                             mae = mean_absolute_error(y_test, y_pred)
@@ -1014,6 +1075,8 @@ with tab5:
         if "df_sample" in st.session_state and st.session_state["df_sample"] is not None:
             df_stats = st.session_state.get("df_current")
             numeric_cols = df_stats.select_dtypes(include=["number"]).columns.tolist()
+
+            st.markdown(f"📏 **Dataset Shape**: {df_stats.shape[0]} rows × {df_stats.shape[1]} columns")
         
             if numeric_cols:
                 st.markdown("### 📊 Descriptive Stats (Mean, Median, Std Dev, etc.)")
