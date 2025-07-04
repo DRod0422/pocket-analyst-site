@@ -748,7 +748,7 @@ with tab4:
     
         # --- Variable Relationships ---
         st.markdown("## 🔍 Explore Variable Relationships")
-        st.markdown("### 🔥 Correlation Heatmap")
+        st.expander("### 🔥 Correlation Heatmap", exanded=False):
         if st.button("Generate Correlation Heatmap"):
             corr = df_sample.select_dtypes(include=np.number).corr()
             fig, ax = plt.subplots(figsize=(12, 7))
