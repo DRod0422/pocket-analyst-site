@@ -261,15 +261,6 @@ with tab2:
             st.warning("Please upload and clean your dataset first in Tab 1.")
             st.stop()
         
-        # --- User Choice: Use Full or Sample ---
-        sample_option = st.checkbox("Use full dataset for AI analysis (may be slower)", value=False)
-        
-        if not sample_option and len(df_current) > 5000:
-            st.warning(f"Large dataset detected ({len(df_current)} rows). Sampling 1000 rows for performance.")
-            df_sample = df_current.sample(n=1000, random_state=42)
-        else:
-            df_sample = df_current
-        
         # Save to session (for consistency across tabs)
         if df_current is not None:
             sample_option = st.checkbox("Use full dataset for AI analysis (may be slower)", value=False, key="ai_sample_option")
