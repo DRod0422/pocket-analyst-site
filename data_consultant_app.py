@@ -260,16 +260,12 @@ with tab2:
         df_raw = st.session_state.get("df_raw")
         df_current = df_clean if df_clean is not None else df_raw
         
-        if df_clean is not None:
-            df_current = df_clean
-        elif df_raw is not None:
-            df_current = df_raw
-        else:
+        if df_current is None:
             st.warning("⚠️ Please upload a dataset in Tab 1 before using the AI Assistant.")
             st.stop()
-            
-        # ✅ Save df_current to session
+        
         st.session_state["df_current"] = df_current
+
         
         # Let user choose full dataset or sample
         sample_option = st.checkbox("Use full dataset for AI analysis (may be slower)", value=False, key="ai_sample_option")
@@ -346,8 +342,6 @@ with tab2:
     
                 except Exception as e:
                     st.error(f"API Error: {e}")
-        else:
-            st.warning("Please upload and clean your dataset first in Tab 1.")
               
     
         # # --- Optional Chart Builder ---
