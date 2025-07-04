@@ -42,7 +42,7 @@ tab1, tab2, tab3, tab4, tab5 = st.tabs([
     "📁 Upload & Clean Data", 
     "🤖 AI Assistant",                         #📊 Quick Analysis
     "📊 Quick Analysis", 
-    "📈 Forecasting", 
+    "📈 Forecasting & Advanced Analysis", 
     "📐 Data Science & Statistical Tools"
 ])
 
