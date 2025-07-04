@@ -574,178 +574,178 @@ with tab4:
         )  
     
         # --- Predictive Forecasting (Simple Time Series) ---
-        with st.expander("📈 Forecast Future Values (Beta)", expanded=True):
-            try:
-                date_cols = [col for col in df_sample.columns if pd.api.types.is_datetime64_any_dtype(df_sample[col])]
-                numeric_cols = df_sample.select_dtypes(include='number').columns.tolist()
-        
-                if not date_cols:
-                    st.warning("No datetime column found. Please include a date column to enable forecasting.")
+        st.markdown("## 📈 Forecast Future Values (Beta)")
+        try:
+            date_cols = [col for col in df_sample.columns if pd.api.types.is_datetime64_any_dtype(df_sample[col])]
+            numeric_cols = df_sample.select_dtypes(include='number').columns.tolist()
+    
+            if not date_cols:
+                st.warning("No datetime column found. Please include a date column to enable forecasting.")
+            else:
+                date_col = st.selectbox("Select the date column:", date_cols)
+                target_col = st.selectbox("Select the value to forecast:", numeric_cols)
+    
+                # User input for forecast horizon
+                forecast_periods = st.slider("Months to forecast", min_value=1, max_value=12, value=6)
+    
+                # Prepare data
+                df_forecast = df_sample[[date_col, target_col]].dropna().copy()
+                df_forecast[date_col] = pd.to_datetime(df_forecast[date_col], errors='coerce')
+                
+                # Detect if any date has only a year (e.g., 2023) by checking if all dates are Jan 1
+                if (df_forecast[date_col].dt.month == 1).all() and (df_forecast[date_col].dt.day == 1).all():
+                    df_forecast[date_col] = df_forecast[date_col].dt.to_period("Y").dt.to_timestamp()
                 else:
-                    date_col = st.selectbox("Select the date column:", date_cols)
-                    target_col = st.selectbox("Select the value to forecast:", numeric_cols)
-        
-                    # User input for forecast horizon
-                    forecast_periods = st.slider("Months to forecast", min_value=1, max_value=12, value=6)
-        
-                    # Prepare data
-                    df_forecast = df_sample[[date_col, target_col]].dropna().copy()
-                    df_forecast[date_col] = pd.to_datetime(df_forecast[date_col], errors='coerce')
-                    
-                    # Detect if any date has only a year (e.g., 2023) by checking if all dates are Jan 1
-                    if (df_forecast[date_col].dt.month == 1).all() and (df_forecast[date_col].dt.day == 1).all():
-                        df_forecast[date_col] = df_forecast[date_col].dt.to_period("Y").dt.to_timestamp()
-                    else:
-                        df_forecast[date_col] = df_forecast[date_col].dt.normalize()
-                    df_forecast = df_forecast.sort_values(date_col)
+                    df_forecast[date_col] = df_forecast[date_col].dt.normalize()
+                df_forecast = df_forecast.sort_values(date_col)
+
+                # Convert dates to ordinal for regression
+                df_forecast['ordinal_date'] = df_forecast[date_col].map(datetime.datetime.toordinal)
+                X = df_forecast[['ordinal_date']]
+                y = df_forecast[target_col]
     
-                    # Convert dates to ordinal for regression
-                    df_forecast['ordinal_date'] = df_forecast[date_col].map(datetime.datetime.toordinal)
-                    X = df_forecast[['ordinal_date']]
-                    y = df_forecast[target_col]
-        
-                    model = LinearRegression()
-                    model.fit(X, y)
-        
-                    # Forecast future dates
-                    last_date = df_forecast[date_col].max()
-                    future_dates = [last_date + pd.DateOffset(months=i) for i in range(1, forecast_periods + 1)]
-                    future_ordinal = [[d.toordinal()] for d in future_dates]
-                    predictions = model.predict(future_ordinal)
-        
-                    # Create forecast DataFrame
-                    forecast_df = pd.DataFrame({
-                        date_col: future_dates,
-                        'Forecast': predictions
-                    })
-                    forecast_df[date_col] = pd.to_datetime(forecast_df[date_col]).dt.normalize()
+                model = LinearRegression()
+                model.fit(X, y)
     
-                    # Rename forecast column first
-                    forecast_df_renamed = forecast_df.rename(columns={'Forecast': "Actual"}, inplace=True)
-        
-                    # Combine past + forecast
-                    full_df = pd.concat([
-                        df_forecast[[date_col, target_col]].rename(columns={target_col: "Actual"}),
-                        forecast_df_renamed
-                    ]).reset_index(drop=True)
+                # Forecast future dates
+                last_date = df_forecast[date_col].max()
+                future_dates = [last_date + pd.DateOffset(months=i) for i in range(1, forecast_periods + 1)]
+                future_ordinal = [[d.toordinal()] for d in future_dates]
+                predictions = model.predict(future_ordinal)
     
-                    # 🔍 Detect if the dates are yearly or monthly
-                    if (df_forecast[date_col].dt.month == 1).all() and (df_forecast[date_col].dt.day == 1).all():
-                        forecast_title = f"📅 Yearly Forecast for {target_col}"
-                    else:
-                        forecast_title = f"📆 Monthly Forecast for {target_col}"
+                # Create forecast DataFrame
+                forecast_df = pd.DataFrame({
+                    date_col: future_dates,
+                    'Forecast': predictions
+                })
+                forecast_df[date_col] = pd.to_datetime(forecast_df[date_col]).dt.normalize()
+
+                # Rename forecast column first
+                forecast_df_renamed = forecast_df.rename(columns={'Forecast': "Actual"}, inplace=True)
     
-                    # Plot
-                    fig = px.line(full_df, x=date_col, y="Actual", title=forecast_title, markers=True)
-                    fig.add_scatter(x=forecast_df[date_col], y=forecast_df["Actual"], mode="lines+markers", name="Forecast")
-        
-                    st.plotly_chart(fig, use_container_width=True)
-        
-            except Exception as e:
-                st.error(f"Forecasting failed: {e}")
+                # Combine past + forecast
+                full_df = pd.concat([
+                    df_forecast[[date_col, target_col]].rename(columns={target_col: "Actual"}),
+                    forecast_df_renamed
+                ]).reset_index(drop=True)
+
+                # 🔍 Detect if the dates are yearly or monthly
+                if (df_forecast[date_col].dt.month == 1).all() and (df_forecast[date_col].dt.day == 1).all():
+                    forecast_title = f"📅 Yearly Forecast for {target_col}"
+                else:
+                    forecast_title = f"📆 Monthly Forecast for {target_col}"
+
+                # Plot
+                fig = px.line(full_df, x=date_col, y="Actual", title=forecast_title, markers=True)
+                fig.add_scatter(x=forecast_df[date_col], y=forecast_df["Actual"], mode="lines+markers", name="Forecast")
+    
+                st.plotly_chart(fig, use_container_width=True)
+    
+        except Exception as e:
+            st.error(f"Forecasting failed: {e}")
                       
         # --- Advanced Forecasting with Prophet ---
-        with st.expander("🔮 Advanced Forecasting (Prophet)", expanded=True):
-            with st.expander("ℹ️ Prophet Forecasting Requirements", expanded=False):
-                st.markdown("""
-                - **Data must be time series** (e.g., monthly sales)
-                - Minimum of **12 time points** for meaningful predictions
-                - Prophet expects **consistent intervals** (no gaps)
-                - Date column will be automatically converted to `ds`
-                - Value to forecast will be used as `y`
-                """)
-            try:
-                date_cols = [col for col in df_sample.columns if pd.api.types.is_datetime64_any_dtype(df_sample[col])]
-                numeric_cols = df_sample.select_dtypes(include='number').columns.tolist()
-        
-                if not date_cols:
-                    st.warning("No datetime column found. Please include a date column to enable Prophet forecasting.")
-                else:
-                    date_col = st.selectbox("📅 Select date column (Prophet):", date_cols, key="prophet_date")
-                    target_col = st.selectbox("📈 Select value to forecast (Prophet):", numeric_cols, key="prophet_target")
-                    forecast_months = st.slider("⏩ Months to forecast (Prophet)", 1, 12, 6, key="prophet_months")
-        
-                    df_prophet = df_sample[[date_col, target_col]].dropna().copy()
-                    df_prophet.columns = ["ds", "y"]
-                    df_prophet["ds"] = pd.to_datetime(df_prophet["ds"], errors="coerce")
-                    df_prophet = df_prophet.dropna()
-        
-                    m = Prophet()
-                    m.fit(df_prophet)
-        
-                    future = m.make_future_dataframe(periods=forecast_months * 30, freq='D')  # roughly 1 month = 30 days
-                    forecast = m.predict(future)
-        
-                    st.write("📊 Forecast Table:")
-                    st.dataframe(forecast[["ds", "yhat", "yhat_lower", "yhat_upper"]].tail(forecast_months * 30))
-        
-                    st.write("📈 Forecast Plot:")
-                    fig1 = m.plot(forecast)
-                    st.pyplot(fig1)
-        
-                    st.write("📉 Forecast Components:")
-                    fig2 = m.plot_components(forecast)
-                    st.pyplot(fig2)
-        
-            except Exception as e:
-                st.error(f"Prophet forecasting failed: {e}")
+        st.markdown("## 🔮 Advanced Forecasting (Prophet)")
+        with st.expander("ℹ️ Prophet Forecasting Requirements", expanded=False):
+            st.markdown("""
+            - **Data must be time series** (e.g., monthly sales)
+            - Minimum of **12 time points** for meaningful predictions
+            - Prophet expects **consistent intervals** (no gaps)
+            - Date column will be automatically converted to `ds`
+            - Value to forecast will be used as `y`
+            """)
+        try:
+            date_cols = [col for col in df_sample.columns if pd.api.types.is_datetime64_any_dtype(df_sample[col])]
+            numeric_cols = df_sample.select_dtypes(include='number').columns.tolist()
+    
+            if not date_cols:
+                st.warning("No datetime column found. Please include a date column to enable Prophet forecasting.")
+            else:
+                date_col = st.selectbox("📅 Select date column (Prophet):", date_cols, key="prophet_date")
+                target_col = st.selectbox("📈 Select value to forecast (Prophet):", numeric_cols, key="prophet_target")
+                forecast_months = st.slider("⏩ Months to forecast (Prophet)", 1, 12, 6, key="prophet_months")
+    
+                df_prophet = df_sample[[date_col, target_col]].dropna().copy()
+                df_prophet.columns = ["ds", "y"]
+                df_prophet["ds"] = pd.to_datetime(df_prophet["ds"], errors="coerce")
+                df_prophet = df_prophet.dropna()
+    
+                m = Prophet()
+                m.fit(df_prophet)
+    
+                future = m.make_future_dataframe(periods=forecast_months * 30, freq='D')  # roughly 1 month = 30 days
+                forecast = m.predict(future)
+    
+                st.write("📊 Forecast Table:")
+                st.dataframe(forecast[["ds", "yhat", "yhat_lower", "yhat_upper"]].tail(forecast_months * 30))
+    
+                st.write("📈 Forecast Plot:")
+                fig1 = m.plot(forecast)
+                st.pyplot(fig1)
+    
+                st.write("📉 Forecast Components:")
+                fig2 = m.plot_components(forecast)
+                st.pyplot(fig2)
+    
+        except Exception as e:
+            st.error(f"Prophet forecasting failed: {e}")
         
         # --- Univariate Analysis ---
-        with st.expander("📈 Univariate Analysis", expanded=True):
-            num_cols = df_sample.select_dtypes(include=np.number).columns.tolist()
-            analysis_option = st.selectbox("Select a univariate analysis option:", [
-                "Single Column Analysis",
-                "Histogram Grid for All Numeric Columns",
-                "Boxplot Grid for All Numeric Columns"
-            ])
-    
-            if analysis_option == "Single Column Analysis":
-                selected_col = st.selectbox("Select a numeric column for analysis:", options=num_cols)
-                if selected_col:
-                    col_data = df_sample[selected_col].dropna()
-                    st.write(f"**Summary Statistics for {selected_col}:**")
-                    st.write(col_data.describe().T)
-                    st.write(f"**Skewness:** {skew(col_data):.3f}")
-                    st.write(f"**Kurtosis:** {kurtosis(col_data):.3f}")
-                    st.plotly_chart(px.histogram(col_data, nbins=30, title=f"Histogram of {selected_col}"))
-                    st.plotly_chart(px.box(df_sample, y=selected_col, title=f"Boxplot of {selected_col}"))
-    
-            elif analysis_option == "Histogram Grid for All Numeric Columns":
-                if st.button("Generate Histograms"):
-                    num_features = len(num_cols)
-                    cols = 3
-                    rows = -(-num_features // cols)
-                    fig, axes = plt.subplots(rows, cols, figsize=(15, 5 * rows))
-                    axes = axes.flatten()
-                    for i, col in enumerate(num_cols):
-                        sns.histplot(data=df_sample, x=col, ax=axes[i], kde=True)
-                        axes[i].set_title(f"Histogram of {col}")
-                    for j in range(i + 1, len(axes)):
-                        fig.delaxes(axes[j])
-                    st.pyplot(fig)
-    
-            elif analysis_option == "Boxplot Grid for All Numeric Columns":
-                if st.button("Generate Boxplots"):
-                    num_features = len(num_cols)
-                    cols = 3
-                    rows = -(-num_features // cols)
-                    fig, axes = plt.subplots(rows, cols, figsize=(15, 5 * rows))
-                    axes = axes.flatten()
-                    for i, col in enumerate(num_cols):
-                        sns.boxplot(data=df_sample, x=col, ax=axes[i])
-                        axes[i].set_title(f"Boxplot of {col}")
-                    for j in range(i + 1, len(axes)):
-                        fig.delaxes(axes[j])
-                    st.pyplot(fig)
+        st.markdown("## 📈 Univariate Analysis")
+        num_cols = df_sample.select_dtypes(include=np.number).columns.tolist()
+        analysis_option = st.selectbox("Select a univariate analysis option:", [
+            "Single Column Analysis",
+            "Histogram Grid for All Numeric Columns",
+            "Boxplot Grid for All Numeric Columns"
+        ])
+
+        if analysis_option == "Single Column Analysis":
+            selected_col = st.selectbox("Select a numeric column for analysis:", options=num_cols)
+            if selected_col:
+                col_data = df_sample[selected_col].dropna()
+                st.write(f"**Summary Statistics for {selected_col}:**")
+                st.write(col_data.describe().T)
+                st.write(f"**Skewness:** {skew(col_data):.3f}")
+                st.write(f"**Kurtosis:** {kurtosis(col_data):.3f}")
+                st.plotly_chart(px.histogram(col_data, nbins=30, title=f"Histogram of {selected_col}"))
+                st.plotly_chart(px.box(df_sample, y=selected_col, title=f"Boxplot of {selected_col}"))
+
+        elif analysis_option == "Histogram Grid for All Numeric Columns":
+            if st.button("Generate Histograms"):
+                num_features = len(num_cols)
+                cols = 3
+                rows = -(-num_features // cols)
+                fig, axes = plt.subplots(rows, cols, figsize=(15, 5 * rows))
+                axes = axes.flatten()
+                for i, col in enumerate(num_cols):
+                    sns.histplot(data=df_sample, x=col, ax=axes[i], kde=True)
+                    axes[i].set_title(f"Histogram of {col}")
+                for j in range(i + 1, len(axes)):
+                    fig.delaxes(axes[j])
+                st.pyplot(fig)
+
+        elif analysis_option == "Boxplot Grid for All Numeric Columns":
+            if st.button("Generate Boxplots"):
+                num_features = len(num_cols)
+                cols = 3
+                rows = -(-num_features // cols)
+                fig, axes = plt.subplots(rows, cols, figsize=(15, 5 * rows))
+                axes = axes.flatten()
+                for i, col in enumerate(num_cols):
+                    sns.boxplot(data=df_sample, x=col, ax=axes[i])
+                    axes[i].set_title(f"Boxplot of {col}")
+                for j in range(i + 1, len(axes)):
+                    fig.delaxes(axes[j])
+                st.pyplot(fig)
     
         # --- Variable Relationships ---
-        with st.expander("🔍 Explore Variable Relationships", expanded=True):
-            st.markdown("### 🔥 Correlation Heatmap")
-            if st.button("Generate Correlation Heatmap"):
-                corr = df_sample.select_dtypes(include=np.number).corr()
-                fig, ax = plt.subplots(figsize=(12, 7))
-                sns.heatmap(corr, annot=True, vmin=-1, vmax=1, fmt=".2f", cmap="Spectral", ax=ax)
-                st.pyplot(fig)
+        st.markdown("## 🔍 Explore Variable Relationships")
+        st.markdown("### 🔥 Correlation Heatmap")
+        if st.button("Generate Correlation Heatmap"):
+            corr = df_sample.select_dtypes(include=np.number).corr()
+            fig, ax = plt.subplots(figsize=(12, 7))
+            sns.heatmap(corr, annot=True, vmin=-1, vmax=1, fmt=".2f", cmap="Spectral", ax=ax)
+            st.pyplot(fig)
 
     # --- Divider ---
 
