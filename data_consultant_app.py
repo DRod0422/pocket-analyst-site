@@ -263,8 +263,12 @@ with tab2:
         # ✅ Save df_current to session
         st.session_state["df_current"] = df_current
         
-        if df_current is None:
-            st.warning("Please upload your dataset in Tab 1.")
+        if df_clean is not None:
+            df_current = df_clean
+        elif df_raw is not None:
+            df_current = df_raw
+        else:
+            st.warning("⚠️ Please upload a dataset in Tab 1 before using the AI Assistant.")
             st.stop()
         
         # Let user choose full dataset or sample
