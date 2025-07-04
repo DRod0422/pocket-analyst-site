@@ -749,11 +749,11 @@ with tab4:
         # --- Variable Relationships ---
         st.markdown("## 🔍 Explore Variable Relationships")
         st.expander("### 🔥 Correlation Heatmap", exanded=False)
-        if st.button("Generate Correlation Heatmap"):
-            corr = df_sample.select_dtypes(include=np.number).corr()
-            fig, ax = plt.subplots(figsize=(12, 7))
-            sns.heatmap(corr, annot=True, vmin=-1, vmax=1, fmt=".2f", cmap="Spectral", ax=ax)
-            st.pyplot(fig)
+            if st.button("Generate Correlation Heatmap"):
+                corr = df_sample.select_dtypes(include=np.number).corr()
+                fig, ax = plt.subplots(figsize=(12, 7))
+                sns.heatmap(corr, annot=True, vmin=-1, vmax=1, fmt=".2f", cmap="Spectral", ax=ax)
+                st.pyplot(fig)
 
 # --- Divider ---
 st.markdown('---')
