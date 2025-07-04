@@ -79,7 +79,8 @@ with tab1:
             sheet_names = xls.sheet_names
             selected_sheet = st.selectbox("Select a sheet to load", sheet_names)
             df_raw = pd.read_excel(xls, sheet_name=selected_sheet)
-        st.session_state["df-raw"] = df_raw
+            
+        st.session_state["df_raw"] = df_raw
         
         # ✅ Only clean the data if it's new or changed
         if "last_uploaded_name" not in st.session_state or st.session_state.last_uploaded_name != uploaded_file.name:
