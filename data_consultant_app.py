@@ -272,7 +272,7 @@ with tab2:
         
         # Save to session (for consistency across tabs)
         if df_current is not None:
-            sample_option = st.checkbox("Use full dataset for AI analysis (may be slower)", value=False)
+            sample_option = st.checkbox("Use full dataset for AI analysis (may be slower)", value=False, key="ai_sample_option")
         
             if not sample_option and len(df_current) > 5000:
                 st.warning(f"Large dataset detected ({len(df_current)} rows). Sampling 1000 rows for faster performance.")
