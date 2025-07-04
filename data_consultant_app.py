@@ -574,7 +574,7 @@ with tab4:
         )  
     
         # --- Predictive Forecasting (Simple Time Series) ---
-        with st.expander("📈 Forecast Future Values (Beta)", expanded=False):
+        with st.expander("📈 Forecast Future Values (Beta)", expanded=True):
             try:
                 date_cols = [col for col in df_sample.columns if pd.api.types.is_datetime64_any_dtype(df_sample[col])]
                 numeric_cols = df_sample.select_dtypes(include='number').columns.tolist()
@@ -645,7 +645,7 @@ with tab4:
                 st.error(f"Forecasting failed: {e}")
                       
         # --- Advanced Forecasting with Prophet ---
-        with st.expander("🔮 Advanced Forecasting (Prophet)", expanded=False):
+        with st.expander("🔮 Advanced Forecasting (Prophet)", expanded=True):
             with st.expander("ℹ️ Prophet Forecasting Requirements", expanded=False):
                 st.markdown("""
                 - **Data must be time series** (e.g., monthly sales)
@@ -691,7 +691,7 @@ with tab4:
                 st.error(f"Prophet forecasting failed: {e}")
         
         # --- Univariate Analysis ---
-        with st.expander("📈 Univariate Analysis"):
+        with st.expander("📈 Univariate Analysis", expanded=True):
             num_cols = df_sample.select_dtypes(include=np.number).columns.tolist()
             analysis_option = st.selectbox("Select a univariate analysis option:", [
                 "Single Column Analysis",
@@ -739,7 +739,7 @@ with tab4:
                     st.pyplot(fig)
     
         # --- Variable Relationships ---
-        with st.expander("🔍 Explore Variable Relationships"):
+        with st.expander("🔍 Explore Variable Relationships", expanded=True):
             st.markdown("### 🔥 Correlation Heatmap")
             if st.button("Generate Correlation Heatmap"):
                 corr = df_sample.select_dtypes(include=np.number).corr()
