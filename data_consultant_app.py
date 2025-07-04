@@ -254,7 +254,7 @@ with tab2:
     
         # --- Get Cleaned Data ---
         df_clean = st.session_state.get("df_clean")
-        df_current = df_clean or st.session_state.get("df_raw")
+        df_current = df_clean if df_clean is not None else st.session_state.get("df_raw")
         
         if df_current is not None:
             # 🔘 Let user choose whether to use the full dataset or a sample
