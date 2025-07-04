@@ -770,6 +770,49 @@ with tab4:
             sns.heatmap(corr, annot=True, vmin=-1, vmax=1, fmt=".2f", cmap="Spectral", ax=ax)
             st.pyplot(fig)
 
+        # --- Divider ---
+        st.markdown('---')
+
+        # --- Bivariate Analysis ---
+        st.markdown("## 🔁 Bivariate Analysis")
+        st.markdown("Explore relationships between two numeric columns using scatter plots and correlation scores.")
+        
+        num_cols = df_sample.select_dtypes(include="number").columns.tolist()
+        
+        if len(num_cols) >= 2:
+            col1 = st.selectbox("Select first column", options=num_cols, key="biv_col1")
+            col2 = st.selectbox("Select second column", options=[c for c in num_cols if c != col1], key="biv_col2")
+        
+            if col1 and col2:
+                st.plotly_chart(
+                    px.scatter(df_sample, x=col1, y=col2, trendline="ols", title=f"{col1} vs {col2}"),
+                    use_container_width=True
+                )
+        
+                corr_val = df_sample[col1].corr(df_sample[col2])
+                st.markdown(f"**Pearson Correlation:** `{corr_val:.2f}`")
+        
+                # Optional AI-style insight
+                ai_key = f"ai_bivar_{col1}_{col2}"
+                if ai_key not in st.session_state:
+                    st.session_state[ai_key] = False
+        
+                if not st.session_state[ai_key]:
+                    if st.checkbox("🧠 Show AI-style interpretation", key=ai_key):
+                        st.session_state[ai_key] = True
+        
+                if st.session_state[ai_key]:
+                    if abs(corr_val) > 0.7:
+                        st.markdown(f"🧠 **Insight:** There’s a strong {'positive' if corr_val > 0 else 'negative'} linear relationship between **{col1}** and **{col2}**.")
+                    elif abs(corr_val) > 0.3:
+                        st.markdown(f"🧠 **Insight:** There's a moderate correlation between **{col1}** and **{col2}**.")
+                    else:
+                        st.markdown(f"🧠 **Insight:** There's little to no linear relationship between **{col1}** and **{col2}**.")
+        
+        else:
+            st.warning("⚠️ Not enough numeric columns to perform bivariate analysis.")
+
+
 # --- Divider ---
 
 def run_auto_statistical_insights(df):
