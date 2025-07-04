@@ -271,15 +271,17 @@ with tab2:
             df_sample = df_current
         
         # Save to session (for consistency across tabs)
-        st.session_state["df_sample"] = df_sample
+        if df_current is not None:
+            sample_option = st.checkbox("Use full dataset for AI analysis (may be slower)", value=False)
         
-        if not sample_option and len(df_current) > 5000:
-            st.warning(f"Large dataset detected ({len(df_current)} rows). Sampling 1000 rows for faster performance.")
-            df_sample = df_current.sample(n=1000, random_state=42)
+            if not sample_option and len(df_current) > 5000:
+                st.warning(f"Large dataset detected ({len(df_current)} rows). Sampling 1000 rows for faster performance.")
+                df_sample = df_current.sample(n=1000, random_state=42)
+            else:
+                df_sample = df_current
         else:
-            df_sample = df_current
-        else:
-            df_sample = None
+            st.warning("Please upload and clean your dataset first in Tab 1.")
+            st.stop()
         
         st.session_state["df_sample"] = df_sample
      
