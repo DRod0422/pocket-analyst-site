@@ -272,13 +272,12 @@ with tab2:
         
         # Save to session (for consistency across tabs)
         st.session_state["df_sample"] = df_sample
-
         
-            if not sample_option and len(df_current) > 5000:
-                st.warning(f"Large dataset detected ({len(df_current)} rows). Sampling 1000 rows for faster performance.")
-                df_sample = df_current.sample(n=1000, random_state=42)
-            else:
-                df_sample = df_current
+        if not sample_option and len(df_current) > 5000:
+            st.warning(f"Large dataset detected ({len(df_current)} rows). Sampling 1000 rows for faster performance.")
+            df_sample = df_current.sample(n=1000, random_state=42)
+        else:
+            df_sample = df_current
         else:
             df_sample = None
         
