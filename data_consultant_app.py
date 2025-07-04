@@ -697,20 +697,20 @@ with tab4:
                 m = Prophet()
                 m.fit(df_prophet)
     
-            if not date_cols:
-                st.warning("No datetime column found. Please include a date column to enable Prophet forecasting.")
-            else:
-                date_col = st.selectbox("📅 Select date column (Prophet):", date_cols, key="prophet_date")
-                target_col = st.selectbox("📈 Select value to forecast (Prophet):", numeric_cols, key="prophet_target")
-                forecast_months = st.slider("⏩ Months to forecast (Prophet)", 1, 12, 6, key="prophet_months")
+            # if not date_cols:
+            #     st.warning("No datetime column found. Please include a date column to enable Prophet forecasting.")
+            # else:
+            #     date_col = st.selectbox("📅 Select date column (Prophet):", date_cols, key="prophet_date")
+            #     target_col = st.selectbox("📈 Select value to forecast (Prophet):", numeric_cols, key="prophet_target")
+            #     forecast_months = st.slider("⏩ Months to forecast (Prophet)", 1, 12, 6, key="prophet_months")
     
-                df_prophet = df_current[[date_col, target_col]].dropna().copy()
-                df_prophet.columns = ["ds", "y"]
-                df_prophet["ds"] = pd.to_datetime(df_prophet["ds"], errors="coerce")
-                df_prophet = df_prophet.dropna()
+            #     df_prophet = df_current[[date_col, target_col]].dropna().copy()
+            #     df_prophet.columns = ["ds", "y"]
+            #     df_prophet["ds"] = pd.to_datetime(df_prophet["ds"], errors="coerce")
+            #     df_prophet = df_prophet.dropna()
     
-                m = Prophet()
-                m.fit(df_prophet)
+            #     m = Prophet()
+            #     m.fit(df_prophet)
     
                 future = m.make_future_dataframe(periods=forecast_months * 30, freq='D')  # roughly 1 month = 30 days
                 forecast = m.predict(future)
