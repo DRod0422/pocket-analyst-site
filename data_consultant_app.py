@@ -934,7 +934,12 @@ with tab5:
         st.markdown("## 🔬 Data Scientist Tools (Pro Preview) *Beta*")
         st.markdown("Use normalized data or raw cleaned data for training machine learning models like Random Forests.")
 
-        data_for_modeling = st.session_state.get("normalized_data") or st.session_state.get("df_current")
+        data_for_modeling = (
+            st.session_state["normalized_data"]
+            if "normalized_data" in st.session_state and st.session_state["normalized_data"] is not None
+            else st.session_state.get("df_current")
+        )
+
     
         if data_for_modeling is not None:
             try:
