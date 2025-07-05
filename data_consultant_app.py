@@ -100,6 +100,12 @@ with tab1:
             else:
                 st.session_state["df_clean"] = None
                 
+            # Determine the working dataset based on cleaning toggle
+            if st.session_state.get("use_cleaning") and st.session_state.get("df_clean") is not None:
+                working_df = st.session_state["df_clean"]
+            else:
+                working_df = st.session_state["df_raw"]    
+                
             st.session_state["df_current"] = working_df
             # ✅ Show dataset summary
             st.info(f"Loaded dataset with `{working_df.shape[0]}` rows and `{working_df.shape[1]}` columns.")
