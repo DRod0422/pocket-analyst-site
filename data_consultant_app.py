@@ -147,11 +147,12 @@ with tab1:
         - Optionally: Drop columns manually before running ML models
         """, unsafe_allow_html=True)
         
+        df_clean = st.session_state.get("df_clean")
         drop_columns = []
         if df_clean is not None and isinstance(df_clean, pd.DataFrame):
             drop_columns = st.multiselect("Optional: Drop Columns Before Processing", df_clean.columns.tolist())
         else:
-            st.warning("⚠️ Cleaned data not available. Please enable auto-cleaning or clean your data manually.")
+            st.warning("⚠️ Cleaned data not available. Please check 'Auto-clean uploaded data?' in Tab 1 and re-upload your file.")
 
         
         # Select scaler
