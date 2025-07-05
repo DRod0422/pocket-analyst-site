@@ -69,61 +69,56 @@ def detect_chart_type_and_columns(question, df):
 # --- File Upload Section ---
 with tab1:
     uploaded_file = st.file_uploader("Upload a CSV or XLSX file", type=["csv", "xlsx"])
-
+    
     if uploaded_file:
+        # --- Load raw data (supporting multi-sheet Excel)
         if uploaded_file.name.endswith(".csv"):
             df_raw = pd.read_csv(uploaded_file)
+            selected_sheet = None
         else:
             xls = pd.ExcelFile(uploaded_file)
             sheet_names = xls.sheet_names
             selected_sheet = st.selectbox("Select a sheet to load", sheet_names)
             df_raw = pd.read_excel(xls, sheet_name=selected_sheet)
+            st.session_state["selected_sheet"] = selected_sheet
     
         st.session_state["df_raw"] = df_raw
+        st.session_state["last_uploaded_name"] = uploaded_file.name
     
-        # 🧼 Show cleaning option immediately after upload
+        # --- Cleaning toggle
         use_cleaning = st.checkbox("🧼 Auto-clean uploaded data?", value=st.session_state.get("use_cleaning", False))
         st.session_state["use_cleaning"] = use_cleaning
     
-        # 🧼 Clean only if selected and file is new
-        if (
-            "last_uploaded_name" not in st.session_state
-            or st.session_state.last_uploaded_name != uploaded_file.name
-            or (use_cleaning and st.session_state.get("df_clean") is None)
-        ):
-            st.session_state.last_uploaded_name = uploaded_file.name
-            st.session_state.ai_ran_once = False
+        # --- Apply cleaning immediately if selected
+        if use_cleaning:
+            from utils import clean_and_format_data
+            df_clean, clean_log = clean_and_format_data(df_raw, log=True)
+            st.session_state["df_clean"] = df_clean
+            df_current = df_clean
+            st.success("✅ File cleaned and loaded.")
+            for entry in clean_log:
+                st.markdown(f"🧼 {entry}")
+        else:
+            st.session_state["df_clean"] = None
+            df_current = df_raw
     
-            if use_cleaning:
-                from utils import clean_and_format_data
-                df_clean, clean_log = clean_and_format_data(df_raw, log=True)
-                st.session_state["df_clean"] = df_clean
-                st.success("✅ File cleaned and loaded.")
-                for entry in clean_log:
-                    st.markdown(f"🧼 {entry}")
-            else:
-                st.session_state["df_clean"] = None
-    
-        # 🔁 Decide current working dataset
-        df_current = st.session_state["df_clean"] if use_cleaning and st.session_state.get("df_clean") is not None else df_raw
+        # --- Save working dataset
         st.session_state["df_current"] = df_current
     
-        # 👁 Preview + shape info
+        # --- Preview and stats
         st.info(f"Loaded dataset with `{df_current.shape[0]}` rows × `{df_current.shape[1]}` columns.")
         st.subheader("Preview of Your Data")
         st.dataframe(df_current.head(100))
     
-        # 🧪 Optional sampling for UI performance
+        # --- Optional sampling for speed
         if len(df_current) > 5000:
             st.warning(f"Large dataset detected ({len(df_current)} rows). Sampling 1000 rows for UI.")
             df_sample = df_current.sample(n=1000, random_state=42)
         else:
             df_sample = df_current
-
-        
-        # ✅ Save both to session state
-        st.session_state["df_sample"] = df_sample              # For UI / visuals
-        st.session_state["df_current_full"] = df_current       # For modeling & insights
+    
+        st.session_state["df_sample"] = df_sample
+        st.session_state["df_current_full"] = df_current     # For modeling & insights
  
             
         # # ✅ Reset AI trigger
