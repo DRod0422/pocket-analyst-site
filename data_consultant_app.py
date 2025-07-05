@@ -160,7 +160,12 @@ with tab1:
         - Optionally: Drop columns manually before running ML models
         """, unsafe_allow_html=True)
         
-        drop_columns = st.multiselect("Optional: Drop Columns Before Processing", df_clean.columns.tolist())
+        drop_columns = []
+        if isinstance(df_clean, pd.DataFrame):
+            drop_columns = st.multiselect("Optional: Drop Columns Before Processing", df_clean.columns.tolist())
+        else:
+            st.warning("⚠️ Cleaned data not available. Please enable auto-cleaning or clean your data manually.")
+
         
         # Select scaler
         scaler_choice = st.selectbox(
