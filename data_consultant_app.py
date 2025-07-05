@@ -81,7 +81,7 @@ with tab1:
     
         st.session_state["df_raw"] = df_raw
     
-        # 🧼 Always show checkbox so user can toggle cleaning
+        # 🧼 show checkbox once after upload
         use_cleaning = st.checkbox("🧼 Auto-clean uploaded data?", value=False)
         st.session_state["use_cleaning"] = use_cleaning
     
@@ -118,10 +118,11 @@ with tab1:
             st.subheader("Preview of Your Data")
             df_clean = st.session_state.get("df_clean")
     
-            if df_clean is not None:
-                st.dataframe(df_clean.head(100))
-            else:
-                st.info("ℹ️ Auto-cleaned data not available. Please enable cleaning or view the raw dataset.")
+            if not st.session_state.get("use_cleaning", False):
+                st.info("You're currently using raw data. To enable cleaning, check the auto-clean box in Tab 1.")
+            elif df_clean is None:
+                st.warning("Cleaning was enabled but no cleaned data is available. Please re-upload or refresh.")
+
             # --- Separate sample (for display) and full data (for logic/stats/modeling) ---
             if df_current is not None and len(df_current) > 5000:
                 st.warning(f"Large dataset detected ({len(df_current)} rows). Sampling 1000 rows for fast UI performance.")
