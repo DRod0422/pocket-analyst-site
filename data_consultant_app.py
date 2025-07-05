@@ -69,70 +69,59 @@ def detect_chart_type_and_columns(question, df):
 # --- File Upload Section ---
 with tab1:
     uploaded_file = st.file_uploader("Upload a CSV or XLSX file", type=["csv", "xlsx"])
-    
+
     if uploaded_file:
         if uploaded_file.name.endswith(".csv"):
             df_raw = pd.read_csv(uploaded_file)
         else:
-            # Get available sheet names
             xls = pd.ExcelFile(uploaded_file)
             sheet_names = xls.sheet_names
             selected_sheet = st.selectbox("Select a sheet to load", sheet_names)
             df_raw = pd.read_excel(xls, sheet_name=selected_sheet)
-            
+    
         st.session_state["df_raw"] = df_raw
-        
-        # ✅ Only clean the data if it's new or changed
-        if "last_uploaded_name" not in st.session_state or st.session_state.last_uploaded_name != uploaded_file.name:
+    
+        # 🧼 Always show checkbox so user can toggle cleaning
+        use_cleaning = st.checkbox("🧼 Auto-clean uploaded data?", value=False)
+        st.session_state["use_cleaning"] = use_cleaning
+    
+        # ✅ Only clean if selected AND this is a new file
+        if "last_uploaded_name" not in st.session_state or st.session_state.last_uploaded_name != uploaded_file.name or st.session_state.get("df_clean") is None:
             st.session_state.last_uploaded_name = uploaded_file.name
-            st.session_state.ai_ran_once = False  # Reset AI insights on new file
-        
-            # Ask user if they want cleaning
-            use_cleaning = st.checkbox("🧼 Auto-clean uploaded data?", value=False)
-            st.session_state["use_cleaning"] = use_cleaning
-        
+            st.session_state.ai_ran_once = False  # Optional: reset AI-related state
+    
             if use_cleaning:
                 from utils import clean_and_format_data
                 df_clean, clean_log = clean_and_format_data(df_raw, log=True)
                 st.session_state["df_clean"] = df_clean
-        
                 st.success("✅ File cleaned and loaded.")
                 for entry in clean_log:
                     st.markdown(f"🧼 {entry}")
             else:
                 st.session_state["df_clean"] = None
-        else:
-            use_cleaning = st.session_state.get("use_cleaning", True)
-            df_clean = st.session_state.get("df_clean")
-        
-        # Define df_sample from correct source
-        if use_cleaning and df_clean is not None:
-            working_df = df_clean
-        else:
-            working_df = df_raw
+                
+            st.session_state["df_current"] = working_df
+            # ✅ Show dataset summary
+            st.info(f"Loaded dataset with `{working_df.shape[0]}` rows and `{working_df.shape[1]}` columns.")
             
-        st.session_state["df_current"] = working_df
-        # ✅ Show dataset summary
-        st.info(f"Loaded dataset with `{working_df.shape[0]}` rows and `{working_df.shape[1]}` columns.")
-        
-        # Select which dataset to use for downstream tasks
-        apply_cleaning = st.checkbox("🧼 Apply Auto-Cleaning to Dataset", value=True)
-        # Decide which dataset to use
-        df_current = st.session_state["df_clean"] if apply_cleaning and "df_clean" in st.session_state else df_raw
-        # Show preview 
-        st.subheader("Preview of Your Data")
-        df_clean = st.session_state.get("df_clean")
-
-        if df_clean is not None:
-            st.dataframe(df_clean.head(100))
-        else:
-            st.info("ℹ️ Auto-cleaned data not available. Please enable cleaning or view the raw dataset.")
-        # --- Separate sample (for display) and full data (for logic/stats/modeling) ---
-        if df_current is not None and len(df_current) > 5000:
-            st.warning(f"Large dataset detected ({len(df_current)} rows). Sampling 1000 rows for fast UI performance.")
-            df_sample = df_current.sample(n=1000, random_state=42)
-        else:
-            df_sample = df_current
+            # Select which dataset to use for downstream tasks
+            apply_cleaning = st.checkbox("🧼 Apply Auto-Cleaning to Dataset", value=True)
+            # Decide which dataset to use
+            df_current = st.session_state["df_clean"] if apply_cleaning and "df_clean" in st.session_state else df_raw
+            # Show preview 
+            st.subheader("Preview of Your Data")
+            df_clean = st.session_state.get("df_clean")
+    
+            if df_clean is not None:
+                st.dataframe(df_clean.head(100))
+            else:
+                st.info("ℹ️ Auto-cleaned data not available. Please enable cleaning or view the raw dataset.")
+            # --- Separate sample (for display) and full data (for logic/stats/modeling) ---
+            if df_current is not None and len(df_current) > 5000:
+                st.warning(f"Large dataset detected ({len(df_current)} rows). Sampling 1000 rows for fast UI performance.")
+                df_sample = df_current.sample(n=1000, random_state=42)
+            else:
+                df_sample = df_current
         
         # ✅ Save both to session state
         st.session_state["df_sample"] = df_sample              # For UI / visuals
