@@ -121,10 +121,12 @@ with tab1:
         df_current = st.session_state["df_clean"] if apply_cleaning and "df_clean" in st.session_state else df_raw
         # Show preview 
         st.subheader("Preview of Your Data")
-        if apply_cleaning and "df_clean" in st.session_state:
-            st.dataframe(st.session_state["df_clean"].head(100))
+        df_clean = st.session_state.get("df_clean")
+
+        if df_clean is not None:
+            st.dataframe(df_clean.head(100))
         else:
-            st.dataframe(df_raw.head(100))
+            st.info("ℹ️ Auto-cleaned data not available. Please enable cleaning or view the raw dataset.")
         # --- Separate sample (for display) and full data (for logic/stats/modeling) ---
         if len(df_current) > 5000:
             st.warning(f"Large dataset detected ({len(df_current)} rows). Sampling 1000 rows for fast UI performance.")
