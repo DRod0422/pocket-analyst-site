@@ -88,7 +88,7 @@ with tab1:
             st.session_state.ai_ran_once = False  # Reset AI insights on new file
         
             # Ask user if they want cleaning
-            use_cleaning = st.checkbox("🧼 Auto-clean uploaded data?", value=True)
+            use_cleaning = st.checkbox("🧼 Auto-clean uploaded data?", value=False)
             st.session_state["use_cleaning"] = use_cleaning
         
             if use_cleaning:
