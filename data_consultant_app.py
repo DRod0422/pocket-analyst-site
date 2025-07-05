@@ -81,14 +81,18 @@ with tab1:
     
         st.session_state["df_raw"] = df_raw
     
-        # 🧼 show checkbox once after upload
-        use_cleaning = st.checkbox("🧼 Auto-clean uploaded data?", value=False)
+        # 🧼 Show cleaning option immediately after upload
+        use_cleaning = st.checkbox("🧼 Auto-clean uploaded data?", value=st.session_state.get("use_cleaning", False))
         st.session_state["use_cleaning"] = use_cleaning
     
-        # ✅ Only clean if selected AND this is a new file
-        if "last_uploaded_name" not in st.session_state or st.session_state.last_uploaded_name != uploaded_file.name or st.session_state.get("df_clean") is None:
+        # 🧼 Clean only if selected and file is new
+        if (
+            "last_uploaded_name" not in st.session_state
+            or st.session_state.last_uploaded_name != uploaded_file.name
+            or (use_cleaning and st.session_state.get("df_clean") is None)
+        ):
             st.session_state.last_uploaded_name = uploaded_file.name
-            st.session_state.ai_ran_once = False  # Optional: reset AI-related state
+            st.session_state.ai_ran_once = False
     
             if use_cleaning:
                 from utils import clean_and_format_data
@@ -99,36 +103,23 @@ with tab1:
                     st.markdown(f"🧼 {entry}")
             else:
                 st.session_state["df_clean"] = None
-                
-            # Determine the working dataset based on cleaning toggle
-            if st.session_state.get("use_cleaning") and st.session_state.get("df_clean") is not None:
-                working_df = st.session_state["df_clean"]
-            else:
-                working_df = st.session_state["df_raw"]    
-                
-            st.session_state["df_current"] = working_df
-            # ✅ Show dataset summary
-            st.info(f"Loaded dataset with `{working_df.shape[0]}` rows and `{working_df.shape[1]}` columns.")
-            
-            # Select which dataset to use for downstream tasks
-            apply_cleaning = st.checkbox("🧼 Apply Auto-Cleaning to Dataset", value=True)
-            # Decide which dataset to use
-            df_current = st.session_state["df_clean"] if apply_cleaning and "df_clean" in st.session_state else df_raw
-            # Show preview 
-            st.subheader("Preview of Your Data")
-            df_clean = st.session_state.get("df_clean")
     
-            if not st.session_state.get("use_cleaning", False):
-                st.info("You're currently using raw data. To enable cleaning, check the auto-clean box in Tab 1.")
-            elif df_clean is None:
-                st.warning("Cleaning was enabled but no cleaned data is available. Please re-upload or refresh.")
+        # 🔁 Decide current working dataset
+        df_current = st.session_state["df_clean"] if use_cleaning and st.session_state.get("df_clean") is not None else df_raw
+        st.session_state["df_current"] = df_current
+    
+        # 👁 Preview + shape info
+        st.info(f"Loaded dataset with `{df_current.shape[0]}` rows × `{df_current.shape[1]}` columns.")
+        st.subheader("Preview of Your Data")
+        st.dataframe(df_current.head(100))
+    
+        # 🧪 Optional sampling for UI performance
+        if len(df_current) > 5000:
+            st.warning(f"Large dataset detected ({len(df_current)} rows). Sampling 1000 rows for UI.")
+            df_sample = df_current.sample(n=1000, random_state=42)
+        else:
+            df_sample = df_current
 
-            # --- Separate sample (for display) and full data (for logic/stats/modeling) ---
-            if df_current is not None and len(df_current) > 5000:
-                st.warning(f"Large dataset detected ({len(df_current)} rows). Sampling 1000 rows for fast UI performance.")
-                df_sample = df_current.sample(n=1000, random_state=42)
-            else:
-                df_sample = df_current
         
         # ✅ Save both to session state
         st.session_state["df_sample"] = df_sample              # For UI / visuals
