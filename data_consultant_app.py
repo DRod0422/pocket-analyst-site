@@ -128,7 +128,7 @@ with tab1:
         else:
             st.info("ℹ️ Auto-cleaned data not available. Please enable cleaning or view the raw dataset.")
         # --- Separate sample (for display) and full data (for logic/stats/modeling) ---
-        if len(df_current) > 5000:
+        if df_current is not None and len(df_current) > 5000:
             st.warning(f"Large dataset detected ({len(df_current)} rows). Sampling 1000 rows for fast UI performance.")
             df_sample = df_current.sample(n=1000, random_state=42)
         else:
