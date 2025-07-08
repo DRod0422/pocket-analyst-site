@@ -81,6 +81,10 @@ with tab1:
             selected_sheet = st.selectbox("Select a sheet to load", sheet_names)
             df_raw = pd.read_excel(xls, sheet_name=selected_sheet)
             st.session_state["selected_sheet"] = selected_sheet
+            
+        # 🧼 Clean empty/unnamed/fully-NA columns early
+        df_raw = df_raw.loc[:, ~df_raw.columns.str.contains("^Unnamed", na=False)]
+        df_raw = df_raw.dropna(axis=1, how="all")
     
         st.session_state["df_raw"] = df_raw
         st.session_state["last_uploaded_name"] = uploaded_file.name
