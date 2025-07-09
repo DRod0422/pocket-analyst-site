@@ -2,120 +2,131 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>AI Pocket Analyst | AI-Powered Data Insights</title>
-    <meta name="description" content="Upload your data, ask questions, and get intelligent insights from AI Pocket Analyst. Perfect for analysts, small business owners, and consultants." />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
-    <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background: #f9f9f9;
-            margin: 0;
-            padding: 0;
-            color: #333;
-        }
-        .header {
-            text-align: center;
-            padding: 40px 20px 20px;
-        }
-       .header img {
-    width: 300px;
-    max-width: 100%;
-    height: auto;
-    margin-bottom: 10px;
-}
-        .header h1 {
-            font-size: 36px;
-            margin: 0;
-        }
-        .hero {
-            text-align: center;
-            padding: 30px 20px;
-        }
-        .hero p {
-            font-size: 20px;
-            color: #555;
-            max-width: 600px;
-            margin: 10px auto 30px;
-        }
-        .cta-button {
-            padding: 14px 28px;
-            background-color: #2c3e50;
-            color: #1abc9c;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            text-decoration: none;
-        }
-        .features {
-            background: #fff;
-            padding: 40px 20px;
-            text-align: center;
-        }
-        .features h2 {
-            font-size: 28px;
-            margin-bottom: 20px;
-        }
-        .features ul {
-            list-style: none;
-            padding: 0;
-            font-size: 18px;
-        }
-        .features ul li {
-            margin: 10px 0;
-        }
-        .footer {
-            text-align: center;
-            padding: 20px;
-            font-size: 14px;
-            color: #999;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pocket Analyst | AI-Powered Data Insights</title>
+  <meta name="description" content="Upload your data, ask questions, and get intelligent insights from AI Pocket Analyst. Perfect for analysts, small business owners, and consultants." />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #f9f9f9;
+      margin: 0;
+      padding: 0;
+      color: #333;
+    }
+    .hero {
+      background: linear-gradient(135deg, #1abc9c, #2c3e50);
+      color: white;
+      padding: 60px 20px;
+      text-align: center;
+      border-radius: 0 0 12px 12px;
+    }
+    .hero h1 {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+    }
+    .hero p {
+      font-size: 1.2rem;
+      max-width: 600px;
+      margin: 0 auto 30px;
+    }
+    .cta-button {
+      padding: 14px 28px;
+      background: linear-gradient(to right, #1abc9c, #16a085);
+      color: white;
+      font-weight: bold;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      text-decoration: none;
+      transition: background 0.3s ease;
+    }
+    .cta-button:hover {
+      background: linear-gradient(to right, #16a085, #1abc9c);
+    }
+    .notice {
+      font-size: 0.9rem;
+      color: #eee;
+      margin-top: 20px;
+    }
+    .features {
+      background: #fff;
+      padding: 60px 20px;
+      text-align: center;
+    }
+    .features h2 {
+      font-size: 1.75rem;
+      margin-bottom: 1rem;
+    }
+    .features ul {
+      list-style: none;
+      padding: 0;
+      line-height: 1.8;
+      font-size: 1rem;
+    }
+    .features li {
+      margin: 10px 0;
+    }
+    .testimonials {
+      background: #f1f1f1;
+      padding: 40px 20px;
+      text-align: center;
+    }
+    .testimonials blockquote {
+      font-style: italic;
+      color: #555;
+      margin: 10px auto;
+      max-width: 600px;
+    }
+    .footer {
+      text-align: center;
+      padding: 20px;
+      font-size: 14px;
+      color: #999;
+    }
+  </style>
 </head>
 <body>
 
-    <div class="header">
-        <img src="logo.png" alt="Pocket Analyst Logo">
-    </div>
+  <div class="hero">
+    <h1>AI-Powered Data Insights</h1>
+    <p>Your always-on AI data consultant. Upload your data. Ask questions. Get insights and predictions instantly.</p>
+    <a class="cta-button" href="https://aipocketanalyst.streamlit.app" target="_blank">🚀 Launch Pocket Analyst</a>
+    <p class="notice">
+      🔐 <strong>Data Privacy:</strong> Your uploaded data is <strong>never stored or shared</strong>. All processing happens in real time.
+    </p>
+  </div>
 
-    <div class="hero">
-        <p>Your always-on AI data consultant. Upload your data. Ask questions. Get insights and predictions instantly.</p>
-        <a class="cta-button" href="https://aipocketanalyst.streamlit.app" target="_blank">Launch the App</a>
-        <p style="font-size: 14px; color: #666; max-width: 600px; margin: 20px auto; text-align: center;">
-            
-  🔐 <strong>Data Privacy Notice:</strong> The data you upload is <strong>not stored, tracked, or shared</strong>.
-  All processing happens securely in real time. Your data is never saved or used by any third parties.
-</p>
-    </div>
+  <section class="features">
+    <h2>🔍 Predictive Modeling with Random Forest</h2>
+    <p><strong>Pocket Analyst</strong> now supports advanced <em>predictive analysis</em> with the Random Forest algorithm — no code required.</p>
+    <ul>
+      <li>✅ One-click Normalization – scales and encodes your data</li>
+      <li>🎯 Target Prediction – select a column and forecast outcomes</li>
+      <li>📊 Feature Importance – see which variables drive your predictions</li>
+      <li>📈 Visual: Actual vs. Predicted</li>
+      <li>📐 Metrics: MAE, RMSE, R² Score</li>
+    </ul>
+    <h3 style="margin-top: 2rem;">📌 Use Cases</h3>
+    <ul>
+      <li>Forecast sales performance over time</li>
+      <li>Predict outcomes based on historical patterns</li>
+      <li>Analyze financial or operational trends</li>
+      <li>Discover which variables impact KPIs</li>
+    </ul>
+    <p style="margin-top: 1.5rem;"><em>More models coming soon. Ready to upload, analyze, and act.</em></p>
+  </section>
 
-    <section class="features" style="padding: 2rem; background-color: #f9f9f9; border-radius: 12px; margin-top: 2rem;">
-      <h2 style="font-size: 1.75rem; margin-bottom: 1rem;">🔍 Now Featuring: Predictive Modeling with Random Forest</h2>
-      <p><strong>Pocket Analyst</strong> now supports advanced <strong>predictive analysis</strong> using the powerful <em>Random Forest</em> algorithm — no code required.</p>
-    
-      <ul style="margin-top: 1rem; padding-left: 1.5rem; line-height: 1.7;">
-        <li>✅ One-click Normalization – scales and encodes your data</li>
-        <li>🎯 Target Prediction – select a column and forecast outcomes</li>
-        <li>📊 Feature Importance – see which variables drive your predictions</li>
-        <li>📈 Actual vs. Predicted visual comparison</li>
-        <li>📐 Performance Metrics – MAE, RMSE, and R² included</li>
-      </ul>
-    
-      <h3 style="margin-top: 2rem;">📌 Use Cases</h3>
-      <ul style="padding-left: 1.5rem; line-height: 1.7;">
-        <li>Forecast sales performance over time</li>
-        <li>Predict outcomes based on historical patterns</li>
-        <li>Analyze financial or operational trends</li>
-        <li>Discover which variables impact your KPIs the most</li>
-      </ul>
-    
-      <p style="margin-top: 1.5rem;"><em>More models coming soon. Ready to upload, analyze, and act.</em></p>
-    </section>
-    
-    </div>
+<!--   <section class="testimonials">
+    <h2>What Users Are Saying</h2>
+    <blockquote>“Pocket Analyst helped me uncover insights I never saw coming. Total game-changer!”</blockquote>
+    <blockquote>“As a small business owner, this is like having a data team on demand.”</blockquote>
+  </section> -->
 
-    <div class="footer">
-        &copy; 2025 Pocket Analyst · Built with Streamlit + OpenAI
-    </div>
+  <div class="footer">
+    &copy; 2025 Pocket Analyst · Built with Streamlit + OpenAI
+  </div>
 
 </body>
 </html>
