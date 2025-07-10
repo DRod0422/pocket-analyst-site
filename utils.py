@@ -41,12 +41,18 @@ def clean_and_format_data(df, log=False):
                 pass
 
     # 6. Attempt to convert remaining object columns to numeric
-    for col in df_clean.select_dtypes(include="object").columns:
-        try:
-            df_clean[col] = pd.to_numeric(df_clean[col], errors="coerce")
-            clean_log.append(f"Safely converted column '{col}' to numeric")
-        except Exception:
-            pass
+    for col in df_clean.columns:
+    # Count how many non-null values can be safely converted to numbers
+    num_convertible = pd.to_numeric(df_clean[col], errors='coerce').notnull().sum()
+    total_nonnull = df_clean[col].notnull().sum()
+
+    # Only convert if at least 90% of non-null values are numeric
+    if total_nonnull > 0 and (num_convertible / total_nonnull) >= 0.9:
+        df_clean[col] = pd.to_numeric(df_clean[col], errors='coerce')
+        clean_log.append(f"Converted column '{col}' to numeric (90%+ values numeric)")
+    else:
+        df_clean[col] = df_clean[col].astype(str).str.strip()
+        clean_log.append(f"Kept column '{col}' as text (mixed or mostly non-numeric)")
 
     return df_clean, clean_log if log else df_clean
 
