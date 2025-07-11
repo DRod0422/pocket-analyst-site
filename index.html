@@ -15,6 +15,18 @@
       padding: 0;
       color: #333;
     }
+    .privacy-notice {
+    background-color: #f8f9fa;
+    padding: 20px 30px;
+    text-align: center;
+    font-size: 15px;
+    color: #333;
+    border-top: 1px solid #dee2e6;
+    border-bottom: 1px solid #dee2e6;
+    margin: 0 auto 40px auto;
+    max-width: 960px;
+    line-height: 1.6;
+  }
     .hero {
       background: linear-gradient(135deg, #1abc9c, #2c3e50);
       color: white;
@@ -93,41 +105,46 @@
     <img src="ailogo.png" alt="AI Pocket Analyst Logo" style="width: 180px; margin-bottom: 10px;">
   </div> -->
 
-  <div class="hero">
-    <h1>AI-Powered Data Insights</h1>
-    <p>Your always-on AI Pocket Analyst. Upload your data. Ask questions. Get insights and predictions instantly.</p>
-  
-    <div style="margin: 30px 0;">
-      <a class="cta-button" href="https://aipocketanalyst.streamlit.app" target="_blank">
-        🚀 Launch AI Pocket Analyst
-      </a>
-    </div>
-  
-    <p style="font-size: 16px; color: #fff; max-width: 600px; margin: 0 auto;">
-      🔐 <strong>Data Privacy:</strong> Your uploaded file is processed in real time and never stored on our servers. Portions of your data are securely sent to OpenAI’s API to generate responses. Per OpenAI’s policy, API data is not used for training and is retained briefly for abuse monitoring.
-      All processing happens in real time.
-    </p>
+ <div class="hero">
+  <h1>AI-Powered Data Insights</h1>
+  <p>Your always-on AI Pocket Analyst. Upload your data. Ask questions. Get insights and predictions instantly.</p>
+
+  <div style="margin: 30px 0;">
+    <a class="cta-button" href="https://aipocketanalyst.streamlit.app" target="_blank">
+      🚀 Launch AI Pocket Analyst
+    </a>
   </div>
-  
-  <section class="features">
-    <h2>🔍 Predictive Modeling with Random Forest</h2>
-    <p><strong>AI Pocket Analyst</strong> now supports advanced <em>predictive analysis</em> with the Random Forest algorithm — no code required.</p>
-    <ul>
-      <li>✅ One-click Normalization – scales and encodes your data</li>
-      <li>🎯 Target Prediction – select a column and forecast outcomes</li>
-      <li>📊 Feature Importance – see which variables drive your predictions</li>
-      <li>📈 Visual: Actual vs. Predicted</li>
-      <li>📐 Metrics: MAE, RMSE, R² Score</li>
-    </ul>
-    <h3 style="margin-top: 2rem;">📌 Use Cases</h3>
-    <ul>
-      <li>Forecast sales performance over time</li>
-      <li>Predict outcomes based on historical patterns</li>
-      <li>Analyze financial or operational trends</li>
-      <li>Discover which variables impact KPIs</li>
-    </ul>
-    <p style="margin-top: 1.5rem;"><em>More models coming soon. Ready to upload, analyze, and act.</em></p>
-  </section>
+</div>
+
+<!-- ✅ Data Privacy Block -->
+<div class="privacy-notice">
+  <p>
+    🔐 <strong>Data Privacy:</strong> Your file is processed securely in real time. We do not store or log your data. Some data is shared with OpenAI’s API to generate insights. Per their policy, API data is not used for training and is only retained temporarily for safety monitoring. All processing happens in real time.
+  </p>
+</div>
+
+<!-- ✅ Features Section -->
+<section class="features">
+  <h2>🔍 Predictive Modeling with Random Forest</h2>
+  <p><strong>AI Pocket Analyst</strong> now supports advanced <em>predictive analysis</em> with the Random Forest algorithm — no code required.</p>
+  <ul>
+    <li>✅ One-click Normalization – scales and encodes your data</li>
+    <li>🎯 Target Prediction – select a column and forecast outcomes</li>
+    <li>📊 Feature Importance – see which variables drive your predictions</li>
+    <li>📈 Visual: Actual vs. Predicted</li>
+    <li>📐 Metrics: MAE, RMSE, R² Score</li>
+  </ul>
+
+  <h3 style="margin-top: 2rem;">📌 Use Cases</h3>
+  <ul>
+    <li>Forecast sales performance over time</li>
+    <li>Predict outcomes based on historical patterns</li>
+    <li>Analyze financial or operational trends</li>
+    <li>Discover which variables impact KPIs</li>
+  </ul>
+
+  <p style="margin-top: 1.5rem;"><em>More models coming soon. Ready to upload, analyze, and act.</em></p>
+</section>
 
 <!--   <section class="testimonials">
     <h2>What Users Are Saying</h2>
