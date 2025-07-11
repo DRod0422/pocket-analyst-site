@@ -1275,11 +1275,11 @@ with tab5:
 year = datetime.datetime.now().year
 
 # --- Footer ---
-st.markdown("---")
-st.caption("Built with ❤️ using Streamlit + OpenAI + Pandas + Plotly")
-st.markdown("📬 Need help? Contact us at [pocketanalyst.help@gmail.com](mailto:pocketanalyst.help@gmail.com)")
-st.markdown(f"""
-<div style='text-align: center; font-size: 0.85em; color: gray; margin-top: 30px;'>
-  © {year} Pocket Analyst · Created by David Rodriguez  
+st.markdown("""
+<div style='text-align: center; font-size: 0.9em; color: gray; margin-top: 50px;'>
+  <hr>
+  <p>Built with ❤️ using Streamlit + OpenAI + Pandas + Plotly</p>
+  <p>📬 Need help? Contact us at <a href="mailto:pocketanalyst.help@gmail.com">pocketanalyst.help@gmail.com</a></p>
+  <p>© {year} Pocket Analyst · Created by David Rodriguez</p>
 </div>
-""", unsafe_allow_html=True)
+""".format(year=year), unsafe_allow_html=True)
