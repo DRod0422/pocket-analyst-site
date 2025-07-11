@@ -13,6 +13,7 @@ import plotly.express as px
 from utils import clean_and_format_data
 import pingouin as pg
 import scipy.stats as stats
+import datetime
 
 from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import MinMaxScaler
@@ -1270,13 +1271,15 @@ with tab5:
 
 
             
+
+year = datetime.datetime.now().year
+
 # --- Footer ---
 st.markdown("---")
 st.caption("Built with ❤️ using Streamlit + OpenAI + Pandas + Plotly")
 st.markdown("📬 Need help? Contact us at [pocketanalyst.help@gmail.com](mailto:pocketanalyst.help@gmail.com)")
-st.markdown("""
-<hr style="margin-top: 50px; margin-bottom: 10px;">
-<div style='text-align: center; font-size: 0.85em; color: gray;'>
-  © 2025 Pocket Analyst · Created by David Rodriguez  
+st.markdown(f"""
+<div style='text-align: center; font-size: 0.85em; color: gray; margin-top: 30px;'>
+  © {year} Pocket Analyst · Created by David Rodriguez  
 </div>
 """, unsafe_allow_html=True)
