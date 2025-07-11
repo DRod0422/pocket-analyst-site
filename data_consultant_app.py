@@ -1274,3 +1274,9 @@ with tab5:
 st.markdown("---")
 st.caption("Built with ❤️ using Streamlit + OpenAI + Pandas + Plotly")
 st.markdown("📬 Need help? Contact us at [pocketanalyst.help@gmail.com](mailto:pocketanalyst.help@gmail.com)")
+st.markdown("""
+<hr style="margin-top: 50px; margin-bottom: 10px;">
+<div style='text-align: center; font-size: 0.85em; color: gray;'>
+  © 2025 Pocket Analyst · Created by David Rodriguez  
+</div>
+""", unsafe_allow_html=True)
