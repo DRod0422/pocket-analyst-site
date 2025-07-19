@@ -41,7 +41,7 @@ st.caption("Upload your file. Ask questions. Predict outcomes. Get insights.")
 # --- Tabs Layout ---
 tab1, tab2, tab3, tab4, tab5 = st.tabs([
     "📁 Upload & Clean Data", 
-    "🤖 AI Assistant",                         #📊 Quick Analysis
+    "🤖 WinBert AI Assistant",                         #📊 Quick Analysis
     "📊 Quick Analysis", 
     "📈 Forecasting & Advanced Analysis", 
     "📐 Data Science & Statistical Tools"
@@ -239,7 +239,7 @@ with tab1:
 
     # --- Go-By Suggestions ---
 with tab2:  
-        with st.expander("💬 **Ask about your data**"):
+        with st.expander("💬 **Ask WinBert about your data**"):
             st.markdown("""
             - What are the key trends in this dataset?
             - What is the average sale price?
@@ -317,8 +317,8 @@ with tab2:
                     )
                     answer = response.choices[0].message.content
     
-                    st.subheader("Bot's Answer")
-                    with st.expander("AI Response", expanded=True):
+                    st.subheader("WinBert's Answer")
+                    with st.expander("WinBert's Response", expanded=True):
                         st.write(answer)
     
                     # Dynamic chart rendering
