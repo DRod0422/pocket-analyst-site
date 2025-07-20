@@ -1280,6 +1280,6 @@ st.markdown("""
   <hr>
   <p>Built with ❤️ using Streamlit + OpenAI + Pandas + Plotly</p>
   <p>📬 Need help? Contact us at <a href="mailto:pocketanalyst.help@gmail.com">pocketanalyst.help@gmail.com</a></p>
-  <p>© {year} Pocket Analyst · Created by David Rodriguez</p>
+  <p>© {year} AI Pocket Analyst · Created by David Rodriguez</p>
 </div>
 """.format(year=year), unsafe_allow_html=True)
