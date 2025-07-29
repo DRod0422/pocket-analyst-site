@@ -1305,7 +1305,7 @@ with tab6:
             image = Image.open(well_log_file).convert("RGB")
             image_np = np.array(image)
             
-            st.image(image_np, caption="Raw Well Log", use_column_width=True)
+            st.image(image_np, caption="Raw Well Log", use_container_width=True)
     
             st.markdown("### Sample Digitization Overlay")
             fig, ax = plt.subplots(figsize=(6, 12))
