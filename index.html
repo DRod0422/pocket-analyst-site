@@ -19,8 +19,8 @@
       max-width: 960px;
       margin: 0 auto;
       padding: 0 20px;
+      text-align: center;
     }
-
     .privacy-notice {
     background-color: #f8f9fa;
     padding: 20px 30px;
@@ -113,27 +113,28 @@
 </head>
 <body>
   <div class="container">
-    <div class="header" style="text-align: center; padding: 20px;">
-      <img src="assets/logo.png" alt="AI Pocket Analyst Logo" style="width: 180px; margin-bottom: 10px;">
+    <!-- Logo -->
+    <div class="header" style="padding: 30px 0;">
+      <img src="assets/logo.png" alt="AI Pocket Analyst Logo" style="width: 180px;">
     </div>
 
- <div class="hero">
-  <h1>AI-Powered Data Insights</h1>
-  <p>Your always-on AI Pocket Analyst. Upload your data. Ask questions. Get insights and predictions instantly.</p>
+    <!-- Hero -->
+    <div class="hero">
+      <h1>AI-Powered Data Insights</h1>
+      <p>Your always-on AI Pocket Analyst. Upload your data. Ask questions. Get insights and predictions instantly.</p>
+      <a href="https://aipocketanalyst.streamlit.app" class="cta-button">🚀 Launch AI Pocket Analyst</a>
+    </div>
 
-  <div style="margin: 30px 0;">
-    <a class="cta-button" href="https://aipocketanalyst.streamlit.app" target="_blank">
-      🚀 Launch AI Pocket Analyst
-    </a>
+    <!-- Data Privacy -->
+    <div class="privacy-notice">
+      <p>
+        🔒 <strong>Data Privacy:</strong> Your file is processed securely in real time. We do not store or log your data. 
+        Some data is shared with OpenAI’s API to generate insights. Per their policy, API data is not used for training 
+        and is only retained temporarily for safety monitoring. All processing happens in real time.
+      </p>
+    </div>
   </div>
-</div>
-
-<!-- ✅ Data Privacy Block -->
-<div class="privacy-notice">
-  <p>
-    🔐 <strong>Data Privacy:</strong> Your file is processed securely in real time. We do not store or log your data. Some data is shared with OpenAI’s API to generate insights. Per their policy, API data is not used for training and is only retained temporarily for safety monitoring. All processing happens in real time.
-  </p>
-</div>
+</body>
 
 <!-- ✅ Features Section -->
 <section class="features">
