@@ -83,65 +83,41 @@ def detect_chart_type_and_columns(question, df):
     return (None, None)
     
 with tab6:
-    st.title("🛢️ Well Log Digitization - Tab 6")
-    st.caption("Upload a TIFF/PNG well log. We'll help you auto-digitize it into LAS-style data.")
+    st.title("🛢️ Well Log Digitization (Simulated)")
 
-    well_log_file = st.file_uploader("Upload a TIFF or PNG well log image", type=["tif", "tiff", "png"], key="log_upload")
-
-    if well_log_file is not None:
-        from PIL import Image
-        import pytesseract
-        import cv2
-        import numpy as np
-        import pandas as pd
-
-        image = Image.open(well_log_file).convert("RGB")
+    uploaded_file = st.file_uploader("Upload a TIFF or PNG well log image", type=["tif", "tiff", "png"], key="log_upload")
+    
+    if uploaded_file:
+        image = Image.open(uploaded_file).convert("L")  # Convert to grayscale
         image_np = np.array(image)
-
-        st.image(image_np, caption="Raw Well Log", use_container_width=True)
-
-        # Convert to grayscale
-        gray = cv2.cvtColor(image_np, cv2.COLOR_RGB2GRAY)
-
-        # Crop left margin for depth OCR (adjust width as needed)
-        h, w = gray.shape
-        depth_strip = gray[:, :int(w * 0.1)]  # 10% from the left
-
-        # Run OCR to detect depth values
-        depth_text = pytesseract.image_to_string(depth_strip, config='--psm 6 digits')
-        raw_depth_lines = depth_text.split("\n")
-        depth_values = []
-
-        for line in raw_depth_lines:
-            try:
-                num = float(line.strip())
-                depth_values.append(num)
-            except:
-                continue
-
-        # Sort and remove duplicates
-        depth_values = sorted(list(set(depth_values)))
-
-        # Generate dummy SP, IL, SN values
-        if len(depth_values) >= 10:
-            df_las_like = pd.DataFrame({
-                "Depth": depth_values,
-                "SP": np.linspace(-50, 50, len(depth_values)),
-                "IL": np.linspace(1, 20, len(depth_values)),
-                "SN": np.linspace(1, 15, len(depth_values))
-            })
-
-            st.success("✅ Digitization complete. Previewing LAS-style data:")
-            st.dataframe(df_las_like)
-
-            # Optional download
-            csv = df_las_like.to_csv(index=False)
-            st.download_button("Download LAS-style CSV", data=csv, file_name="digitized_log.csv", mime="text/csv")
-
-        else:
-            st.warning("⚠️ Not enough depth values detected. Try a higher quality scan or adjust the OCR strip.")
-    else:
-        st.info("Please upload a TIFF/PNG well log to begin digitization.")
+    
+        st.image(image_np, caption="Grayscale Log", use_column_width=True)
+    
+        st.markdown("### Step 1: Select a vertical strip to simulate digitization")
+    
+        width = image_np.shape[1]
+        selected_x = st.slider("X-coordinate to extract column", min_value=0, max_value=width-1, value=width // 2)
+    
+        # Extract 1-pixel wide column (or a thin strip)
+        column_data = image_np[:, selected_x]
+    
+        # Convert to DataFrame with pseudo-depth
+        depth = np.linspace(0, len(column_data), len(column_data))
+        df_simulated = pd.DataFrame({
+            "Depth (pseudo-ft)": depth,
+            "Pixel Intensity": column_data
+        })
+    
+        st.line_chart(df_simulated.set_index("Depth (pseudo-ft)"))
+    
+        st.dataframe(df_simulated.head(20))
+    
+        st.download_button(
+            "Download Simulated Data as CSV",
+            data=df_simulated.to_csv(index=False).encode(),
+            file_name="simulated_well_log.csv",
+            mime="text/csv"
+        )
 
 
 # --- File Upload Section ---
