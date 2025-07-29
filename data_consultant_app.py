@@ -14,6 +14,7 @@ from utils import clean_and_format_data
 import pingouin as pg
 import scipy.stats as stats
 import datetime
+import cv2
 
 from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import MinMaxScaler
@@ -24,6 +25,7 @@ from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 from prophet import Prophet
 from scipy import stats
 from pathlib import Path
+from PIL import Image
 
 # --- Config Section ---
 openai.api_key = st.secrets["OPENAI_API_KEY"]
@@ -52,12 +54,13 @@ st.markdown(
 st.caption("Upload your file. Ask questions. Predict outcomes. Get insights.")
 
 # --- Tabs Layout ---
-tab1, tab2, tab3, tab4, tab5 = st.tabs([
+tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
     "📁 Upload & Clean Data", 
     "🤖 WinBert AI Assistant",                         #📊 Quick Analysis
     "📊 Quick Analysis", 
     "📈 Forecasting & Advanced Analysis", 
-    "📐 Data Science & Statistical Tools"
+    "📐 Data Science & Statistical Tools",
+    "🛢️ Well Log Digitization"
 ])
 
 # --- Chart Type Detector ---
@@ -1282,8 +1285,34 @@ with tab5:
             else:
                 st.warning("Dataset not loaded.")
 
-
-            
+with tab6:
+    st.title("🛢️ Well Log Digitization - Tab 6")
+    st.caption("Upload a TIFF/PNG well log. We'll help you auto-digitize it.")
+    
+    uploaded_file = st.file_uploader("Upload a TIFF or PNG well log image", type=["tif", "tiff", "png"])
+    
+    if uploaded_file:
+        # Read image using PIL and convert to OpenCV format
+        image = Image.open(uploaded_file).convert("RGB")
+        image_np = np.array(image)
+        
+        st.image(image_np, caption="Raw Well Log", use_column_width=True)
+    
+        # Dummy overlay (you'll replace this later with auto-detection)
+        st.markdown("### Sample Digitization Overlay")
+        fig, ax = plt.subplots(figsize=(6, 12))
+        ax.imshow(image_np)
+    
+        # Dummy curve: diagonal line overlay
+        h, w, _ = image_np.shape
+        x = np.linspace(w // 4, 3 * w // 4, 500)
+        y = np.linspace(0, h, 500)
+        ax.plot(x, y, color='red', linewidth=1.5, label="Auto-Digitized Curve")
+    
+        ax.set_title("Overlay Visualization")
+        ax.axis("off")
+        st.pyplot(fig)
+             
 
 year = datetime.datetime.now().year
 
