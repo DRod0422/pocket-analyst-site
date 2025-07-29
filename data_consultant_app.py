@@ -23,6 +23,7 @@ from sklearn.model_selection import train_test_split, cross_val_score
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 from prophet import Prophet
 from scipy import stats
+from pathlib import Path
 
 # --- Config Section ---
 openai.api_key = st.secrets["OPENAI_API_KEY"]
@@ -35,10 +36,14 @@ st.set_page_config(
     page_icon="assets/logo.svg"
 )
 #st.image("logo.png", width=160)
+# Construct path for Streamlit Cloud compatibility
+logo_path = Path("assets/logo.svg")
+
+# Use custom HTML for inline image + title
 st.markdown(
-    """
+    f"""
     <div style="display: flex; align-items: center; gap: 12px;">
-        <img src="assets/logo.svg" alt="AIPA Logo" style="height: 40px;">
+        <img src="https://raw.githubusercontent.com/YOUR_USERNAME/YOUR_REPO_NAME/main/{logo_path}" alt="AIPA Logo" style="height: 40px;">
         <h1 style="margin: 0;">AI Pocket Analyst</h1>
     </div>
     """,
