@@ -1298,7 +1298,7 @@ with tab6:
     )
 
 
-   if well_log_file is not None:
+    if well_log_file is not None:
         try:
             from PIL import Image
     
