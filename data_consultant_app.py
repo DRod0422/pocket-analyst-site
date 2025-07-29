@@ -1295,13 +1295,13 @@ with tab6:
         image_file = st.file_uploader(
             "Upload a TIFF or PNG well log image",
             type=["tif", "tiff", "png"],
-            key="welllog_uploader"
+            key="welllog_upload_tab6"
         )
 
         if image_file is not None:
             image = Image.open(image_file).convert("RGB")
 
-            # Resize to prevent crash
+            # Resize to avoid Streamlit memory crash
             max_width = 1000
             if image.width > max_width:
                 scale = max_width / image.width
@@ -1325,7 +1325,7 @@ with tab6:
             st.pyplot(fig)
 
     except Exception as e:
-        st.error(f"❌ Error loading image: {e}")
+        st.error(f"❌ Error in Tab 6: {e}")
 
              
 
