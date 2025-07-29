@@ -43,7 +43,7 @@ logo_path = Path("assets/logo.png")
 st.markdown(
     f"""
     <div style="display: flex; align-items: center; gap: 12px;">
-        <img src="https://raw.githubusercontent.com/YOUR_USERNAME/YOUR_REPO_NAME/main/{logo_path}" alt="AIPA Logo" style="height: 40px;">
+        <img src="https://raw.githubusercontent.com/DRod0422/pocket-analyst-site/main/{logo_path}" alt="AIPA Logo" style="height: 40px;">
         <h1 style="margin: 0;">AI Pocket Analyst</h1>
     </div>
     """,
