@@ -1291,7 +1291,7 @@ with tab6:
     st.title("🛢️ Well Log Digitization - Tab 6")
     st.caption("Upload a TIFF/PNG well log. We'll help you auto-digitize it.")
     
-    uploaded_log_file = st.file_uploader(
+    log_file = st.file_uploader(
         "Upload a TIFF or PNG well log image", 
         type=["tif", "tiff", "png"],
         key="uploader_tab6"  # 👈 THIS IS REQUIRED
