@@ -14,3 +14,4 @@ opencv-python-headless
 pillow
 lasio
 numpy
+pytesseract
