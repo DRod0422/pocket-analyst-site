@@ -83,7 +83,7 @@ def detect_chart_type_and_columns(question, df):
     return (None, None)
     
 with tab6:
-    st.title("🛢️ Well Log Digitization - Tab 6")
+    st.title("🛢️ Well Log Digitization")
     st.caption("Upload a TIFF/PNG well log. We'll help you auto-digitize it.")
     
     well_log_file = st.file_uploader(
