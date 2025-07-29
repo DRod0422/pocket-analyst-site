@@ -1290,9 +1290,9 @@ with tab6:
     st.caption("Upload a TIFF/PNG well log. We'll help you auto-digitize it.")
     
     uploaded_log_file = st.file_uploader(
-        "Upload a TIFF or PNG well log image",
+        "Upload a TIFF or PNG well log image", 
         type=["tif", "tiff", "png"],
-        key="log_upload_tab6"  # 👈 unique key for tab 6
+        key="uploader_tab6"  # 👈 THIS IS REQUIRED
     )
 
     if uploaded_log_file:
