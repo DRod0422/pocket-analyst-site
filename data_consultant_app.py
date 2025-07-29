@@ -1294,37 +1294,37 @@ with tab6:
     well_log_file = st.file_uploader(
         "Upload a TIFF or PNG well log image",
         type=["tif", "tiff", "png"],
-        key="log_upload_tab6"  # unique key
+        key="log_upload_tab6"  # Unique key is critical!
     )
-
 
     if well_log_file is not None:
         try:
             from PIL import Image
-    
+
             image = Image.open(well_log_file).convert("RGB")
             image_np = np.array(image)
             
-            st.image(image_np, caption="Raw Well Log", use_container_width=True)
-    
+            st.image(image_np, caption="Raw Well Log", use_column_width=True)
+
             st.markdown("### Sample Digitization Overlay")
             fig, ax = plt.subplots(figsize=(6, 12))
             ax.imshow(image_np)
-    
-            # Dummy overlay curve
+
+            # Dummy overlay: red line
             h, w, _ = image_np.shape
             x = np.linspace(w // 4, 3 * w // 4, 500)
             y = np.linspace(0, h, 500)
             ax.plot(x, y, color='red', linewidth=1.5, label="Auto-Digitized Curve")
-    
+
             ax.set_title("Overlay Visualization")
             ax.axis("off")
             st.pyplot(fig)
-    
+
         except Exception as e:
             st.error(f"Something went wrong: {e}")
     else:
         st.info("Please upload a TIFF/PNG well log to begin digitization.")
+
 
 
              
