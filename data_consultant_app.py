@@ -1290,18 +1290,11 @@ with tab5:
 with tab6:
     st.title("🛢️ Well Log Digitization - Tab 6")
     st.caption("Upload a TIFF/PNG well log. We'll help you auto-digitize it.")
-    
-    log_file = st.file_uploader(
-        "Upload a TIFF or PNG well log image", 
-        type=["tif", "tiff", "png"],
-        key="uploader_tab6"  # 👈 THIS IS REQUIRED
-    )
+    log_file = st.file_uploader("Upload a TIFF or PNG well log image", type=["tif", "tiff", "png"], key="log_upload")
 
-    if uploaded_log_file:
-        # Read image using PIL and convert to OpenCV format
-        image = Image.open(uploaded_log_file).convert("RGB")
+    if log_file:
+        image = Image.open(log_file).convert("RGB")
         image_np = np.array(image)
-
         st.image(image_np, caption="Raw Well Log", use_column_width=True)
 
         st.markdown("### Sample Digitization Overlay")
@@ -1316,7 +1309,6 @@ with tab6:
         ax.set_title("Overlay Visualization")
         ax.axis("off")
         st.pyplot(fig)
-
              
 
 year = datetime.datetime.now().year
