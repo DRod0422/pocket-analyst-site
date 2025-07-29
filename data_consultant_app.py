@@ -1287,31 +1287,46 @@ with tab5:
             else:
                 st.warning("Dataset not loaded.")
 
-# with tab6:
-#     st.title("🛢️ Well Log Digitization - Tab 6")
-#     st.caption("Upload a TIFF/PNG well log. We'll help you auto-digitize it.")
+with tab6:
+    st.title("🛢️ Well Log Digitization - Tab 6")
+    st.caption("Upload a TIFF/PNG well log. We'll help you auto-digitize it.")
 
-#     st.markdown("✅ **Debug Check:** Tab 6 is rendering.")
-    
-#     log_file = st.file_uploader("Upload a TIFF or PNG well log image", type=["tif", "tiff", "png"], key="log_upload")
+    try:
+        image_file = st.file_uploader(
+            "Upload a TIFF or PNG well log image",
+            type=["tif", "tiff", "png"],
+            key="welllog_uploader"
+        )
 
-#     if log_file:
-#         image = Image.open(log_file).convert("RGB")
-#         image_np = np.array(image)
-#         st.image(image_np, caption="Raw Well Log", use_column_width=True)
+        if image_file is not None:
+            image = Image.open(image_file).convert("RGB")
 
-#         st.markdown("### Sample Digitization Overlay")
-#         fig, ax = plt.subplots(figsize=(6, 12))
-#         ax.imshow(image_np)
+            # Resize to prevent crash
+            max_width = 1000
+            if image.width > max_width:
+                scale = max_width / image.width
+                image = image.resize((int(image.width * scale), int(image.height * scale)))
 
-#         h, w, _ = image_np.shape
-#         x = np.linspace(w // 4, 3 * w // 4, 500)
-#         y = np.linspace(0, h, 500)
-#         ax.plot(x, y, color='red', linewidth=1.5, label="Auto-Digitized Curve")
+            image_np = np.array(image)
+            st.image(image_np, caption="Raw Well Log", use_column_width=True)
 
-#         ax.set_title("Overlay Visualization")
-#         ax.axis("off")
-#         st.pyplot(fig)
+            st.markdown("### Sample Digitization Overlay")
+            fig, ax = plt.subplots(figsize=(6, 12))
+            ax.imshow(image_np)
+
+            # Dummy overlay
+            h, w, _ = image_np.shape
+            x = np.linspace(w // 4, 3 * w // 4, 500)
+            y = np.linspace(0, h, 500)
+            ax.plot(x, y, color='red', linewidth=1.5, label="Auto-Digitized Curve")
+
+            ax.set_title("Overlay Visualization")
+            ax.axis("off")
+            st.pyplot(fig)
+
+    except Exception as e:
+        st.error(f"❌ Error loading image: {e}")
+
              
 
 year = datetime.datetime.now().year
