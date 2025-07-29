@@ -1291,27 +1291,27 @@ with tab6:
     st.title("🛢️ Well Log Digitization - Tab 6")
     st.caption("Upload a TIFF/PNG well log. We'll help you auto-digitize it.")
 
-    try:
-        log_image = st.file_uploader("Upload a TIFF or PNG well log image", type=["tif", "tiff", "png"], key="log_upload")
+    well_log_file = st.file_uploader(
+        "Upload a TIFF or PNG well log image",
+        type=["tif", "tiff", "png"],
+        key="log_upload"  # <- ✅ Important: unique key!
+    )
 
-        if log_image:
+    if well_log_file is not None:
+        try:
             from PIL import Image
-            import cv2
             import numpy as np
             import matplotlib.pyplot as plt
 
-            # Convert image to NumPy array
-            image = Image.open(log_image).convert("RGB")
+            image = Image.open(well_log_file).convert("RGB")
             image_np = np.array(image)
 
             st.image(image_np, caption="Raw Well Log", use_column_width=True)
 
-            # Dummy overlay visualization
             st.markdown("### Sample Digitization Overlay")
             fig, ax = plt.subplots(figsize=(6, 12))
             ax.imshow(image_np)
 
-            # Dummy curve: diagonal line overlay
             h, w, _ = image_np.shape
             x = np.linspace(w // 4, 3 * w // 4, 500)
             y = np.linspace(0, h, 500)
@@ -1320,9 +1320,8 @@ with tab6:
             ax.set_title("Overlay Visualization")
             ax.axis("off")
             st.pyplot(fig)
-
-    except Exception as e:
-        st.error(f"❌ Oops! Tab 6 ran into an error: {e}")
+        except Exception as e:
+            st.error(f"Something went wrong while processing the image: {e}")
 
              
 
