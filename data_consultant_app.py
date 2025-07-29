@@ -37,9 +37,9 @@ st.set_page_config(
 #st.image("logo.png", width=160)
 st.markdown(
     """
-    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
-        <img src="assets/logo.svg" alt="AIPA Logo" style="height: 40px;" />
-        <h1 style="margin: 0; font-size: 28px;">AI Pocket Analyst</h1>
+    <div style="display: flex; align-items: center; gap: 12px;">
+        <img src="assets/logo.svg" alt="AIPA Logo" style="height: 40px;">
+        <h1 style="margin: 0;">AI Pocket Analyst</h1>
     </div>
     """,
     unsafe_allow_html=True
