@@ -1294,19 +1294,20 @@ with tab6:
     well_log_file = st.file_uploader(
         "Upload a TIFF or PNG well log image",
         type=["tif", "tiff", "png"],
-        key="log_upload"  # <- ✅ Important: unique key!
+        key="log_upload_tab6"  # unique key
     )
+
 
     if well_log_file is not None:
         try:
             from PIL import Image
-            import numpy as np
-            import matplotlib.pyplot as plt
 
             image = Image.open(well_log_file).convert("RGB")
             image_np = np.array(image)
-
+        if well_log_file:
             st.image(image_np, caption="Raw Well Log", use_column_width=True)
+        else:
+            st.info("Please upload a TIFF/PNG well log to begin digitization.")
 
             st.markdown("### Sample Digitization Overlay")
             fig, ax = plt.subplots(figsize=(6, 12))
