@@ -85,7 +85,9 @@ def detect_chart_type_and_columns(question, df):
 
 # --- File Upload Section ---
 with tab1:
-    uploaded_file = st.file_uploader("Upload a CSV or XLSX file", type=["csv", "xlsx"])
+    uploaded_file = st.file_uploader(
+        "Upload your dataset (.csv or .xlsx)", type=["csv", "xlsx"], key="main_upload"
+    )
     
     if uploaded_file:
         # --- Load raw data (supporting multi-sheet Excel)
