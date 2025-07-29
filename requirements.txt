@@ -10,3 +10,7 @@ openpyxl
 prophet
 cmdstanpy
 pingouin
+opencv-python-headless
+pillow
+lasio
+numpy
