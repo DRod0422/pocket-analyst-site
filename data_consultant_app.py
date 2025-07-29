@@ -37,7 +37,7 @@ st.set_page_config(
 )
 #st.image("logo.png", width=160)
 # Construct path for Streamlit Cloud compatibility
-logo_path = Path("assets/logo.png")
+logo_path = Path("assets/logo.svg")
 
 # Use custom HTML for inline image + title
 st.markdown(
