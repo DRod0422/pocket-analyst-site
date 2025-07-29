@@ -35,7 +35,15 @@ st.set_page_config(
     page_icon="assets/logo.svg"
 )
 #st.image("logo.png", width=160)
-st.title("🤖 AI Pocket Analyst")
+st.markdown(
+    """
+    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
+        <img src="assets/logo.svg" alt="AIPA Logo" style="height: 40px;" />
+        <h1 style="margin: 0; font-size: 28px;">AI Pocket Analyst</h1>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
 st.caption("Upload your file. Ask questions. Predict outcomes. Get insights.")
 
 # --- Tabs Layout ---
