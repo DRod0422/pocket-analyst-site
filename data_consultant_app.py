@@ -83,39 +83,57 @@ def detect_chart_type_and_columns(question, df):
     return (None, None)
     
 with tab6:
-    st.title("🛢️ Well Log Digitization (Simulated)")
+    st.subheader("Step 1: Select a vertical strip to simulate digitization")
 
-    uploaded_file = st.file_uploader("Upload a TIFF or PNG well log image", type=["tif", "tiff", "png"], key="log_upload")
+    tiff_file = st.file_uploader("Upload well log image (TIFF, JPEG, PNG)", type=["tif", "tiff", "jpg", "jpeg", "png"], key="well_log_upload")
     
-    if uploaded_file:
-        image = Image.open(uploaded_file).convert("L")  # Convert to grayscale
-        image_np = np.array(image)
-    
-        st.image(image_np, caption="Grayscale Log", use_column_width=True)
-    
-        st.markdown("### Step 1: Select a vertical strip to simulate digitization")
-    
-        width = image_np.shape[1]
-        selected_x = st.slider("X-coordinate to extract column", min_value=0, max_value=width-1, value=width // 2)
-    
-        # Extract 1-pixel wide column (or a thin strip)
-        column_data = image_np[:, selected_x]
-    
-        # Convert to DataFrame with pseudo-depth
-        depth = np.linspace(0, len(column_data), len(column_data))
-        df_simulated = pd.DataFrame({
-            "Depth (pseudo-ft)": depth,
-            "Pixel Intensity": column_data
+    if tiff_file:
+        image = Image.open(tiff_file).convert("L")  # grayscale
+        img_array = np.array(image)
+        height, width = img_array.shape
+
+        st.markdown("### X-coordinate to extract column")
+        x_coord = st.slider("X-coordinate to extract column", min_value=0, max_value=width-1, value=width//2)
+
+        extracted_strip = img_array[:, x_coord]
+
+        # Optional inversion
+        invert = st.checkbox("Invert pixel values (for dark-on-light logs)?", value=False)
+        if invert:
+            extracted_strip = 255 - extracted_strip
+
+        # Depth calibration
+        st.markdown("### Depth Range Calibration")
+        start_depth_ft = st.number_input("Start depth (ft)", value=1200)
+        end_depth_ft = st.number_input("End depth (ft)", value=12000)
+
+        # Interpolate to depth range
+        depth_range = np.linspace(start_depth_ft, end_depth_ft, num=len(extracted_strip))
+
+        # Curve label
+        curve_label = st.selectbox("Curve Type", ["SP", "IL", "SN", "Custom"])
+        if curve_label == "Custom":
+            curve_label = st.text_input("Enter custom curve name", value="MyCurve")
+
+        # Create dataframe
+        df_digitized = pd.DataFrame({
+            "Depth (ft)": depth_range,
+            f"{curve_label} (pixel value)": extracted_strip
         })
-    
-        st.line_chart(df_simulated.set_index("Depth (pseudo-ft)"))
-    
-        st.dataframe(df_simulated.head(20))
-    
+
+        # Plot it
+        st.markdown("### Curve Preview")
+        fig = px.line(df_digitized, x=f"{curve_label} (pixel value)", y="Depth (ft)", title=f"{curve_label} Curve (Digitized)", height=600)
+        fig.update_yaxes(autorange="reversed")  # depth increases down
+        st.plotly_chart(fig, use_container_width=True)
+
+        # Download
+        st.markdown("### Download")
+        csv_data = df_digitized.to_csv(index=False)
         st.download_button(
-            "Download Simulated Data as CSV",
-            data=df_simulated.to_csv(index=False).encode(),
-            file_name="simulated_well_log.csv",
+            label="Download CSV",
+            data=csv_data,
+            file_name=f"{curve_label}_digitized_log.csv",
             mime="text/csv"
         )
 
