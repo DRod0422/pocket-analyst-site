@@ -54,7 +54,7 @@ st.markdown(
 st.caption("Upload your file. Ask questions. Predict outcomes. Get insights.")
 
 # --- Tabs Layout ---
-tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
+tab1, tab2, tab3, tab4, tab5 = st.tabs([
     "📁 Upload & Clean Data", 
     "🤖 WinBert AI Assistant",                         #📊 Quick Analysis
     "📊 Quick Analysis", 
