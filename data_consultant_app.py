@@ -83,59 +83,75 @@ def detect_chart_type_and_columns(question, df):
     return (None, None)
     
 with tab6:
-    st.subheader("Step 1: Select a vertical strip to simulate digitization")
+    st.title("🛢️ Well Log Digitization - Tab 6")
+    st.caption("Upload a TIFF/PNG well log. We'll extract LAS-style numeric data.")
 
-    tiff_file = st.file_uploader("Upload well log image (TIFF, JPEG, PNG)", type=["tif", "tiff", "jpg", "jpeg", "png"], key="well_log_upload")
-    
-    if tiff_file:
-        image = Image.open(tiff_file).convert("L")  # grayscale
-        img_array = np.array(image)
-        height, width = img_array.shape
+    well_log_file = st.file_uploader("Upload your TIFF or PNG well log", type=["tif", "tiff", "png"], key="log_upload")
 
-        st.markdown("### X-coordinate to extract column")
-        x_coord = st.slider("X-coordinate to extract column", min_value=0, max_value=width-1, value=width//2)
+    if well_log_file:
+        from PIL import Image
+        import pytesseract
+        import numpy as np
+        import pandas as pd
+        import cv2
+        import matplotlib.pyplot as plt
 
-        extracted_strip = img_array[:, x_coord]
+        try:
+            # Load and preprocess image
+            image = Image.open(well_log_file).convert("L")  # Grayscale
+            image_np = np.array(image)
 
-        # Optional inversion
-        invert = st.checkbox("Invert pixel values (for dark-on-light logs)?", value=False)
-        if invert:
-            extracted_strip = 255 - extracted_strip
+            # OPTIONAL: Show full log
+            st.image(image_np, caption="Raw Well Log", use_container_width=True)
 
-        # Depth calibration
-        st.markdown("### Depth Range Calibration")
-        start_depth_ft = st.number_input("Start depth (ft)", value=1200)
-        end_depth_ft = st.number_input("End depth (ft)", value=12000)
+            # --- CROP REGIONS (adjust these ranges for your log layout)
+            depth_strip = image_np[:, 50:100]     # Slice of depth column (X-axis)
+            curve_strip = image_np[:, 200:250]    # Slice of curve (e.g., SP/IL)
 
-        # Interpolate to depth range
-        depth_range = np.linspace(start_depth_ft, end_depth_ft, num=len(extracted_strip))
+            # --- Invert for OCR and curves
+            depth_strip = 255 - depth_strip
+            curve_strip = 255 - curve_strip
 
-        # Curve label
-        curve_label = st.selectbox("Curve Type", ["SP", "IL", "SN", "Custom"])
-        if curve_label == "Custom":
-            curve_label = st.text_input("Enter custom curve name", value="MyCurve")
+            # --- OCR the depth track
+            st.markdown("### ⛏️ OCR Extracted Depths")
+            depth_text = pytesseract.image_to_string(depth_strip, config='--psm 6 digits')
+            depth_lines = [line.strip() for line in depth_text.splitlines() if line.strip().isdigit()]
+            depth_values = [int(val) for val in depth_lines]
 
-        # Create dataframe
-        df_digitized = pd.DataFrame({
-            "Depth (ft)": depth_range,
-            f"{curve_label} (pixel value)": extracted_strip
-        })
+            if len(depth_values) >= 2:
+                st.success(f"Extracted {len(depth_values)} depth values.")
+                st.code(depth_values[:10], language="python")
 
-        # Plot it
-        st.markdown("### Curve Preview")
-        fig = px.line(df_digitized, x=f"{curve_label} (pixel value)", y="Depth (ft)", title=f"{curve_label} Curve (Digitized)", height=600)
-        fig.update_yaxes(autorange="reversed")  # depth increases down
-        st.plotly_chart(fig, use_container_width=True)
+                # --- Extract curve values
+                curve_values = curve_strip.mean(axis=1)  # avg value across column width
+                curve_values = 255 - curve_values        # invert if necessary
 
-        # Download
-        st.markdown("### Download")
-        csv_data = df_digitized.to_csv(index=False)
-        st.download_button(
-            label="Download CSV",
-            data=csv_data,
-            file_name=f"{curve_label}_digitized_log.csv",
-            mime="text/csv"
-        )
+                # --- Interpolate depth to match curve height
+                depths = np.linspace(depth_values[0], depth_values[-1], len(curve_values))
+
+                # --- Create DataFrame
+                df_curve = pd.DataFrame({
+                    "Depth_ft": depths,
+                    "Curve_1": curve_values
+                })
+
+                st.markdown("### 📈 Digitized Curve Preview")
+                st.line_chart(df_curve.set_index("Depth_ft"))
+
+                # --- Download as CSV
+                csv = df_curve.to_csv(index=False).encode('utf-8')
+                st.download_button("📥 Download Curve CSV", csv, "digitized_curve.csv", "text/csv")
+
+            else:
+                st.error("❌ Could not extract enough valid depth values from the depth strip.")
+
+        except Exception as e:
+            st.error("❌ Something went wrong during digitization.")
+            st.exception(e)
+
+    else:
+        st.info("Please upload a TIFF/PNG well log to begin digitization.")
+
 
 
 # --- File Upload Section ---
