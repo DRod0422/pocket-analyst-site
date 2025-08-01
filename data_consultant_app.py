@@ -1341,6 +1341,60 @@ with tab5:
             else:
                 st.warning("Dataset not loaded.")
 
+        # SPC & AI Insights
+
+        def xbar_r_chart(df, column, subgroup_size=5, show_insight=False):
+            subgroups = [df[column].iloc[i:i+subgroup_size] for i in range(0, len(df[column]), subgroup_size)]
+            subgroups = [group for group in subgroups if len(group) == subgroup_size]
+        
+            means = [group.mean() for group in subgroups]
+            ranges = [group.max() - group.min() for group in subgroups]
+        
+            xbar = np.mean(means)
+            rbar = np.mean(ranges)
+        
+            UCLx = xbar + (2.66 * rbar)
+            LCLx = xbar - (2.66 * rbar)
+        
+            fig, ax = plt.subplots()
+            ax.plot(means, marker='o', label='Subgroup Means')
+            ax.axhline(xbar, color='green', label='Center Line')
+            ax.axhline(UCLx, color='red', linestyle='--', label='UCL')
+            ax.axhline(LCLx, color='red', linestyle='--', label='LCL')
+            ax.set_title(f'X̄ Chart – {column}')
+            ax.set_xlabel('Subgroup')
+            ax.set_ylabel(column)
+            ax.legend()
+            st.pyplot(fig)
+        
+            if show_insight:
+                insight = f"""
+        **💡 WinBert Insight on `{column}`:**
+        
+        - Process average: **{xbar:.2f}**
+        - Range average: **{rbar:.2f}**
+        - Control limits: **UCL = {UCLx:.2f}**, **LCL = {LCLx:.2f}**
+        - {"✅ Process appears stable." if all(LCLx <= m <= UCLx for m in means) else "❌ Out-of-control conditions detected."}
+                """
+                st.markdown(insight)
+                download_insight(insight)
+        
+        def download_insight(insight):
+            b64 = base64.b64encode(insight.encode()).decode()
+            st.markdown(f'<a href="data:file/txt;base64,{b64}" download="WinBert_SPC_Insight.txt">📥 Download Insight</a>', unsafe_allow_html=True)
+        
+        def render_spc_tab(df):
+            st.header("📈 SPC Charts & Control Monitoring")
+        
+            numeric_cols = df.select_dtypes(include='number').columns.tolist()
+            selected_col = st.selectbox("Select a numeric column to analyze:", numeric_cols)
+        
+            subgroup_size = st.slider("Subgroup size (for X̄ chart)", 3, 10, 5)
+        
+            show_insight = st.checkbox("💡 Show WinBert Insight")
+        
+            if st.button("Generate SPC Chart"):
+                xbar_r_chart(df, selected_col, subgroup_size, show_insight)
 
 
 
