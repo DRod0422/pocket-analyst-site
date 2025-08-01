@@ -1343,6 +1343,11 @@ with tab5:
 
         # SPC & AI Insights
             
+        # --- SPC & AI Insights ---
+        st.markdown("---")
+        st.markdown("<h2 style='text-align: left;'>📉 SPC Charts & AI Process Monitoring</h2>", unsafe_allow_html=True)
+        st.markdown("Visualize control limits and detect out-of-control conditions using X̄ & R charts.")
+        
         def xbar_r_chart(df, column, subgroup_size=5, show_insight=False):
             subgroups = [df[column].iloc[i:i+subgroup_size] for i in range(0, len(df[column]), subgroup_size)]
             subgroups = [group for group in subgroups if len(group) == subgroup_size]
@@ -1383,24 +1388,19 @@ with tab5:
             b64 = base64.b64encode(insight.encode()).decode()
             st.markdown(f'<a href="data:file/txt;base64,{b64}" download="WinBert_SPC_Insight.txt">📥 Download Insight</a>', unsafe_allow_html=True)
         
-        def render_spc_tab(df):
-            st.header("📈 SPC Charts & Control Monitoring")
-            
-            if df_current is not None:
-                render_spc_tab(df_current)
+        if df_current is not None:
+            numeric_cols = df_current.select_dtypes(include='number').columns.tolist()
+            if numeric_cols:
+                selected_col = st.selectbox("Select a numeric column to analyze:", numeric_cols)
+                subgroup_size = st.slider("Subgroup size (for X̄ chart)", 3, 10, 5)
+                show_insight = st.checkbox("💡 Show WinBert Insight")
+        
+                if st.button("Generate SPC Chart"):
+                    xbar_r_chart(df_current, selected_col, subgroup_size, show_insight)
             else:
-                st.warning("Dataset not loaded.")
-            
-            numeric_cols = df.select_dtypes(include='number').columns.tolist()
-            selected_col = st.selectbox("Select a numeric column to analyze:", numeric_cols)
-        
-            subgroup_size = st.slider("Subgroup size (for X̄ chart)", 3, 10, 5)
-        
-            show_insight = st.checkbox("💡 Show WinBert Insight")
-        
-            if st.button("Generate SPC Chart"):
-                xbar_r_chart(df, selected_col, subgroup_size, show_insight)
-
+                st.warning("No numeric columns available to plot SPC chart.")
+        else:
+            st.warning("Dataset not loaded.")
 
 
              
