@@ -1342,13 +1342,6 @@ with tab5:
                 st.warning("Dataset not loaded.")
 
         # SPC & AI Insights
-        st.markdown("---")
-        st.subheader("📈 Statistical Process Control (SPC)")
-        
-        if df_current is not None:
-            render_spc_tab(df_current)
-        else:
-            st.warning("Dataset not loaded.")
             
         def xbar_r_chart(df, column, subgroup_size=5, show_insight=False):
             subgroups = [df[column].iloc[i:i+subgroup_size] for i in range(0, len(df[column]), subgroup_size)]
@@ -1392,7 +1385,12 @@ with tab5:
         
         def render_spc_tab(df):
             st.header("📈 SPC Charts & Control Monitoring")
-        
+            
+            if df_current is not None:
+                render_spc_tab(df_current)
+            else:
+                st.warning("Dataset not loaded.")
+            
             numeric_cols = df.select_dtypes(include='number').columns.tolist()
             selected_col = st.selectbox("Select a numeric column to analyze:", numeric_cols)
         
