@@ -272,22 +272,22 @@ with tab1:
                 
             # --- Divider ---
             st.markdown("---")
-            st.markdown("<h2 style='text-align: left;'>✨ Generate AI Insights with a Click</h2>", unsafe_allow_html=True)
+            st.markdown("<h2 style='text-align: left;'>✨ Generate WinBert Insights with a Click</h2>", unsafe_allow_html=True)
             st.markdown("Get a quick summary of your dataset in plain English. Ideal for data scientists, statisticians, and analysts alike.")
 
             # Show disabled state if already run
             if st.session_state.ai_ran_once:
-                st.success("✅ AI Insights already generated for this session.")
+                st.success("✅ WinBert's Insights already generated for this session.")
             else:
-                if st.button("Generate AI Insights"):
-                    with st.expander("✨ AI Quick Insights", expanded=True):
+                if st.button("Generate WinBert's Insight"):
+                    with st.expander("✨ WinBert's Quick Insights", expanded=True):
                         try:
                             st.markdown("Here's what I noticed in your data:")
         
                             csv_snippet = df_current.to_csv(index=False)[:4000]
                             insight_prompt = f"""
-                            You are a data analyst. Read the data below and write 3 short, plain-English insights.
-                            Avoid technical jargon. Pretend you're talking to a small business owner.
+                            You are a data analyst, named WinBert. Read the data below and write 3 short, plain-English insights.
+                            Avoid technical jargon. Pretend you're talking to an analyst, data scientist, or business owner.
         
                             Data sample:
                             {csv_snippet}
@@ -306,7 +306,7 @@ with tab1:
                             st.session_state.ai_ran_once = True  # 🔒 Lock it
         
                         except Exception as e:
-                            st.warning(f"Could not generate AI insights: {e}")
+                            st.warning(f"Could not generate WinBert insights: {e}")
 
 
     # --- Go-By Suggestions ---
@@ -329,14 +329,14 @@ with tab2:
         df_current = df_clean if df_clean is not None else df_raw
         
         if df_current is None:
-            st.warning("⚠️ Please upload a dataset in Tab 1 before using the AI Assistant.")
+            st.warning("⚠️ Please upload a dataset in Tab 1 before using WinBert AI Assistant.")
             st.stop()
         
         st.session_state["df_current"] = df_current
 
         
         # Let user choose full dataset or sample
-        sample_option = st.checkbox("Use full dataset for AI analysis (may be slower)", value=False, key="ai_sample_option")
+        sample_option = st.checkbox("Use full dataset for WinBert's AI analysis (may be slower)", value=False, key="ai_sample_option")
         
         if not sample_option and len(df_current) > 5000:
             st.warning(f"Large dataset detected ({len(df_current)} rows). Sampling 1000 rows for faster performance.")
