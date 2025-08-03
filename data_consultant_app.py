@@ -1401,7 +1401,31 @@ with tab5:
                 st.warning("No numeric columns available to plot SPC chart.")
         else:
             st.warning("Dataset not loaded.")
-
+           
+        # SPC by Group
+        with st.expander("📊 SPC by Group"):
+            st.markdown("Break out X̄ control charts for each group in a categorical column.")
+        
+            cat_cols = df_current.select_dtypes(include='object').columns.tolist()
+            num_cols = df_current.select_dtypes(include='number').columns.tolist()
+        
+            selected_group = st.selectbox("Group by (categorical column):", cat_cols)
+            selected_metric = st.selectbox("SPC metric (numeric column):", num_cols)
+            subgroup_size = st.slider("Subgroup size", 3, 10, 5, key="group_subgroup")
+            show_insight = st.checkbox("💡 Add WinBert Insight to each chart", key="group_insight")
+        
+            if st.button("📈 Generate Group SPC Charts"):
+                groups = df_current[selected_group].dropna().unique()
+                st.info(f"📌 {len(groups)} groups found in `{selected_group}`")
+        
+                for grp in sorted(groups):
+                    subset = df_current[df_current[selected_group] == grp][selected_metric].dropna().reset_index(drop=True)
+                    if len(subset) < subgroup_size * 2:
+                        st.warning(f"⚠️ Not enough data in `{grp}` to form control subgroups.")
+                        continue
+        
+                    st.subheader(f"🔹 {selected_group}: `{grp}`")
+                    xbar_r_chart(subset.to_frame(), selected_metric, subgroup_size, show_insight)
 
              
 
