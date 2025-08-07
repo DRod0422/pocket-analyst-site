@@ -402,7 +402,25 @@ with tab3:
         
                 dup_count = df_sample.duplicated().sum()
                 st.write(f"**Duplicate Rows:** {dup_count}")
+
+                 # 🎯 Slice selector (new)
+                st.subheader("📊 Slice Mode")
+                slice_option = st.radio(
+                    "Select a quarter of the dataset to analyze:",
+                    ("Top 25%", "25–50%", "50–75%", "Bottom 25%"),
+                    index=0,
+                    horizontal=True
+                )
         
+                if slice_option == "Top 25%":
+                    df_sample = df_full.iloc[:quarter]
+                elif slice_option == "25–50%":
+                    df_sample = df_full.iloc[quarter:quarter*2]
+                elif slice_option == "50–75%":
+                    df_sample = df_full.iloc[quarter*2:quarter*3]
+                else:
+                    df_sample = df_full.iloc[quarter*3:]
+                
                 st.markdown("<h3 style='text-align: center;'>📈 Quick Distribution Check (Numeric Columns)</h3>", unsafe_allow_html=True)
                 numeric_cols = df_sample.select_dtypes(include=np.number).columns.tolist()
                 if numeric_cols:
@@ -412,7 +430,7 @@ with tab3:
                     st.dataframe(stats_df.round(2))
                 else:
                     st.info("No numeric columns detected.")
-                    
+                
                 #Divider
                 st.markdown("---")
         
