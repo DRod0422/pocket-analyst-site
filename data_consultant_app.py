@@ -426,136 +426,136 @@ with tab3:
         st.write(f"**Duplicate Rows:** {dup_count}")
 
                 
-            st.markdown("<h3 style='text-align: center;'>📈 Quick Distribution Check (Numeric Columns)</h3>", unsafe_allow_html=True)
-            numeric_cols = df_sample.select_dtypes(include=np.number).columns.tolist()
-            if numeric_cols:
-                stats_df = df_sample[numeric_cols].describe().T
-                stats_df['skew'] = df_sample[numeric_cols].skew()
-                stats_df['kurtosis'] = df_sample[numeric_cols].kurtosis()
-                st.dataframe(stats_df.round(2))
-            else:
-                st.info("No numeric columns detected.")
-            
-            #Divider
-            st.markdown("---")
-    
-            st.markdown("<h3 style='text-align: center;'>Top Categorical Distributions</h3>", unsafe_allow_html=True)
-            cat_cols = df_sample.select_dtypes(include='object').columns.tolist()
-    
-            if not cat_cols:
-                st.info("No categorical columns found in your dataset.")
-            else:
-                for i in range(0, len(cat_cols), 2):
-                    cols = st.columns(2)
-            
-                    for j in range(2):
-                        if i + j < len(cat_cols):
-                            col_name = cat_cols[i + j]
-                            with cols[j]:
-                                # Centered section title
-                                st.markdown(f"<h5 style='text-align: center;'>{col_name} - Top Categories</h5>", unsafe_allow_html=True)
-            
-                                # Get value counts
-                                count_df = df_sample[col_name].value_counts().head(5).reset_index()
-                                count_df.columns = [col_name, "Count"]
-            
-                                # Create pie chart
-                                fig = px.pie(
-                                    count_df,
-                                    names=col_name,
-                                    values="Count",
-                                    title="",  # Remove Plotly's default title
-                                    hole=0.3  # Optional: donut style
-                                )
-                                fig.update_layout(margin=dict(t=10, b=10), height=300)
-            
+        st.markdown("<h3 style='text-align: center;'>📈 Quick Distribution Check (Numeric Columns)</h3>", unsafe_allow_html=True)
+        numeric_cols = df_sample.select_dtypes(include=np.number).columns.tolist()
+        if numeric_cols:
+            stats_df = df_sample[numeric_cols].describe().T
+            stats_df['skew'] = df_sample[numeric_cols].skew()
+            stats_df['kurtosis'] = df_sample[numeric_cols].kurtosis()
+            st.dataframe(stats_df.round(2))
+        else:
+            st.info("No numeric columns detected.")
+        
+        #Divider
+        st.markdown("---")
+
+        st.markdown("<h3 style='text-align: center;'>Top Categorical Distributions</h3>", unsafe_allow_html=True)
+        cat_cols = df_sample.select_dtypes(include='object').columns.tolist()
+
+        if not cat_cols:
+            st.info("No categorical columns found in your dataset.")
+        else:
+            for i in range(0, len(cat_cols), 2):
+                cols = st.columns(2)
+        
+                for j in range(2):
+                    if i + j < len(cat_cols):
+                        col_name = cat_cols[i + j]
+                        with cols[j]:
+                            # Centered section title
+                            st.markdown(f"<h5 style='text-align: center;'>{col_name} - Top Categories</h5>", unsafe_allow_html=True)
+        
+                            # Get value counts
+                            count_df = df_sample[col_name].value_counts().head(5).reset_index()
+                            count_df.columns = [col_name, "Count"]
+        
+                            # Create pie chart
+                            fig = px.pie(
+                                count_df,
+                                names=col_name,
+                                values="Count",
+                                title="",  # Remove Plotly's default title
+                                hole=0.3  # Optional: donut style
+                            )
+                            fig.update_layout(margin=dict(t=10, b=10), height=300)
+        
+                            st.plotly_chart(fig, use_container_width=True)
+
+          #Divider
+        st.markdown("---")
+        
+        st.markdown("<h3 style='text-align: center;'>🧪 Auto-Generated Chart Gallery</h3>", unsafe_allow_html=True)
+        chart_type = st.radio("Chart style:", ["Bar (Counts)", "Line (Counts)"], horizontal=True)
+        
+        # Convert float columns to rounded integers (safe for counting)
+        float_cols = df_sample.select_dtypes(include=["float"]).columns
+        for col in float_cols:
+            df_sample.loc[:, col] = df_sample[col].round().astype("Int64")
+        
+        # Recompute numeric columns after transformation
+        numeric_cols = df_sample.select_dtypes(include="number").columns.tolist()
+
+        if numeric_cols:
+            st.markdown("Quick glance at value distributions:")
+        
+            for i in range(0, len(numeric_cols), 2):  # Two charts per row
+                cols = st.columns(2)
+        
+                for j in range(2):
+                    if i + j < len(numeric_cols):
+                        col = numeric_cols[i + j]
+                        with cols[j]:
+                            try:
+                                #st.markdown(f"**{col}**")
+                                binned_col = pd.cut(df_sample[col], bins=10)
+                                counts = binned_col.value_counts().sort_index()
+                                # Clean bin labels by rounding left/right edges to whole numbers
+                                clean_bin_labels = [f"{int(interval.left)}–{int(interval.right)}" for interval in counts.index]
+                                vc_df = pd.DataFrame({f"{col} (binned)": clean_bin_labels, "Count": counts.values})
+        
+                                if chart_type == "Bar (Counts)":
+                                    fig = px.bar(vc_df, x=f"{col} (binned)", y="Count", title=f"{col}")
+                                    fig.update_layout(
+                                        title={
+                                            'text': f"{col} - Bar Chart (Binned)",
+                                            'x': 0.5,
+                                            'xanchor': 'center',
+                                            'font': dict(size=18)
+                                        }
+                                    )
+                                elif chart_type == "Line (Counts)":
+                                    fig = px.line(vc_df, x=f"{col} (binned)", y="Count", title=f"{col}")
+                                    fig.update_layout(
+                                        title={
+                                            'text': f"{col} - Bar Chart (Binned)",
+                                            'x': 0.5,
+                                            'xanchor': 'center',
+                                            'font': dict(size=18)
+                                        }
+                                    )
+                                else:
+                                    st.warning("Chart type not recognized.")
+        
                                 st.plotly_chart(fig, use_container_width=True)
-    
-              #Divider
-            st.markdown("---")
+                            except Exception as e:
+                                st.warning(f"Could not generate chart for {col}: {e}")
             
-            st.markdown("<h3 style='text-align: center;'>🧪 Auto-Generated Chart Gallery</h3>", unsafe_allow_html=True)
-            chart_type = st.radio("Chart style:", ["Bar (Counts)", "Line (Counts)"], horizontal=True)
-            
-            # Convert float columns to rounded integers (safe for counting)
-            float_cols = df_sample.select_dtypes(include=["float"]).columns
-            for col in float_cols:
-                df_sample.loc[:, col] = df_sample[col].round().astype("Int64")
-            
-            # Recompute numeric columns after transformation
-            numeric_cols = df_sample.select_dtypes(include="number").columns.tolist()
-    
-            if numeric_cols:
-                st.markdown("Quick glance at value distributions:")
-            
-                for i in range(0, len(numeric_cols), 2):  # Two charts per row
-                    cols = st.columns(2)
-            
-                    for j in range(2):
-                        if i + j < len(numeric_cols):
-                            col = numeric_cols[i + j]
-                            with cols[j]:
-                                try:
-                                    #st.markdown(f"**{col}**")
-                                    binned_col = pd.cut(df_sample[col], bins=10)
-                                    counts = binned_col.value_counts().sort_index()
-                                    # Clean bin labels by rounding left/right edges to whole numbers
-                                    clean_bin_labels = [f"{int(interval.left)}–{int(interval.right)}" for interval in counts.index]
-                                    vc_df = pd.DataFrame({f"{col} (binned)": clean_bin_labels, "Count": counts.values})
-            
-                                    if chart_type == "Bar (Counts)":
-                                        fig = px.bar(vc_df, x=f"{col} (binned)", y="Count", title=f"{col}")
-                                        fig.update_layout(
-                                            title={
-                                                'text': f"{col} - Bar Chart (Binned)",
-                                                'x': 0.5,
-                                                'xanchor': 'center',
-                                                'font': dict(size=18)
-                                            }
-                                        )
-                                    elif chart_type == "Line (Counts)":
-                                        fig = px.line(vc_df, x=f"{col} (binned)", y="Count", title=f"{col}")
-                                        fig.update_layout(
-                                            title={
-                                                'text': f"{col} - Bar Chart (Binned)",
-                                                'x': 0.5,
-                                                'xanchor': 'center',
-                                                'font': dict(size=18)
-                                            }
-                                        )
-                                    else:
-                                        st.warning("Chart type not recognized.")
-            
-                                    st.plotly_chart(fig, use_container_width=True)
-                                except Exception as e:
-                                    st.warning(f"Could not generate chart for {col}: {e}")
-                
-            #Divider
-            st.markdown("---")    
-    
-            st.markdown("<h3 style='text-align: center;'>Categorical Count Explorer</h3>", unsafe_allow_html=True)
-            cat_cols = df_sample.select_dtypes(include='object').columns.tolist()
-            
-            if not cat_cols:
-                st.info("No categorical columns found in your dataset.")
-            else:
-                selected_cat = st.selectbox("Select a categorical column", cat_cols)
-            
-                if selected_cat:
-                    top_n = st.slider("Limit to top N values", min_value=5, max_value=30, value=10)
-                    count_df = df_sample[selected_cat].value_counts().head(top_n).reset_index()
-                    count_df.columns = [selected_cat, "Count"]
-            
-                    chart_style = st.radio("Chart style:", ["Bar", "Pie"], horizontal=True)
-            
-                    st.dataframe(count_df)
-            
-                    if chart_style == "Bar":
-                        fig = px.bar(count_df, x=selected_cat, y="Count", title=f"Top {top_n} {selected_cat}")
-                    else:
-                        fig = px.pie(count_df, names=selected_cat, values="Count", title=f"{selected_cat} Distribution")
-            
-                    st.plotly_chart(fig, use_container_width=True)
+        #Divider
+        st.markdown("---")    
+
+        st.markdown("<h3 style='text-align: center;'>Categorical Count Explorer</h3>", unsafe_allow_html=True)
+        cat_cols = df_sample.select_dtypes(include='object').columns.tolist()
+        
+        if not cat_cols:
+            st.info("No categorical columns found in your dataset.")
+        else:
+            selected_cat = st.selectbox("Select a categorical column", cat_cols)
+        
+            if selected_cat:
+                top_n = st.slider("Limit to top N values", min_value=5, max_value=30, value=10)
+                count_df = df_sample[selected_cat].value_counts().head(top_n).reset_index()
+                count_df.columns = [selected_cat, "Count"]
+        
+                chart_style = st.radio("Chart style:", ["Bar", "Pie"], horizontal=True)
+        
+                st.dataframe(count_df)
+        
+                if chart_style == "Bar":
+                    fig = px.bar(count_df, x=selected_cat, y="Count", title=f"Top {top_n} {selected_cat}")
+                else:
+                    fig = px.pie(count_df, names=selected_cat, values="Count", title=f"{selected_cat} Distribution")
+        
+                st.plotly_chart(fig, use_container_width=True)
                         
         
                 # st.markdown("---")
