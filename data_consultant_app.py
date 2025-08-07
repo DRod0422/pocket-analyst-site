@@ -378,48 +378,63 @@ with tab2:
         #st.markdown("---")            
 
     # --- Smart Auto Insights ---
-with tab3:    
-            st.markdown("<h2 style='text-align: left;'>📱 Smart Auto Insights</h2>", unsafe_allow_html=True)
-            st.markdown("Get an instant overview of your dataset without lifting a finger. This section auto-generates summaries, stats, and visuals for quick insight.")
-            st.markdown("---")
-            # --- Safety check ---
-            if 'df_sample' in st.session_state and st.session_state['df_sample'] is not None:
-                df_sample = st.session_state['df_sample']
-                
-                st.markdown("<h3 style='text-align: center;'>🔍 Dataset Summary</h3>", unsafe_allow_html=True)
-                st.write(f"**Shape:** {df_sample.shape[0]} rows × {df_sample.shape[1]} columns")
-                st.write("**Data Types:**")
-                st.dataframe(df_sample.dtypes)
-        
-                missing_counts = df_sample.isnull().sum()
-                missing_percent = (missing_counts / len(df_sample)) * 100
-                missing_df = pd.DataFrame({
-                'Missing Values': missing_counts,
-                'Percent Missing': missing_percent
-                }).round(2)
-                st.write("**Missing Data Overview:**")
-                st.dataframe(missing_df[missing_df['Missing Values'] > 0])
-        
-                dup_count = df_sample.duplicated().sum()
-                st.write(f"**Duplicate Rows:** {dup_count}")
+with tab3:
+    st.markdown("<h2 style='text-align: left;'>📱 Smart Auto Insights</h2>", unsafe_allow_html=True)
+    st.markdown("Get an instant overview of your dataset without lifting a finger. This section auto-generates summaries, stats, and visuals for quick insight.")
+    st.markdown("---")
 
-                 # 🎯 Slice selector (new)
-                st.subheader("📊 Slice Mode")
-                slice_option = st.radio(
-                    "Select a quarter of the dataset to analyze:",
-                    ("Top 25%", "25–50%", "50–75%", "Bottom 25%"),
-                    index=0,
-                    horizontal=True
-                )
-        
-                if slice_option == "Top 25%":
-                    df_sample = df_full.iloc[:quarter]
-                elif slice_option == "25–50%":
-                    df_sample = df_full.iloc[quarter:quarter*2]
-                elif slice_option == "50–75%":
-                    df_sample = df_full.iloc[quarter*2:quarter*3]
-                else:
-                    df_sample = df_full.iloc[quarter*3:]
+    # --- Safety check ---
+    if 'df_current_full' in st.session_state and st.session_state['df_current_full'] is not None:
+        df_full = st.session_state['df_current_full']
+        total_rows = len(df_full)
+        quarter = total_rows // 4
+
+        # 🎯 Slice selector (new) — moved up!
+        st.subheader("📊 Slice Mode")
+        slice_option = st.radio(
+            "Select a quarter of the dataset to analyze:",
+            ("Top 25%", "25–50%", "50–75%", "Bottom 25%"),
+            index=0,
+            horizontal=True
+        )
+
+        if slice_option == "Top 25%":
+            df_sample = df_full.iloc[:quarter]
+        elif slice_option == "25–50%":
+            df_sample = df_full.iloc[quarter:quarter*2]
+        elif slice_option == "50–75%":
+            df_sample = df_full.iloc[quarter*2:quarter*3]
+        else:
+            df_sample = df_full.iloc[quarter*3:]
+
+        # Now you're safely using df_sample
+        st.markdown("<h3 style='text-align: center;'>🔍 Dataset Summary</h3>", unsafe_allow_html=True)
+        st.write(f"**Shape:** {df_sample.shape[0]} rows × {df_sample.shape[1]} columns")
+        st.write("**Data Types:**")
+        st.dataframe(df_sample.dtypes)
+
+        missing_counts = df_sample.isnull().sum()
+        missing_percent = (missing_counts / len(df_sample)) * 100
+        missing_df = pd.DataFrame({
+            'Missing Values': missing_counts,
+            'Percent Missing': missing_percent
+        }).round(2)
+        st.write("**Missing Data Overview:**")
+        st.dataframe(missing_df[missing_df['Missing Values'] > 0])
+
+        dup_count = df_sample.duplicated().sum()
+        st.write(f"**Duplicate Rows:** {dup_count}")
+
+        st.markdown("<h3 style='text-align: center;'>📈 Quick Distribution Check (Numeric Columns)</h3>", unsafe_allow_html=True)
+        numeric_cols = df_sample.select_dtypes(include=np.number).columns.tolist()
+        if numeric_cols:
+            stats_df = df_sample[numeric_cols].describe().T
+            stats_df['skew'] = df_sample[numeric_cols].skew()
+            stats_df['kurtosis'] = df_sample[numeric_cols].kurtosis()
+            st.dataframe(stats_df.round(2))
+        else:
+            st.info("No numeric columns detected.")
+
                 
                 st.markdown("<h3 style='text-align: center;'>📈 Quick Distribution Check (Numeric Columns)</h3>", unsafe_allow_html=True)
                 numeric_cols = df_sample.select_dtypes(include=np.number).columns.tolist()
