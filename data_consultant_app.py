@@ -425,16 +425,6 @@ with tab3:
         dup_count = df_sample.duplicated().sum()
         st.write(f"**Duplicate Rows:** {dup_count}")
 
-        st.markdown("<h3 style='text-align: center;'>📈 Quick Distribution Check (Numeric Columns)</h3>", unsafe_allow_html=True)
-        numeric_cols = df_sample.select_dtypes(include=np.number).columns.tolist()
-        if numeric_cols:
-            stats_df = df_sample[numeric_cols].describe().T
-            stats_df['skew'] = df_sample[numeric_cols].skew()
-            stats_df['kurtosis'] = df_sample[numeric_cols].kurtosis()
-            st.dataframe(stats_df.round(2))
-        else:
-            st.info("No numeric columns detected.")
-
                 
                 st.markdown("<h3 style='text-align: center;'>📈 Quick Distribution Check (Numeric Columns)</h3>", unsafe_allow_html=True)
                 numeric_cols = df_sample.select_dtypes(include=np.number).columns.tolist()
