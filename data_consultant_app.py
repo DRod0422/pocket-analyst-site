@@ -26,6 +26,7 @@ from prophet import Prophet
 from scipy import stats
 from pathlib import Path
 from PIL import Image
+from dataclasses import dataclass
 
 # --- Config Section ---
 openai.api_key = st.secrets["OPENAI_API_KEY"]
@@ -665,14 +666,17 @@ with tab4:
                 df["date"] = pd.to_datetime(df["date"])
                 s = pd.Series(df["usage"].values, index=df["date"])
             
-            inp = LifeModelInputs(
-                period_usage=s,
-                design_life_low=12000,     # tweak for your asset
-                design_life_high=15000,
-                normal_pace_low=1000,      # “fixed” target band
-                normal_pace_high=1200,
-                label="Upstairs HVAC"
-            )
+            @dataclass
+            class LifeModelInputs:
+                # period usage, indexed by month-end or any DatetimeIndex; values = hours/miles/cycles
+                period_usage: pd.Series
+                design_life_low: float = 12000.0
+                design_life_high: float = 15000.0
+                normal_pace_low: float = 1000.0     # units/year if fixed
+                normal_pace_high: float = 1200.0
+                annualize_months: int = 12
+                label: str = "Asset"
+                        )
             out = remaining_life_model(inp)
         
             low, high = out["results_low"], out["results_high"]
