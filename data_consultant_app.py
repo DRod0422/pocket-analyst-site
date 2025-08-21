@@ -636,6 +636,47 @@ with tab4:
         
         # --- Divider ---
         st.markdown('---')
+        st.subheader("Remaining Life (Wear Model)")
+
+        # Example input format (you likely already have this DataFrame):
+        # df columns: ["date", "usage"] where "usage" is monthly hours (or miles/cycles)
+        # df["date"] should be any date in that month; monthly aggregation is handled.
+        
+        uploaded = st.file_uploader("Upload monthly usage CSV (columns: date, usage)", type=["csv"], key="life_csv")
+        if uploaded:
+            df = pd.read_csv(uploaded)
+            df["date"] = pd.to_datetime(df["date"])
+            s = pd.Series(df["usage"].values, index=df["date"])
+        
+            inp = LifeModelInputs(
+                period_usage=s,
+                design_life_low=12000,     # tweak for your asset
+                design_life_high=15000,
+                normal_pace_low=1000,      # “fixed” target band
+                normal_pace_high=1200,
+                label="Upstairs HVAC"
+            )
+            out = remaining_life_model(inp)
+        
+            low, high = out["results_low"], out["results_high"]
+            st.plotly_chart(out["figure"], use_container_width=True)
+        
+            col1, col2, col3 = st.columns(3)
+            col1.metric("Annualized Pace (Now)", f'{low["pace_now_yr"]:.0f} /yr')
+            col2.metric("% Life Used (Low Life)", f'{low["pct_used"]:.1f}%')
+            col3.metric("% Life Used (High Life)", f'{high["pct_used"]:.1f}%')
+        
+            st.write(
+                f'**Projected EOL at Current Pace:** '
+                f'{low["eol_now"].date() if low["eol_now"] else "—"} (low life)  |  '
+                f'{high["eol_now"].date() if high["eol_now"] else "—"} (high life)'
+            )
+            st.write(
+                f'**Years Left if Fixed:** '
+                f'{low["years_left_if_fixed"][0]:.1f}–{low["years_left_if_fixed"][1]:.1f} yrs '
+                f'(for low-life case).'
+            )
+
         # --- Predictive Forecasting (Simple Time Series) ---
         st.markdown("## 📈 Forecast Future Values (Beta)")
         try:
