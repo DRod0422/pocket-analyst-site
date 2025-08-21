@@ -648,7 +648,7 @@ with tab4:
             key="life_file"
             )
             
-       if uploaded:
+        if uploaded:
             if uploaded.name.endswith(".csv"):
                 df = pd.read_csv(uploaded)
         
