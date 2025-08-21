@@ -676,7 +676,7 @@ with tab4:
                 normal_pace_high: float = 1200.0
                 annualize_months: int = 12
                 label: str = "Asset"
-            )
+            
             out = remaining_life_model(inp)
         
             low, high = out["results_low"], out["results_high"]
