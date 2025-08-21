@@ -637,6 +637,87 @@ with tab4:
         # --- Divider ---
         st.markdown('---')
         from dataclasses import dataclass  # only needed if defining LifeModelInputs inline here
+        import pandas as pd
+        import numpy as np
+        import plotly.graph_objects as go
+        
+        def remaining_life_model(inp):
+            s = inp.period_usage.copy()
+            if not isinstance(s.index, pd.DatetimeIndex):
+                s.index = pd.to_datetime(s.index)
+            s = s.sort_index()
+        
+            # Fill missing months
+            month_range = pd.period_range(s.index.min().to_period("M"), s.index.max().to_period("M"), freq="M")
+            s = s.groupby(s.index.to_period("M")).sum()
+            s = s.reindex(month_range, fill_value=0.0)
+            s.index = s.index.to_timestamp("M")
+        
+            cum = s.cumsum()
+            used = float(cum.iloc[-1])
+            today = pd.Timestamp.today().normalize()
+        
+            def _annualized_pace(s, months=12):
+                tail = s.tail(months)
+                months_covered = max(len(tail), 1)
+                return float(tail.sum()) / months_covered * 12.0
+        
+            pace_now = _annualized_pace(s, inp.annualize_months)
+        
+            def _project(design_life):
+                remaining = max(design_life - used, 0.0)
+                yrs_left_now = (remaining / pace_now) if pace_now > 0 else np.inf
+                eol_now = (today + pd.DateOffset(years=yrs_left_now)) if np.isfinite(yrs_left_now) else None
+        
+                # Fixed scenario
+                yrs_left_fixed_low  = remaining / inp.normal_pace_low  if inp.normal_pace_low  > 0 else np.inf
+                yrs_left_fixed_high = remaining / inp.normal_pace_high if inp.normal_pace_high > 0 else np.inf
+                eol_fixed_low  = today + pd.DateOffset(years=yrs_left_fixed_low)
+                eol_fixed_high = today + pd.DateOffset(years=yrs_left_fixed_high)
+        
+                pct_used = (used / design_life) * 100.0 if design_life > 0 else 0.0
+        
+                return dict(
+                    design_life=design_life,
+                    pct_used=pct_used,
+                    pace_now_yr=pace_now,
+                    years_left_now=yrs_left_now,
+                    eol_now=eol_now,
+                    years_left_if_fixed=(yrs_left_fixed_low, yrs_left_fixed_high),
+                    eol_if_fixed=(eol_fixed_low, eol_fixed_high),
+                )
+        
+            out_low  = _project(inp.design_life_low)
+            out_high = _project(inp.design_life_high)
+        
+            # Plot cumulative vs expected & projected
+            normal_mid = 0.5 * (inp.normal_pace_low + inp.normal_pace_high)
+            months = np.arange(len(s)) + 1
+            expected = months * (normal_mid / 12.0)
+        
+            fig = go.Figure()
+            fig.add_trace(go.Scatter(x=cum.index, y=cum.values, mode="lines+markers",
+                                     name=f"{inp.label} Cumulative"))
+            fig.add_trace(go.Scatter(x=cum.index, y=expected, mode="lines",
+                                     name="Expected (Normal Pace)", line=dict(dash="dash")))
+        
+            if pace_now > 0:
+                last_x, last_y = cum.index[-1], cum.values[-1]
+                future_months = pd.date_range(last_x + pd.offsets.MonthEnd(1), periods=24, freq="M")
+                monthly_at_pace = pace_now / 12.0
+                projected = last_y + np.arange(1, len(future_months)+1) * monthly_at_pace
+                fig.add_trace(go.Scatter(x=future_months, y=projected, mode="lines",
+                                         name="Projected @ Current Pace", line=dict(dash="dot")))
+        
+            fig.update_layout(
+                title=f"{inp.label} – Cumulative Usage vs Expected & Projected",
+                xaxis_title="Month",
+                yaxis_title="Cumulative Usage",
+                height=420
+            )
+        
+            return {"results_low": out_low, "results_high": out_high,
+                    "cumulative": cum, "figure": fig}
 
         st.subheader("Remaining Life (Wear Model)")
         
