@@ -636,18 +636,20 @@ with tab4:
         
         # --- Divider ---
         st.markdown('---')
-        from dataclasses import dataclass  # only needed if defining LifeModelInputs inline here
+        import streamlit as st
+        from dataclasses import dataclass
         import pandas as pd
         import numpy as np
         import plotly.graph_objects as go
         
+        # ---------------- Remaining-life model ----------------
         def remaining_life_model(inp):
             s = inp.period_usage.copy()
             if not isinstance(s.index, pd.DatetimeIndex):
                 s.index = pd.to_datetime(s.index)
             s = s.sort_index()
         
-            # Fill missing months
+            # Group to month, fill gaps
             month_range = pd.period_range(s.index.min().to_period("M"), s.index.max().to_period("M"), freq="M")
             s = s.groupby(s.index.to_period("M")).sum()
             s = s.reindex(month_range, fill_value=0.0)
@@ -657,8 +659,8 @@ with tab4:
             used = float(cum.iloc[-1])
             today = pd.Timestamp.today().normalize()
         
-            def _annualized_pace(s, months=12):
-                tail = s.tail(months)
+            def _annualized_pace(s_m, months=12):
+                tail = s_m.tail(months)
                 months_covered = max(len(tail), 1)
                 return float(tail.sum()) / months_covered * 12.0
         
@@ -666,22 +668,23 @@ with tab4:
         
             def _project(design_life):
                 remaining = max(design_life - used, 0.0)
-                yrs_left_now = (remaining / pace_now) if pace_now > 0 else np.inf
-                eol_now = (today + pd.DateOffset(years=yrs_left_now)) if np.isfinite(yrs_left_now) else None
+                years_left_now = (remaining / pace_now) if pace_now > 0 else np.inf
+                # Use timedelta to support fractional years
+                days_now = years_left_now * 365.25 if np.isfinite(years_left_now) else None
+                eol_now = (today + pd.to_timedelta(days_now, unit="D")) if days_now is not None else None
         
                 # Fixed scenario
                 yrs_left_fixed_low  = remaining / inp.normal_pace_low  if inp.normal_pace_low  > 0 else np.inf
                 yrs_left_fixed_high = remaining / inp.normal_pace_high if inp.normal_pace_high > 0 else np.inf
-                eol_fixed_low  = today + pd.DateOffset(years=yrs_left_fixed_low)
-                eol_fixed_high = today + pd.DateOffset(years=yrs_left_fixed_high)
+                eol_fixed_low  = today + pd.to_timedelta(yrs_left_fixed_low  * 365.25, unit="D")
+                eol_fixed_high = today + pd.to_timedelta(yrs_left_fixed_high * 365.25, unit="D")
         
                 pct_used = (used / design_life) * 100.0 if design_life > 0 else 0.0
-        
                 return dict(
                     design_life=design_life,
                     pct_used=pct_used,
                     pace_now_yr=pace_now,
-                    years_left_now=yrs_left_now,
+                    years_left_now=years_left_now,
                     eol_now=eol_now,
                     years_left_if_fixed=(yrs_left_fixed_low, yrs_left_fixed_high),
                     eol_if_fixed=(eol_fixed_low, eol_fixed_high),
@@ -716,9 +719,24 @@ with tab4:
                 height=420
             )
         
-            return {"results_low": out_low, "results_high": out_high,
-                    "cumulative": cum, "figure": fig}
-
+            return {
+                "results_low": out_low,
+                "results_high": out_high,
+                "cumulative": cum,
+                "figure": fig
+            }
+        
+        @dataclass
+        class LifeModelInputs:
+            period_usage: pd.Series
+            design_life_low: float = 12000.0
+            design_life_high: float = 15000.0
+            normal_pace_low: float = 1000.0
+            normal_pace_high: float = 1200.0
+            annualize_months: int = 12
+            label: str = "Asset"
+        # ------------------------------------------------------
+        
         st.subheader("Remaining Life (Wear Model)")
         
         uploaded = st.file_uploader(
@@ -728,79 +746,44 @@ with tab4:
         )
         
         if uploaded:
-            # --- Read file ---
+            # Read file
             if uploaded.name.lower().endswith(".csv"):
                 df = pd.read_csv(uploaded)
             else:
-                # Excel: let user pick sheet
                 xls = pd.ExcelFile(uploaded)
                 sheet = st.selectbox("Select worksheet", xls.sheet_names)
                 df = pd.read_excel(uploaded, sheet_name=sheet)
         
-            # --- Normalize column names ---
+            # Normalize/rename headers
             df.columns = [c.strip().lower() for c in df.columns]
-            # Allow some friendly header variants
-            col_map = {}
             if "date" not in df.columns:
-                # try alternatives
                 for alt in ("month", "period", "period_end"):
                     if alt in df.columns:
-                        col_map[alt] = "date"; break
+                        df = df.rename(columns={alt: "date"})
+                        break
             if "usage" not in df.columns:
                 for alt in ("hours", "runtime", "value"):
                     if alt in df.columns:
-                        col_map[alt] = "usage"; break
-            if col_map:
-                df = df.rename(columns=col_map)
+                        df = df.rename(columns={alt: "usage"})
+                        break
         
-            # --- Validate ---
+            # Validate
             if "date" not in df.columns or "usage" not in df.columns:
                 st.error("File must contain 'date' and 'usage' columns (case-insensitive).")
                 st.stop()
         
-            # --- Parse dates & build Series ---
-            try:
-                df["date"] = pd.to_datetime(df["date"])
-            except Exception as e:
-                st.error(f"Could not parse 'date' column as dates: {e}")
-                st.stop()
-        
-            # Optional: ensure numeric
+            # Parse/clean
+            df["date"] = pd.to_datetime(df["date"], errors="coerce")
             df["usage"] = pd.to_numeric(df["usage"], errors="coerce")
-            df = df.dropna(subset=["usage"])
+            df = df.dropna(subset=["date", "usage"])
         
-            # Preview
             with st.expander("Preview data", expanded=False):
                 st.dataframe(df.head(20), use_container_width=True)
         
-            # Build Series indexed by date; monthly grouping happens in the model
+            # Build Series
             s = pd.Series(df["usage"].values, index=df["date"])
         
-            # --- If you are IMPORTING the model (preferred) ---
-            # inp = LifeModelInputs(
-            #     period_usage=s,
-            #     design_life_low=12000,
-            #     design_life_high=15000,
-            #     normal_pace_low=1000,
-            #     normal_pace_high=1200,
-            #     label=st.text_input("Asset label", value="Upstairs HVAC")
-            # )
-            # out = remaining_life_model(inp)
-        
-            # --- If you have NOT moved the code to utils yet ---
-            # Minimal inline dataclass so your previous LifeModelInputs resolves.
-            @dataclass
-            class LifeModelInputs:
-                period_usage: pd.Series
-                design_life_low: float = 12000.0
-                design_life_high: float = 15000.0
-                normal_pace_low: float = 1000.0
-                normal_pace_high: float = 1200.0
-                annualize_months: int = 12
-                label: str = "Asset"
-        
-            # You STILL need remaining_life_model defined above OR import it.
-            # If you already pasted the function earlier, this will now work:
+            # Inputs + run
             asset_label = st.text_input("Asset label", value="Upstairs HVAC")
             inp = LifeModelInputs(
                 period_usage=s,
@@ -810,11 +793,9 @@ with tab4:
                 normal_pace_high=1200,
                 label=asset_label
             )
-        
-            # Call your previously defined remaining_life_model here
             out = remaining_life_model(inp)
         
-            # --- Display ---
+            # Display
             low, high = out["results_low"], out["results_high"]
             st.plotly_chart(out["figure"], use_container_width=True)
         
@@ -825,14 +806,14 @@ with tab4:
         
             st.write(
                 f'**Projected EOL at Current Pace:** '
-                f'{low["eol_now"].date() if low["eol_now"] else "—"} (low life)  |  '
-                f'{high["eol_now"].date() if high["eol_now"] else "—"} (high life)'
+                f'{low["eol_now"].date() if low["eol_now"] is not None else "—"} (low life)  |  '
+                f'{high["eol_now"].date() if high["eol_now"] is not None else "—"} (high life)'
             )
             st.write(
-                f'**Years Left if Fixed:** '
-                f'{low["years_left_if_fixed"][0]:.1f}–{low["years_left_if_fixed"][1]:.1f} yrs '
-                f'(low-life case band).'
-    )
+                f'**Years Left if Fixed (Low-Life basis):** '
+                f'{low["years_left_if_fixed"][0]:.1f}–{low["years_left_if_fixed"][1]:.1f} yrs'
+            )
+
         # --- Predictive Forecasting (Simple Time Series) ---
         st.markdown("## 📈 Forecast Future Values (Beta)")
         try:
