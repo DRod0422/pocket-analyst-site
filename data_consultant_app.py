@@ -26,7 +26,6 @@ from prophet import Prophet
 from scipy import stats
 from pathlib import Path
 from PIL import Image
-from dataclasses import dataclass
 
 # --- Config Section ---
 openai.api_key = st.secrets["OPENAI_API_KEY"]
@@ -637,48 +636,104 @@ with tab4:
         
         # --- Divider ---
         st.markdown('---')
-        st.subheader("Remaining Life (Wear Model)")
+        from dataclasses import dataclass  # only needed if defining LifeModelInputs inline here
 
-        # Example input format (you likely already have this DataFrame):
-        # df columns: ["date", "usage"] where "usage" is monthly hours (or miles/cycles)
-        # df["date"] should be any date in that month; monthly aggregation is handled.
+        st.subheader("Remaining Life (Wear Model)")
         
         uploaded = st.file_uploader(
             "Upload monthly usage file (CSV or Excel). For Excel, columns must be: date, usage",
             type=["csv", "xlsx"],
             key="life_file"
-            )
-            
-        if uploaded:
-            if uploaded.name.endswith(".csv"):
-                df = pd.read_csv(uploaded)
+        )
         
-            elif uploaded.name.endswith(".xlsx"):
-                # List sheet names first
+        if uploaded:
+            # --- Read file ---
+            if uploaded.name.lower().endswith(".csv"):
+                df = pd.read_csv(uploaded)
+            else:
+                # Excel: let user pick sheet
                 xls = pd.ExcelFile(uploaded)
                 sheet = st.selectbox("Select worksheet", xls.sheet_names)
                 df = pd.read_excel(uploaded, sheet_name=sheet)
         
-            # Make sure we have the right columns
+            # --- Normalize column names ---
+            df.columns = [c.strip().lower() for c in df.columns]
+            # Allow some friendly header variants
+            col_map = {}
+            if "date" not in df.columns:
+                # try alternatives
+                for alt in ("month", "period", "period_end"):
+                    if alt in df.columns:
+                        col_map[alt] = "date"; break
+            if "usage" not in df.columns:
+                for alt in ("hours", "runtime", "value"):
+                    if alt in df.columns:
+                        col_map[alt] = "usage"; break
+            if col_map:
+                df = df.rename(columns=col_map)
+        
+            # --- Validate ---
             if "date" not in df.columns or "usage" not in df.columns:
-                st.error("File must contain 'date' and 'usage' columns.")
-            else:
+                st.error("File must contain 'date' and 'usage' columns (case-insensitive).")
+                st.stop()
+        
+            # --- Parse dates & build Series ---
+            try:
                 df["date"] = pd.to_datetime(df["date"])
-                s = pd.Series(df["usage"].values, index=df["date"])
-            
+            except Exception as e:
+                st.error(f"Could not parse 'date' column as dates: {e}")
+                st.stop()
+        
+            # Optional: ensure numeric
+            df["usage"] = pd.to_numeric(df["usage"], errors="coerce")
+            df = df.dropna(subset=["usage"])
+        
+            # Preview
+            with st.expander("Preview data", expanded=False):
+                st.dataframe(df.head(20), use_container_width=True)
+        
+            # Build Series indexed by date; monthly grouping happens in the model
+            s = pd.Series(df["usage"].values, index=df["date"])
+        
+            # --- If you are IMPORTING the model (preferred) ---
+            # inp = LifeModelInputs(
+            #     period_usage=s,
+            #     design_life_low=12000,
+            #     design_life_high=15000,
+            #     normal_pace_low=1000,
+            #     normal_pace_high=1200,
+            #     label=st.text_input("Asset label", value="Upstairs HVAC")
+            # )
+            # out = remaining_life_model(inp)
+        
+            # --- If you have NOT moved the code to utils yet ---
+            # Minimal inline dataclass so your previous LifeModelInputs resolves.
             @dataclass
             class LifeModelInputs:
-                # period usage, indexed by month-end or any DatetimeIndex; values = hours/miles/cycles
                 period_usage: pd.Series
                 design_life_low: float = 12000.0
                 design_life_high: float = 15000.0
-                normal_pace_low: float = 1000.0     # units/year if fixed
+                normal_pace_low: float = 1000.0
                 normal_pace_high: float = 1200.0
                 annualize_months: int = 12
                 label: str = "Asset"
-            
+        
+            # You STILL need remaining_life_model defined above OR import it.
+            # If you already pasted the function earlier, this will now work:
+            asset_label = st.text_input("Asset label", value="Upstairs HVAC")
+            inp = LifeModelInputs(
+                period_usage=s,
+                design_life_low=12000,
+                design_life_high=15000,
+                normal_pace_low=1000,
+                normal_pace_high=1200,
+                label=asset_label
+            )
+        
+            # Call your previously defined remaining_life_model here
             out = remaining_life_model(inp)
         
+            # --- Display ---
             low, high = out["results_low"], out["results_high"]
             st.plotly_chart(out["figure"], use_container_width=True)
         
@@ -695,9 +750,8 @@ with tab4:
             st.write(
                 f'**Years Left if Fixed:** '
                 f'{low["years_left_if_fixed"][0]:.1f}–{low["years_left_if_fixed"][1]:.1f} yrs '
-                f'(for low-life case).'
-            )
-
+                f'(low-life case band).'
+    )
         # --- Predictive Forecasting (Simple Time Series) ---
         st.markdown("## 📈 Forecast Future Values (Beta)")
         try:
