@@ -642,12 +642,29 @@ with tab4:
         # df columns: ["date", "usage"] where "usage" is monthly hours (or miles/cycles)
         # df["date"] should be any date in that month; monthly aggregation is handled.
         
-        uploaded = st.file_uploader("Upload monthly usage CSV (columns: date, usage)", type=["csv"], key="life_csv")
-        if uploaded:
-            df = pd.read_csv(uploaded)
-            df["date"] = pd.to_datetime(df["date"])
-            s = pd.Series(df["usage"].values, index=df["date"])
+        uploaded = st.file_uploader(
+            "Upload monthly usage file (CSV or Excel). For Excel, columns must be: date, usage",
+            type=["csv", "xlsx"],
+            key="life_file"
+            )
+            
+       if uploaded:
+            if uploaded.name.endswith(".csv"):
+                df = pd.read_csv(uploaded)
         
+            elif uploaded.name.endswith(".xlsx"):
+                # List sheet names first
+                xls = pd.ExcelFile(uploaded)
+                sheet = st.selectbox("Select worksheet", xls.sheet_names)
+                df = pd.read_excel(uploaded, sheet_name=sheet)
+        
+            # Make sure we have the right columns
+            if "date" not in df.columns or "usage" not in df.columns:
+                st.error("File must contain 'date' and 'usage' columns.")
+            else:
+                df["date"] = pd.to_datetime(df["date"])
+                s = pd.Series(df["usage"].values, index=df["date"])
+            
             inp = LifeModelInputs(
                 period_usage=s,
                 design_life_low=12000,     # tweak for your asset
