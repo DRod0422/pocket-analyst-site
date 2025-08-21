@@ -666,29 +666,55 @@ with tab4:
         
             pace_now = _annualized_pace(s, inp.annualize_months)
         
+                # AFTER computing pace_now, add a fallback:
+            if not np.isfinite(pace_now) or pace_now <= 0:
+                # fallback: use overall mean * 12 (or 0 if empty)
+                pace_now = float(s.mean() * 12.0) if len(s) else 0.0
+        
             def _project(design_life):
                 remaining = max(design_life - used, 0.0)
                 years_left_now = (remaining / pace_now) if pace_now > 0 else np.inf
-                # Use timedelta to support fractional years
-                days_now = years_left_now * 365.25 if np.isfinite(years_left_now) else None
-                eol_now = (today + pd.to_timedelta(days_now, unit="D")) if days_now is not None else None
         
-                # Fixed scenario
-                yrs_left_fixed_low  = remaining / inp.normal_pace_low  if inp.normal_pace_low  > 0 else np.inf
-                yrs_left_fixed_high = remaining / inp.normal_pace_high if inp.normal_pace_high > 0 else np.inf
-                eol_fixed_low  = today + pd.to_timedelta(yrs_left_fixed_low  * 365.25, unit="D")
-                eol_fixed_high = today + pd.to_timedelta(yrs_left_fixed_high * 365.25, unit="D")
+                # guard for non-finite or ridiculously large values
+                if not np.isfinite(years_left_now) or years_left_now > 200:  # cap at 200 yrs
+                    eol_now = None
+                else:
+                    days_now = years_left_now * 365.25
+                    try:
+                        eol_now = pd.Timestamp(today) + pd.to_timedelta(days_now, unit="D")
+                    except Exception:
+                        eol_now = None
+        
+                # Fixed/normal scenario (these should be finite, but guard anyway)
+                def _eol_fixed(years_left_fixed):
+                    if not np.isfinite(years_left_fixed) or years_left_fixed > 200:
+                        return None
+                    try:
+                        return pd.Timestamp(today) + pd.to_timedelta(years_left_fixed * 365.25, unit="D")
+                    except Exception:
+                        return None
+        
+                yrs_left_fixed_low  = (remaining / inp.normal_pace_low)  if inp.normal_pace_low  > 0 else np.inf
+                yrs_left_fixed_high = (remaining / inp.normal_pace_high) if inp.normal_pace_high > 0 else np.inf
+        
+                eol_fixed_low  = _eol_fixed(yrs_left_fixed_low)
+                eol_fixed_high = _eol_fixed(yrs_left_fixed_high)
         
                 pct_used = (used / design_life) * 100.0 if design_life > 0 else 0.0
+        
                 return dict(
                     design_life=design_life,
                     pct_used=pct_used,
                     pace_now_yr=pace_now,
-                    years_left_now=years_left_now,
+                    years_left_now=years_left_now if np.isfinite(years_left_now) and years_left_now <= 200 else None,
                     eol_now=eol_now,
-                    years_left_if_fixed=(yrs_left_fixed_low, yrs_left_fixed_high),
+                    years_left_if_fixed=(
+                        yrs_left_fixed_low  if np.isfinite(yrs_left_fixed_low)  and yrs_left_fixed_low  <= 200 else None,
+                        yrs_left_fixed_high if np.isfinite(yrs_left_fixed_high) and yrs_left_fixed_high <= 200 else None,
+                    ),
                     eol_if_fixed=(eol_fixed_low, eol_fixed_high),
                 )
+
         
             out_low  = _project(inp.design_life_low)
             out_high = _project(inp.design_life_high)
