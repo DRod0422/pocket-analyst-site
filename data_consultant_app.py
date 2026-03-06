@@ -26,7 +26,7 @@ from PIL import Image
 # LOCAL LLM CONFIG
 # ─────────────────────────────────────────────
 OLLAMA_URL = "http://localhost:11434/api/chat"
-OLLAMA_MODEL = "llama3"  # confirm with: ollama list
+OLLAMA_MODEL = "llama3:latest"  # confirm with: ollama list
 
 def ask_winbert(system_prompt: str, user_prompt: str, timeout: int = 120) -> str:
     """Call local Llama 3 via Ollama. Returns response text."""
@@ -45,7 +45,7 @@ def ask_winbert(system_prompt: str, user_prompt: str, timeout: int = 120) -> str
     except requests.exceptions.ConnectionError:
         return "⚠️ WinBert is offline. Make sure Ollama is running: `ollama serve`"
     except Exception as e:
-        return f"⚠️ WinBert error: {e}"
+        return f"⚠️ WinBert error: {type(e).__name__}: {e}"
 
 
 def winbert_chat_turn(messages: list, timeout: int = 120) -> str:
